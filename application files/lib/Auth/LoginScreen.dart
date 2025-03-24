@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'walletscreen.dart';
+import 'package:testapp/Home/WalletScreen.dart';
 
 class LoginScreen extends StatelessWidget {
   final _usernameController = TextEditingController();

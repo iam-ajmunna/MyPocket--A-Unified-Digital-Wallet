@@ -4,19 +4,19 @@ import 'dart:convert';
 import 'transaction.dart';
 import 'WalletScreen.dart';
 import 'PaymentsScreen.dart';
-import 'bkashpayscreen.dart';
 import 'MobileTopUpScreen.dart';
 
-class MobileTopUpScreen extends StatefulWidget {
+class BkashPayScreen extends StatefulWidget {
   @override
-  _MobileTopUpScreenState createState() => _MobileTopUpScreenState();
+  _BkashPayScreenState createState() => _BkashPayScreenState();
 }
 
-class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
-  int _selectedIndex = 1; // Default to "Mobile Top-Up"
-  final _mobileNumberController = TextEditingController();
+class _BkashPayScreenState extends State<BkashPayScreen> {
+  int _selectedIndex = 0; // Default to "bKash Pay"
+  final _bkashIdController = TextEditingController();
   final _amountController = TextEditingController();
   final _pinController = TextEditingController();
+  String? selectedCard;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -25,13 +25,13 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
 
     switch (index) {
       case 0:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => BkashPayScreen()),
-        );
+      // Already on BkashPayScreen
         break;
       case 1:
-      // Already on MobileTopUpScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MobileTopUpScreen()),
+        );
         break;
       case 2:
         Navigator.pushReplacement(
@@ -70,7 +70,7 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
   }
 
   void _confirmTransaction() async {
-    if (_mobileNumberController.text.isEmpty || _amountController.text.isEmpty) {
+    if (_bkashIdController.text.isEmpty || _amountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please fill all fields'),
@@ -129,20 +129,20 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
     if (confirmed == true) {
       // Add transaction to history
       _addTransaction(
-        'Mobile Top-Up',
+        'bKash Pay',
         double.parse(_amountController.text),
         'Success',
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Top-Up successful!'),
+          content: Text('Transfer successful!'),
           backgroundColor: Colors.green,
         ),
       );
 
       // Clear fields
-      _mobileNumberController.clear();
+      _bkashIdController.clear();
       _amountController.clear();
       _pinController.clear();
     }
@@ -152,7 +152,7 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mobile Top-Up'),
+        title: Text('bKash Pay'),
         backgroundColor: Colors.purple,
       ),
       body: Container(
@@ -166,11 +166,21 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
         ),
         child: Column(
           children: [
-            // Mobile Number Input
+            // bKash Logo
+            Container(
+              color: Colors.white, // White background for the image
+              child: Image.asset(
+                'assets/bkash_logo_new.png', // Add bKash logo to your assets folder
+                width: 250,
+                height: 80,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // bKash ID Input
             TextField(
-              controller: _mobileNumberController,
+              controller: _bkashIdController,
               decoration: InputDecoration(
-                labelText: 'Mobile Number',
+                labelText: 'bKash ID (Mobile Number)',
                 labelStyle: TextStyle(color: Colors.white54),
                 filled: true,
                 fillColor: Colors.grey[800],
@@ -198,7 +208,7 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 20),
-            // Recharge Button
+            // Transfer Button
             ElevatedButton(
               onPressed: _confirmTransaction,
               style: ElevatedButton.styleFrom(
@@ -209,7 +219,7 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
                 ),
               ),
               child: Text(
-                'Recharge',
+                'Transfer',
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
