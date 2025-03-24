@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'loginscreen.dart';
+import 'package:testapp/Auth/LoginScreen.dart';
+
 
 class WelcomeScreen extends StatelessWidget {
   @override
@@ -19,11 +20,11 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                Image.asset(
-                  'assets/logo.png', // Add logo to your assets folder
-                  width: 50,
-                  height: 50,
-                ),
+              Image.asset(
+                'assets/logo.png', // Add logo to your assets folder
+                width: 50,
+                height: 50,
+              ),
               Text(
                 "MyPocket",
                 style: GoogleFonts.poppins(
@@ -72,7 +73,10 @@ class WelcomeScreen extends StatelessWidget {
                           const SizedBox(height: 30),
                           Text(
                             "Card number",
-                            style: TextStyle(color: Colors.white54, fontSize: 18),
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 18,
+                            ),
                           ),
                           Text(
                             "**** **** **** 4353",
@@ -88,10 +92,7 @@ class WelcomeScreen extends StatelessWidget {
                     Positioned(
                       top: 20,
                       right: 20,
-                      child: Icon(
-                        Icons.wifi,
-                        color: Colors.white54,
-                      ),
+                      child: Icon(Icons.wifi, color: Colors.white54),
                     ),
                   ],
                 ),
@@ -109,10 +110,7 @@ class WelcomeScreen extends StatelessWidget {
               RichText(
                 text: TextSpan(
                   text: "All your bank ",
-                  style: GoogleFonts.poppins(
-                    fontSize: 26,
-                    color: Colors.white,
-                  ),
+                  style: GoogleFonts.poppins(fontSize: 26, color: Colors.white),
                   children: [
                     TextSpan(
                       text: "wallets",
@@ -123,9 +121,7 @@ class WelcomeScreen extends StatelessWidget {
                         fontSize: 28,
                       ),
                     ),
-                    TextSpan(
-                      text: " in one place",
-                    ),
+                    TextSpan(text: " in one place"),
                   ],
                 ),
               ),
@@ -137,7 +133,10 @@ class WelcomeScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 18,
+                    ),
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -145,7 +144,11 @@ class WelcomeScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => LoginScreen()),
                     );
                   },
-                  child: const Icon(Icons.arrow_forward, color: Colors.white, size: 30),
+                  child: const Icon(
+                    Icons.arrow_forward,
+                    color: Colors.white,
+                    size: 30,
+                  ),
                 ),
               ),
             ],

@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'bkashpayscreen.dart';
 import 'mobiletopupscreen.dart';
 import 'paymentsscreen.dart';
-import 'transaction.dart';
 
 class WalletScreen extends StatefulWidget {
   @override
@@ -84,6 +83,7 @@ class _WalletScreenState extends State<WalletScreen> {
     prefs.setStringList('cards', cardList);
   }
 
+  // ignore: unused_element
   _deleteCard(int index) async {
     final prefs = await SharedPreferences.getInstance();
     cards.removeAt(index);
