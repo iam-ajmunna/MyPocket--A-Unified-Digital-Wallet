@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'transaction.dart';
 import 'WalletScreen.dart';
-import 'PaymentsScreen.dart';
 import 'bkashpayscreen.dart';
 import 'MobileTopUpScreen.dart';
 
