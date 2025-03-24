@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'welcomescreen.dart';
+import 'package:testapp/Home/WelcomeScreen.dart';
 
 void main() {
   runApp(MyApp());
