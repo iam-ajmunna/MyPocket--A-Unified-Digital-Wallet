@@ -41,8 +41,7 @@ class _LoginScreenState extends State<LoginScreen>
               // This container Shows the Brand And Logo
               Container(
                 height: 200,
-                width: double
-                    .infinity, // Ensures it takes up the full width available
+                width: 420, // Ensures it takes up the full width available
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(73, 140, 157, 255),
                   borderRadius: BorderRadius.only(
