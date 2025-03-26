@@ -25,7 +25,7 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
 
     switch (index) {
       case 0:
-      // Already on BkashPayScreen
+        // Already on BkashPayScreen
         break;
       case 1:
         Navigator.push(
@@ -46,14 +46,15 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
         );
         break;
       case 4:
-      // Handle Transfer navigation
+        // Handle Transfer navigation
         break;
       default:
         break;
     }
   }
 
-  Future<void> _addTransaction(String type, double amount, String status) async {
+  Future<void> _addTransaction(
+      String type, double amount, String status) async {
     final prefs = await SharedPreferences.getInstance();
     final transaction = Transaction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -226,38 +227,6 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
-      selectedItemColor: Colors.purple,
-      unselectedItemColor: Colors.grey,
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.payment),
-          label: 'bKash Pay',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.phone_android),
-          label: 'Mobile Top-Up',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.payments),
-          label: 'Payments',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.compare_arrows),
-          label: 'Transfer',
-        ),
-      ],
     );
   }
 }
