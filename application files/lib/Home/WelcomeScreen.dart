@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:testapp/Auth/LoginScreen.dart';
+import 'package:mypocket/Auth/LoginScreen.dart';
 
 
 class WelcomeScreen extends StatelessWidget {
