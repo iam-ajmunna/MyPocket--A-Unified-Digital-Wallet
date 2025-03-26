@@ -41,8 +41,7 @@ class _LoginScreenState extends State<LoginScreen>
               // This container Shows the Brand And Logo
               Container(
                 height: 200,
-                width: double
-                    .infinity, // Ensures it takes up the full width available
+                width: 420,
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(73, 140, 157, 255),
                   borderRadius: BorderRadius.only(
@@ -50,27 +49,13 @@ class _LoginScreenState extends State<LoginScreen>
                     topRight: Radius.circular(20),
                   ),
                 ),
+                //    padding: const EdgeInsets.all(1),
                 child: Center(
-                  child: Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center, // Centers the Row
-                    mainAxisSize: MainAxisSize
-                        .min, // Ensures the Row only takes as much space as needed
-                    children: [
-                      Image.asset(
-                        'MyWalletLogo.png',
-                        height: 200, // Adjust the height as needed
-                        width: 250, // Adjust the width as needed
-                      ),
-                      Text(
-                        'MyPocket',
-                        style: GoogleFonts.urbanist(
-                          textStyle: Theme.of(context).textTheme.headlineMedium,
-                          fontSize: 45,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
+                  child: Image.asset(
+                    'MyPocketBrand.png', // Ensure the correct path
+                    width: 150, // Ensures full width
+                    height:
+                        150, // Ensures the image fits well inside the container
                   ),
                 ),
               ),
@@ -93,14 +78,6 @@ class _LoginScreenState extends State<LoginScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    //                 Text(
-                    //                    'MyPocket',
-                    //                    style: GoogleFonts.roboto(
-                    //                     textStyle: Theme.of(context).textTheme.headlineMedium,
-                    //                     fontSize: 34,
-                    //                     fontWeight: FontWeight.w800,
-                    //                    ),
-                    //                   ),
                     SizedBox(height: 20),
                     TabBar(
                       controller: _tabController,
@@ -120,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                     SizedBox(height: 16),
                     Container(
-                      height: 550,
+                      height: 570,
                       child: TabBarView(
                         controller: _tabController,
                         children: [
