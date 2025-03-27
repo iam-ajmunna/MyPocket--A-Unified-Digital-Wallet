@@ -18,7 +18,7 @@ const double pagePaddingVertical = 40.0;
 const double carouselItemMargin = 8.0;
 const double indicatorSize = 8.0;
 const double dividerHeight = 1.0;
-const double dividerThickness = 1.0;
+const double dividerThickness = 2.0;
 const double dividerIndent = 24.0;
 const double dividerEndIndent = 24.0;
 const Color dividerColor = Color(0xFFE0E3E7);
@@ -467,6 +467,31 @@ class _WalletScreenState extends State<WalletScreen> {
     final cardWidth = screenWidth * cardWidthFactor;
 
     return Scaffold(
+      appBar: AppBar(
+        // Row for Welcome text and Add Button
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("Welcome, " + userName,
+                style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold)),
+            GestureDetector(
+              onTap: () {
+                _showAddCardDialog();
+              },
+              child: const CircleAvatar(
+                  backgroundColor: Colors.white,
+                  radius: 15,
+                  child: Icon(
+                    Icons.add_box,
+                    color: Colors.indigoAccent,
+                  )),
+            ),
+          ],
+        ),
+      ),
       extendBody: true,
       body: PageView(
         controller: _pageController,
@@ -474,50 +499,21 @@ class _WalletScreenState extends State<WalletScreen> {
           BkashPayScreen(),
           MobileTopUpScreen(),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: pagePaddingVertical),
+            padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: pagePaddingHorizontal),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 30),
-
-// Row for Welcome text and Add Button
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Welcome, " + userName,
-                              style: GoogleFonts.poppins(
-                                  fontSize: 24,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold)),
-                          GestureDetector(
-                            onTap: () {
-                              _showAddCardDialog();
-                            },
-                            child: const CircleAvatar(
-                                backgroundColor: Colors.white,
-                                radius: 15,
-                                child: Icon(
-                                  Icons.add_box,
-                                  color: Colors.indigoAccent,
-                                )),
-                          ),
-                        ],
-                      ),
-
 // Your Button is seperate Column
-                      const SizedBox(height: 20),
                       Text("Your Balance",
                           style: GoogleFonts.poppins(
                               fontSize: 18, color: Colors.black54)),
 
 // Row For Balance and Delete Button
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -527,11 +523,10 @@ class _WalletScreenState extends State<WalletScreen> {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black)),
 
-                          // Start of Delete Button
+                          // Start of Delete Button If there are Cards
                           if (cards.isNotEmpty)
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: pagePaddingHorizontal),
+                              padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: GestureDetector(
@@ -593,58 +588,78 @@ class _WalletScreenState extends State<WalletScreen> {
                                 ),
                               ),
                             ),
+                          //if there is no card
+                          if (cards.isEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white70,
+                              ),
+                              child: CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  radius: 15,
+                                  child: Icon(
+                                    Icons.delete_outline_outlined,
+                                    color: const Color.fromARGB(
+                                        255, 124, 124, 124),
+                                  )),
+                            ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      _buildAddNewCardButton(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 25),
+                      Center(child: _buildAddNewCardButton()),
+                      const SizedBox(height: 5),
                     ],
                   ),
                 ),
                 // Carousel Slider
-                SizedBox(
-                  width: double.infinity,
-                  height: cardHeight + 30,
-                  child: CarouselSlider.builder(
-                    itemCount: cards.length,
-                    carouselController: _carouselController,
-                    options: CarouselOptions(
-                      height: cardHeight,
-                      initialPage: 0,
-                      viewportFraction: cardWidthFactor,
-                      enableInfiniteScroll: false,
-                      autoPlay: false,
-                      onPageChanged: (index, reason) {
-                        setState(() {
-                          _carouselCurrentIndex = index;
-                        });
+
+                if (cards.isNotEmpty)
+                  SizedBox(
+                    width: double.infinity,
+                    height: cardHeight + 30,
+                    child: CarouselSlider.builder(
+                      itemCount: cards.length,
+                      carouselController: _carouselController,
+                      options: CarouselOptions(
+                        height: cardHeight,
+                        initialPage: 0,
+                        viewportFraction: cardWidthFactor,
+                        enableInfiniteScroll: false,
+                        autoPlay: false,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            _carouselCurrentIndex = index;
+                          });
+                        },
+                      ),
+                      itemBuilder: (context, index, realIndex) {
+                        final card = cards[index];
+                        // Calculate scale based on the current index
+                        double scale;
+                        if (index == _carouselCurrentIndex) {
+                          scale = 1.0; // Full size for the focused card
+                        } else if (index == _carouselCurrentIndex - 1 ||
+                            index == _carouselCurrentIndex + 1) {
+                          scale = 0.9; // Slightly smaller for adjacent cards
+                        } else {
+                          scale = 0.8; // Smaller for distant cards
+                        }
+
+                        return AnimatedScale(
+                          duration: const Duration(milliseconds: 300),
+                          scale: scale,
+                          child: Stack(
+                            children: [
+                              _buildCarouselItem(
+                                  context, card, index, cardWidth),
+                            ],
+                          ),
+                        );
                       },
                     ),
-                    itemBuilder: (context, index, realIndex) {
-                      final card = cards[index];
-                      // Calculate scale based on the current index
-                      double scale;
-                      if (index == _carouselCurrentIndex) {
-                        scale = 1.0; // Full size for the focused card
-                      } else if (index == _carouselCurrentIndex - 1 ||
-                          index == _carouselCurrentIndex + 1) {
-                        scale = 0.9; // Slightly smaller for adjacent cards
-                      } else {
-                        scale = 0.8; // Smaller for distant cards
-                      }
-
-                      return AnimatedScale(
-                        duration: const Duration(milliseconds: 300),
-                        scale: scale,
-                        child: Stack(
-                          children: [
-                            _buildCarouselItem(context, card, index, cardWidth),
-                          ],
-                        ),
-                      );
-                    },
                   ),
-                ),
                 const SizedBox(height: 20),
                 // Page Indicator
                 Row(
@@ -660,7 +675,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         borderRadius: BorderRadius.circular(5),
                         color: _carouselCurrentIndex == index
                             ? Colors.blue
-                            : Colors.grey,
+                            : const Color.fromARGB(163, 155, 154, 154),
                       ),
                     );
                   }).toList(),
@@ -678,7 +693,12 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Delete Button
+                // Making the Bottom Button Grids
+
+                Container(
+                  padding: const EdgeInsets.all(40),
+                  child: buildButtonGrid(context),
+                )
               ],
             ),
           ),
@@ -735,7 +755,7 @@ class _WalletScreenState extends State<WalletScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Colors.white,
-          width: 2,
+          width: 2.5,
         ),
         boxShadow: [
           BoxShadow(
@@ -768,7 +788,7 @@ class _WalletScreenState extends State<WalletScreen> {
               const SizedBox(height: 10),
               Text(
                 "**** **** **** ${card['cardNumber']?.substring(card['cardNumber']!.length - 4) ?? "0000"}",
-                style: const TextStyle(color: Colors.white, fontSize: 22),
+                style: const TextStyle(color: Colors.white54, fontSize: 22),
               ),
               const SizedBox(height: 10),
               Text(
@@ -883,4 +903,72 @@ class MyDivider extends StatelessWidget {
       color: color,
     );
   }
+}
+
+Widget buildBodyButton(
+  BuildContext context, {
+  required String title,
+  required IconData icon,
+  VoidCallback? onPressed,
+}) {
+  return SizedBox(
+    width: 100, // Set a fixed width for the button.  Adjust as needed.
+    height: 100, // Set a fixed height for the button. Adjust as needed.
+    child: ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.indigoAccent[100],
+        padding: const EdgeInsets.symmetric(
+            horizontal: 8, vertical: 8), // Further reduced padding
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        elevation: 3,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 30, // Reduced icon size
+            color: Colors.white,
+          ),
+          const SizedBox(height: 6), // Reduced spacing
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 12, // Reduced font size
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget buildButtonGrid(BuildContext context) {
+  return GridView.count(
+    crossAxisCount: 3,
+    mainAxisSpacing: 56.0, // Further reduced vertical spacing
+    crossAxisSpacing: 56.0, // Further reduced horizontal spacing
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    childAspectRatio: 1.0,
+    children: [
+      buildBodyButton(context,
+          icon: Icons.event, title: 'Event Passes', onPressed: () {}),
+      buildBodyButton(context,
+          icon: Icons.train, title: 'Transits', onPressed: () {}),
+      buildBodyButton(context,
+          icon: Icons.event, title: 'Event Passes', onPressed: () {}),
+      buildBodyButton(context,
+          icon: Icons.description, title: 'Documents', onPressed: () {}),
+      buildBodyButton(context,
+          icon: Icons.school, title: 'Certificates', onPressed: () {}),
+      buildBodyButton(context,
+          icon: Icons.widgets, title: 'More', onPressed: () {}),
+    ],
+  );
 }
