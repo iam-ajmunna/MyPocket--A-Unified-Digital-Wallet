@@ -88,6 +88,16 @@ dependencies:
   url_launcher_web: ^2.4.0
   url_launcher_windows: ^3.1.4
   cupertino_icons: ^1.0.8
+  animated_notch_bottom_bar: ^1.0.0
+  flutter_svg: ^2.0.17
+  flutter_facebook_auth: ^7.1.1
+  page_transition: ^2.0.9
+  shared_preferences: ^2.0.11
+  camera: ^0.10.0
+  google_sign_in: ^5.4.2
+  googleapis: ^9.2.0
+  http: ^0.13.5
+  share_plus: ^6.3.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -109,6 +119,8 @@ flutter:
   assets:
   - assets/MyWalletLogo.png
   - assets/MyPocketBrand.png
+  - assets/google_logo.svg
+  - assets/facebook_logo.svg
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
