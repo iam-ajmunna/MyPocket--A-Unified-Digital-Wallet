@@ -1,6 +1,6 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:camera/camera.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'CertificatesListScreen.dart';
