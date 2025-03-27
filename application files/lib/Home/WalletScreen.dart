@@ -295,7 +295,7 @@ class _WalletScreenState extends State<WalletScreen> {
           BkashPayScreen(), // Ensure this screen exists
           MobileTopUpScreen(), // Ensure this screen exists
           Container(
-            // Your original WalletScreen content
+            // original WalletScreen content
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -427,23 +427,24 @@ class _WalletScreenState extends State<WalletScreen> {
         bottomBarItems: [
           const BottomBarItem(
               inActiveItem: Icon(Icons.payment, color: Colors.grey),
-              activeItem: Icon(Icons.payment, color: Colors.purple),
+              activeItem: Icon(Icons.payment, color: Colors.indigoAccent),
               itemLabel: 'bKash Pay'),
           const BottomBarItem(
               inActiveItem: Icon(Icons.phone_android, color: Colors.grey),
-              activeItem: Icon(Icons.phone_android, color: Colors.purple),
+              activeItem: Icon(Icons.phone_android, color: Colors.indigoAccent),
               itemLabel: 'Mobile Top-Up'),
           const BottomBarItem(
               inActiveItem: Icon(Icons.home, color: Colors.grey),
-              activeItem: Icon(Icons.home, color: Colors.purple),
+              activeItem: Icon(Icons.home, color: Colors.indigo),
               itemLabel: 'Home'),
           const BottomBarItem(
               inActiveItem: Icon(Icons.payments, color: Colors.grey),
-              activeItem: Icon(Icons.payments, color: Colors.purple),
+              activeItem: Icon(Icons.payments, color: Colors.indigoAccent),
               itemLabel: 'Payments'),
           const BottomBarItem(
               inActiveItem: Icon(Icons.compare_arrows, color: Colors.grey),
-              activeItem: Icon(Icons.compare_arrows, color: Colors.purple),
+              activeItem:
+                  Icon(Icons.compare_arrows, color: Colors.indigoAccent),
               itemLabel: 'Transfer'),
         ],
         onTap: (index) => _onItemTapped(index),
