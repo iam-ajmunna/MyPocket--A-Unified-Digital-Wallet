@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mypocket/Documents/SendToSocialScreen.dart';
+import 'package:mypocket/Documents/UploadToDriveScreen.dart';
 import 'ScanCertificatesScreen.dart';
-import 'UploadToDriveScreen.dart';
-import 'SendToSocialScreen.dart';
 import 'CertificatesListScreen.dart';
 
 class CertificatesScreen extends StatelessWidget {
