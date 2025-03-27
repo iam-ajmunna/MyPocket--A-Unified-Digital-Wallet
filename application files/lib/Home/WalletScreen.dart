@@ -1,6 +1,10 @@
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mypocket/Certificates/CertificatesScreen.dart';
+import 'package:mypocket/Passes/event_ticket.dart';
+import 'package:mypocket/Passes/passes_list_screen.dart';
+import 'package:mypocket/Transit/transit_list_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'dart:ui';
@@ -912,33 +916,38 @@ Widget buildBodyButton(
   VoidCallback? onPressed,
 }) {
   return SizedBox(
-    width: 100, // Set a fixed width for the button.  Adjust as needed.
-    height: 100, // Set a fixed height for the button. Adjust as needed.
+    width: 100,
+    height: 100,
     child: ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.indigoAccent[100],
-        padding: const EdgeInsets.symmetric(
-            horizontal: 8, vertical: 8), // Further reduced padding
+        backgroundColor: Colors.white, // Change background color
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
+          side: BorderSide(
+            // Add a border
+            color: Colors.grey.shade300,
+            width: 1.0,
+          ),
         ),
         elevation: 3,
+        shadowColor: Colors.indigoAccent.withOpacity(0.8), // Add shadow color
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             icon,
-            size: 30, // Reduced icon size
-            color: Colors.white,
+            size: 30,
+            color: Colors.indigoAccent, // Change icon color
           ),
-          const SizedBox(height: 6), // Reduced spacing
+          const SizedBox(height: 6),
           Text(
             title,
             style: GoogleFonts.poppins(
-              fontSize: 12, // Reduced font size
-              color: Colors.white,
+              fontSize: 12,
+              color: Colors.black87, // Change text color
             ),
             textAlign: TextAlign.center,
           ),
@@ -951,24 +960,60 @@ Widget buildBodyButton(
 Widget buildButtonGrid(BuildContext context) {
   return GridView.count(
     crossAxisCount: 3,
-    mainAxisSpacing: 56.0, // Further reduced vertical spacing
-    crossAxisSpacing: 56.0, // Further reduced horizontal spacing
+    mainAxisSpacing: 56.0,
+    crossAxisSpacing: 56.0,
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
     childAspectRatio: 1.0,
     children: [
+      buildBodyButton(context, icon: Icons.event, title: 'Event Passes',
+          onPressed: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => PassesListScreen(),
+          ),
+        );
+      }),
+      buildBodyButton(context, icon: Icons.train, title: 'Transits',
+          onPressed: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => TransitListScreen(),
+          ),
+        );
+      }),
       buildBodyButton(context,
-          icon: Icons.event, title: 'Event Passes', onPressed: () {}),
-      buildBodyButton(context,
-          icon: Icons.train, title: 'Transits', onPressed: () {}),
-      buildBodyButton(context,
-          icon: Icons.event, title: 'Event Passes', onPressed: () {}),
-      buildBodyButton(context,
-          icon: Icons.description, title: 'Documents', onPressed: () {}),
-      buildBodyButton(context,
-          icon: Icons.school, title: 'Certificates', onPressed: () {}),
-      buildBodyButton(context,
-          icon: Icons.widgets, title: 'More', onPressed: () {}),
+          icon: Icons.document_scanner, title: 'Statements', onPressed: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => PassesListScreen(),
+          ),
+        );
+      }),
+      buildBodyButton(context, icon: Icons.description, title: 'Documents',
+          onPressed: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => PassesListScreen(),
+          ),
+        );
+      }),
+      buildBodyButton(context, icon: Icons.school, title: 'Certificates',
+          onPressed: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => CertificatesScreen(),
+          ),
+        );
+      }),
+      buildBodyButton(context, icon: Icons.widgets, title: 'More',
+          onPressed: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => PassesListScreen(),
+          ),
+        );
+      }),
     ],
   );
 }
