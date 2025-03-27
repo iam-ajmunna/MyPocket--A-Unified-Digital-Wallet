@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:mypocket/Home/WalletScreen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -49,13 +51,11 @@ class _LoginScreenState extends State<LoginScreen>
                     topRight: Radius.circular(20),
                   ),
                 ),
-                //    padding: const EdgeInsets.all(1),
                 child: Center(
                   child: Image.asset(
-                    'MyPocketBrand.png', // Ensure the correct path
-                    width: 150, // Ensures full width
-                    height:
-                        150, // Ensures the image fits well inside the container
+                    'MyPocketBrand.png',
+                    width: 150,
+                    height: 150,
                   ),
                 ),
               ),
@@ -116,6 +116,7 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+// This Widget is for the Create Account Tab
   Widget _buildSignUpTab() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,11 +152,12 @@ class _LoginScreenState extends State<LoginScreen>
           ),
         )),
         SizedBox(height: 20),
-        _buildSocialButtons(),
+        _buildSocialButtons(), // This Creates the Social button
       ],
     );
   }
 
+// This Widget is for the Log In Page
   Widget _buildLoginTab() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,6 +194,7 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+//This widget is for the Text Fields
   Widget _buildTextField(String label) {
     return TextField(
       decoration: InputDecoration(
@@ -218,6 +221,7 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+//This Widget is for the Password Field
   Widget _buildPasswordField(String label) {
     return TextField(
       obscureText: obscureText, // Use the class-level variable
@@ -254,13 +258,14 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+// This widget is for the Login or Get Started Button
   Widget _buildMainButton(String text) {
     return Center(
       child: ElevatedButton(
         /* Going to The Dashboard from here */
 
         onPressed: () {
-          // Add your validation here, e.g., checking if the email and password are correct
+          // Space for having validation here, e.g., checking if the email and password are correct
           bool isValidInput = true; // Replace this with actual validation
 
           if (isValidInput) {
@@ -295,18 +300,19 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+//This Widget is for the Social Button
   Widget _buildSocialButtons() {
     return Column(
       children: [
-        _buildSocialButton('Continue with Google', Icons.g_translate),
+        _buildSocialButton('Continue with Google', 'google_logo.svg'),
         SizedBox(height: 20),
-        _buildSocialButton('Continue with Facebook', Icons.facebook),
+        _buildSocialButton('Continue with Facebook', 'facebook_logo.svg'),
         SizedBox(height: 20),
       ],
     );
   }
 
-  Widget _buildSocialButton(String text, IconData icon) {
+  Widget _buildSocialButton(String text, dynamic icon) {
     return Center(
       child: ElevatedButton.icon(
         onPressed: () async {
@@ -316,23 +322,45 @@ class _LoginScreenState extends State<LoginScreen>
               GoogleSignInAccount? user = await _googleSignIn.signIn();
               if (user != null) {
                 // User successfully signed in
-                print('User Info: ${user.displayName}');
+                print('Google User Info: ${user.displayName}, ${user.email}');
                 // Handle user data, for example:
                 // - Navigate to the next screen
                 // - Store user info in the database
+              } else {
+                print('Google Sign-In canceled by user.');
               }
             } catch (error) {
               print('Error during Google Sign-In: $error');
             }
           } else if (text == 'Continue with Facebook') {
-            // Implement Faccebook Sign-In if necessary
+            // Facebook Sign-In Logic
+            try {
+              final LoginResult result = await FacebookAuth.instance.login();
+              if (result.status == LoginStatus.success) {
+                final userData = await FacebookAuth.instance.getUserData();
+                print(
+                    'Facebook User Info: ${userData['name']}, ${userData['email']}');
+                // Handle user data
+              } else {
+                print(
+                    'Facebook Sign-In canceled or failed: ${result.status}, ${result.message}');
+              }
+            } catch (error) {
+              print('Error during Facebook Sign-In: $error');
+            }
           }
         },
-        icon: Icon(
-          icon,
-          color: Colors.black,
-          size: 20,
-        ),
+        icon: icon is IconData
+            ? Icon(
+                icon,
+                color: Colors.black,
+                size: 20,
+              )
+            : SvgPicture.asset(
+                icon,
+                height: 20,
+                width: 20,
+              ),
         label: Text(
           text,
           style: GoogleFonts.manrope(

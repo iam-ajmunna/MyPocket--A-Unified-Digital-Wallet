@@ -121,38 +121,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
           },
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
-      selectedItemColor: Colors.purple,
-      unselectedItemColor: Colors.grey,
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.payment),
-          label: 'bKash Pay',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.phone_android),
-          label: 'Mobile Top-Up',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.payments),
-          label: 'Payments',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.compare_arrows),
-          label: 'Transfer',
-        ),
-      ],
     );
   }
 }
