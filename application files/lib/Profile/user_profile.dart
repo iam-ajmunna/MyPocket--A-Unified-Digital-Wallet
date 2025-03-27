@@ -248,9 +248,9 @@ class UserProfileView extends StatelessWidget {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(241, 244, 248, 255),
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Color.fromARGB(241, 244, 248, 255),
           automaticallyImplyLeading: false,
           actions: [
             Padding(
