@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:testapp/Home/WelcomeScreen.dart';
+import 'package:mypocket/Auth/LoginScreen.dart';
 
 void main() {
   runApp(MyApp());
 }
+
+// Note For Me
+/* Calling MyApp and Returning Material app for widgets
+   Calling Log In Screen
+ */
 
 class MyApp extends StatelessWidget {
   @override
@@ -11,10 +16,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.purple,
-        scaffoldBackgroundColor: const Color(0xFF0F0F10),
-      ),
-      home: WelcomeScreen(),
+          primarySwatch: Colors.purple,
+          scaffoldBackgroundColor: const Color.fromARGB(255, 248, 248, 248)),
+      home: LoginScreen(),
     );
   }
 }
