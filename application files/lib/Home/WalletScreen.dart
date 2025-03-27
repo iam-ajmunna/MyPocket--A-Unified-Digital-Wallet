@@ -1,10 +1,11 @@
+import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mypocket/Profile/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'bkashpayscreen.dart'; // Ensure this file exists
-import 'mobiletopupscreen.dart'; // Ensure this file exists
-import 'paymentsscreen.dart'; // Ensure this file exists
-import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
+import 'bkashpayscreen.dart';
+import 'mobiletopupscreen.dart';
+import 'paymentsscreen.dart';
 
 class WalletScreen extends StatefulWidget {
   @override
@@ -141,9 +142,13 @@ class _WalletScreenState extends State<WalletScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+              // Added this line
+              borderRadius: BorderRadius.circular(15)),
           title: Text('Add New Card',
-              style: GoogleFonts.poppins(color: Colors.white)),
-          backgroundColor: Colors.grey[900],
+              style: GoogleFonts.poppins(
+                  color: const Color.fromARGB(255, 0, 0, 0))),
+          backgroundColor: const Color.fromARGB(255, 253, 253, 253),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -152,9 +157,10 @@ class _WalletScreenState extends State<WalletScreen> {
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                       labelText: 'Bank Name',
-                      labelStyle: TextStyle(color: Colors.white54),
+                      labelStyle:
+                          TextStyle(color: const Color.fromARGB(137, 0, 0, 0)),
                       filled: true,
-                      fillColor: Colors.grey[800])),
+                      fillColor: const Color.fromARGB(255, 228, 227, 227))),
               const SizedBox(height: 10),
               TextField(
                   controller: cardNumberController,
@@ -246,10 +252,12 @@ class _WalletScreenState extends State<WalletScreen> {
     });
     _pageController.animateToPage(
       index,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeIn,
+      duration: const Duration(milliseconds: 1), // Changed duration to 1ms
+      curve: Curves.linear, // Changed curve to linear
     );
-    _controller.jumpTo(index);
+    _controller.jumpTo(
+      index,
+    ); // Keep this for the bottom bar to update.  It should not have a delay.
   }
 
 // For Showing the Page of Card info
@@ -362,7 +370,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             margin: EdgeInsets.only(bottom: 15),
                             decoration: BoxDecoration(
                                 gradient: cardColors[index % cardColors.length],
-                                borderRadius: BorderRadius.circular(15)),
+                                borderRadius: BorderRadius.circular(12)),
                             child: Padding(
                               padding: const EdgeInsets.all(20.0),
                               child: Column(
@@ -415,9 +423,7 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
           ),
           PaymentsScreen(), // Ensure this screen exists
-          Center(
-              child: Text(
-                  'Transfer Page')), // Placeholder - Replace with your Transfer page content
+          UserProfileView(), // Placeholder - Replace with your Transfer page content
         ],
       ),
       bottomNavigationBar: AnimatedNotchBottomBar(
@@ -432,7 +438,7 @@ class _WalletScreenState extends State<WalletScreen> {
           const BottomBarItem(
               inActiveItem: Icon(Icons.phone_android, color: Colors.grey),
               activeItem: Icon(Icons.phone_android, color: Colors.indigoAccent),
-              itemLabel: 'Mobile Top-Up'),
+              itemLabel: 'Top-Up'),
           const BottomBarItem(
               inActiveItem: Icon(Icons.home, color: Colors.grey),
               activeItem: Icon(Icons.home, color: Colors.indigo),
@@ -442,10 +448,11 @@ class _WalletScreenState extends State<WalletScreen> {
               activeItem: Icon(Icons.payments, color: Colors.indigoAccent),
               itemLabel: 'Payments'),
           const BottomBarItem(
-              inActiveItem: Icon(Icons.compare_arrows, color: Colors.grey),
+              inActiveItem:
+                  Icon(Icons.account_circle_sharp, color: Colors.grey),
               activeItem:
-                  Icon(Icons.compare_arrows, color: Colors.indigoAccent),
-              itemLabel: 'Transfer'),
+                  Icon(Icons.account_circle_sharp, color: Colors.indigoAccent),
+              itemLabel: 'Profile'),
         ],
         onTap: (index) => _onItemTapped(index),
       ),

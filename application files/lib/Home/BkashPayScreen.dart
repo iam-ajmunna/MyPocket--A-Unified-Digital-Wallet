@@ -171,7 +171,7 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
             Container(
               color: Colors.white, // White background for the image
               child: Image.asset(
-                'assets/bkash_logo_new.png', // Add bKash logo to your assets folder
+                'bkash_logo_new.png', // Add bKash logo to your assets folder
                 width: 250,
                 height: 80,
               ),
