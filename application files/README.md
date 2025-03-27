@@ -1,6 +1,6 @@
-# testapp
+# mypocket
 
-A new Flutter project.
+A Unified Digital Wallet.
 
 ## Getting Started
 
