@@ -30,7 +30,7 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
         );
         break;
       case 1:
-      // Already on MobileTopUpScreen
+        // Already on MobileTopUpScreen
         break;
       case 2:
         Navigator.pushReplacement(
@@ -45,14 +45,15 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
         );
         break;
       case 4:
-      // Handle Transfer navigation
+        // Handle Transfer navigation
         break;
       default:
         break;
     }
   }
 
-  Future<void> _addTransaction(String type, double amount, String status) async {
+  Future<void> _addTransaction(
+      String type, double amount, String status) async {
     final prefs = await SharedPreferences.getInstance();
     final transaction = Transaction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -69,7 +70,8 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
   }
 
   void _confirmTransaction() async {
-    if (_mobileNumberController.text.isEmpty || _amountController.text.isEmpty) {
+    if (_mobileNumberController.text.isEmpty ||
+        _amountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please fill all fields'),
@@ -151,28 +153,42 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mobile Top-Up'),
-        backgroundColor: Colors.purple,
+        title: Text(
+          'Mobile Top-Up',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
       ),
       body: Container(
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          color: const Color(0xFFE0E3E7),
         ),
         child: Column(
           children: [
+            SizedBox(
+              height: 80,
+            ),
+            // Logo
+            Container(
+              child: Image.asset(
+                'Mobile-Top-Up.png', // Add bKash logo to your assets folder
+                width: 450,
+                height: 220,
+              ),
+            ),
+            const SizedBox(height: 20),
             // Mobile Number Input
             TextField(
               controller: _mobileNumberController,
               decoration: InputDecoration(
                 labelText: 'Mobile Number',
-                labelStyle: TextStyle(color: Colors.white54),
+                labelStyle: TextStyle(color: Colors.grey),
                 filled: true,
-                fillColor: Colors.grey[800],
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -186,9 +202,9 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
               controller: _amountController,
               decoration: InputDecoration(
                 labelText: 'Amount',
-                labelStyle: TextStyle(color: Colors.white54),
+                labelStyle: TextStyle(color: Colors.grey),
                 filled: true,
-                fillColor: Colors.grey[800],
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -201,14 +217,15 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
             ElevatedButton(
               onPressed: _confirmTransaction,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                fixedSize: Size(200, 50),
+                backgroundColor: Colors.indigoAccent,
+                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(24),
                 ),
               ),
               child: Text(
-                'Recharge',
+                'Transfer',
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),

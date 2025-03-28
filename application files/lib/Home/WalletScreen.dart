@@ -15,7 +15,7 @@ import 'package:mypocket/Profile/user_profile.dart';
 import 'package:intl/intl.dart'; // Import the intl package
 
 // Constants for UI elements and text
-const double cardHeight = 200.0;
+const double cardHeight = 210.0;
 const double cardWidthFactor = 0.8;
 const double pagePaddingHorizontal = 20.0;
 const double pagePaddingVertical = 40.0;
@@ -471,31 +471,6 @@ class _WalletScreenState extends State<WalletScreen> {
     final cardWidth = screenWidth * cardWidthFactor;
 
     return Scaffold(
-      appBar: AppBar(
-        // Row for Welcome text and Add Button
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text("Welcome, " + userName,
-                style: GoogleFonts.poppins(
-                    fontSize: 24,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold)),
-            GestureDetector(
-              onTap: () {
-                _showAddCardDialog();
-              },
-              child: const CircleAvatar(
-                  backgroundColor: Colors.white,
-                  radius: 15,
-                  child: Icon(
-                    Icons.add_box,
-                    color: Colors.indigoAccent,
-                  )),
-            ),
-          ],
-        ),
-      ),
       extendBody: true,
       body: PageView(
         controller: _pageController,
@@ -512,6 +487,39 @@ class _WalletScreenState extends State<WalletScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      SizedBox(
+                        height: 20,
+                      ),
+// Row for Welcome text and Add Button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Welcome, " + userName,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 24,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold)),
+                          if (cards.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 14, 0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  _showAddCardDialog();
+                                },
+                                child: const CircleAvatar(
+                                    backgroundColor: Colors.white,
+                                    radius: 15,
+                                    child: Icon(
+                                      Icons.add_box,
+                                      color: Colors.indigoAccent,
+                                    )),
+                              ),
+                            ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
 // Your Button is seperate Column
                       Text("Your Balance",
                           style: GoogleFonts.poppins(

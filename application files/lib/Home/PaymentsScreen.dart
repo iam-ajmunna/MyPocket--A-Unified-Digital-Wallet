@@ -24,7 +24,8 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
 
   Future<void> _loadTransactions() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String>? transactionStrings = prefs.getStringList('transactions');
+    final List<String>? transactionStrings =
+        prefs.getStringList('transactions');
     if (transactionStrings != null) {
       setState(() {
         transactions = transactionStrings.map((transactionString) {
@@ -59,10 +60,10 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
         );
         break;
       case 3:
-      // Already on PaymentsScreen
+        // Already on PaymentsScreen
         break;
       case 4:
-      // Handle Transfer navigation
+        // Handle Transfer navigation
         break;
       default:
         break;
@@ -73,53 +74,58 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Payments History'),
-        backgroundColor: Colors.purple,
+        title: Text(
+          'Payments History',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
       ),
       body: Container(
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          color: const Color(0xFFE0E3E7),
         ),
         child: transactions.isEmpty
             ? Center(
-          child: Text(
-            'No transactions yet.',
-            style: TextStyle(color: Colors.white54, fontSize: 18),
-          ),
-        )
+                child: Text(
+                  'No transactions yet.',
+                  style: TextStyle(color: Colors.grey, fontSize: 18),
+                ),
+              )
             : ListView.builder(
-          itemCount: transactions.length,
-          itemBuilder: (context, index) {
-            final transaction = transactions[index];
-            return Card(
-              color: Colors.grey[900],
-              margin: EdgeInsets.only(bottom: 10),
-              child: ListTile(
-                title: Text(
-                  transaction.type,
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ),
-                subtitle: Text(
-                  'Amount: \$${transaction.amount.toStringAsFixed(2)}\nDate: ${transaction.date.toString()}',
-                  style: TextStyle(color: Colors.white54),
-                ),
-                trailing: Text(
-                  transaction.status,
-                  style: TextStyle(
-                    color: transaction.status == 'Success'
-                        ? Colors.green
-                        : Colors.red,
-                  ),
-                ),
+                itemCount: transactions.length,
+                itemBuilder: (context, index) {
+                  final transaction = transactions[index];
+                  return Card(
+                    color: Colors.white,
+                    margin: EdgeInsets.only(bottom: 10),
+                    child: ListTile(
+                      title: Text(
+                        transaction.type,
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        'Amount: \$${transaction.amount.toStringAsFixed(2)}\nDate: ${transaction.date.toString()}',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      trailing: Text(
+                        transaction.status,
+                        style: TextStyle(
+                          color: transaction.status == 'Success'
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
       ),
     );
   }

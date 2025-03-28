@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'transaction.dart';
@@ -86,28 +87,37 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: const Color(0xFFE0E3E7),
           title: Text('Confirm Transaction'),
           content: TextField(
             controller: _pinController,
             decoration: InputDecoration(
               labelText: 'Enter PIN',
-              labelStyle: TextStyle(color: Colors.white54),
+              labelStyle: TextStyle(color: Colors.grey),
               filled: true,
-              fillColor: Colors.grey[800],
+              fillColor: Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.black),
             obscureText: true,
             keyboardType: TextInputType.number,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.indigoAccent,
+                ),
+              ),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+              ),
               onPressed: () {
                 if (_pinController.text == '1234') {
                   Navigator.pop(context, true);
@@ -120,7 +130,12 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
                   );
                 }
               },
-              child: Text('Confirm'),
+              child: Text(
+                'Confirm',
+                style: TextStyle(
+                  color: Colors.indigoAccent,
+                ),
+              ),
             ),
           ],
         );
@@ -152,28 +167,59 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+// This is For the AppBar Title "bKash Pay"
       appBar: AppBar(
-        title: Text('bKash Pay'),
-        backgroundColor: Colors.purple,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'b',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.pinkAccent,
+              ),
+            ),
+            Text(
+              'Kash',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            SizedBox(
+              width: 5,
+            ),
+            Text(
+              'Pay',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.pinkAccent,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
       ),
+
+// THis is the Start of the Body
       body: Container(
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          color: const Color(0xFFE0E3E7),
         ),
+
+// This is the Content Column
         child: Column(
           children: [
+            SizedBox(
+              height: 180,
+            ),
             // bKash Logo
             Container(
-              color: Colors.white, // White background for the image
               child: Image.asset(
                 'bkash_logo_new.png', // Add bKash logo to your assets folder
-                width: 250,
-                height: 80,
+                width: 350,
+                height: 120,
               ),
             ),
             const SizedBox(height: 20),
@@ -182,14 +228,14 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
               controller: _bkashIdController,
               decoration: InputDecoration(
                 labelText: 'bKash ID (Mobile Number)',
-                labelStyle: TextStyle(color: Colors.white54),
+                labelStyle: TextStyle(color: Colors.grey),
                 filled: true,
-                fillColor: Colors.grey[800],
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.black),
               keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 20),
@@ -198,14 +244,14 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
               controller: _amountController,
               decoration: InputDecoration(
                 labelText: 'Amount',
-                labelStyle: TextStyle(color: Colors.white54),
+                labelStyle: TextStyle(color: Colors.grey),
                 filled: true,
-                fillColor: Colors.grey[800],
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.black),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 20),
@@ -213,10 +259,11 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
             ElevatedButton(
               onPressed: _confirmTransaction,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                fixedSize: Size(200, 50),
+                backgroundColor: Colors.indigoAccent,
+                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(24),
                 ),
               ),
               child: Text(
