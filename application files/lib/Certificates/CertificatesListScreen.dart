@@ -211,7 +211,7 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Color(0x4C000000), // Replaced Colors.black.withOpacity(0.3)
               blurRadius: 10,
               offset: Offset(0, 5),
             ),
@@ -222,7 +222,7 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue[600]!.withOpacity(0.2),
+                color: Color(0x331976D2), // Replaced Colors.blue[600]!.withOpacity(0.2)
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.description, color: Colors.blue[400], size: 34),

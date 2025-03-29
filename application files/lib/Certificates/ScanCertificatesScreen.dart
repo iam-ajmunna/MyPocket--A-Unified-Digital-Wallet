@@ -80,103 +80,103 @@ class _ScanCertificatesScreenState extends State<ScanCertificatesScreen> with Si
         backgroundColor: Colors.purple[800],
         elevation: 0,
         centerTitle: true,
-        flexible Space: Container(
-      decoration: BoxDecoration(
-      gradient: LinearGradient(
-      colors: [Colors.purple[800]!, Colors.purple[400]!],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.purple[800]!, Colors.purple[400]!],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
-    ),
-    ),
-    ),
-    body: Container(
-    decoration: BoxDecoration(
-    gradient: LinearGradient(
-    colors: [Color(0xFF1A1A2E), Color(0xFF2A2A4E)],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    ),
-    ),
-    child: SafeArea(
-    child: Column(
-    children: [
-    Expanded(
-    child: FadeTransition(
-    opacity: _fadeAnimation,
-    child: _isCameraReady
-    ? FutureBuilder<void>(
-    future: _initializeControllerFuture,
-    builder: (context, snapshot) {
-    if (snapshot.connectionState == ConnectionState.done) {
-    return Stack(
-    children: [
-    ClipRRect(
-    borderRadius: BorderRadius.circular(15),
-    child: CameraPreview(_controller),
-    ),
-    _buildOverlay(),
-    ],
-    );
-    } else if (snapshot.hasError) {
-    return Center(
-    child: Text(
-    "Camera Error",
-    style: GoogleFonts.poppins(
-    fontSize: 20,
-    color: Colors.red[400],
-    ),
-    ),
-    );
-    } else {
-    return Center(
-    child: CircularProgressIndicator(
-    valueColor: AlwaysStoppedAnimation<Color>(Colors.purple[400]!),
-    ),
-    );
-    }
-    },
-    )
-        : Center(
-    child: CircularProgressIndicator(
-    valueColor: AlwaysStoppedAnimation<Color>(Colors.purple[400]!),
-    ),
-    ),
-    ),
-    ),
-    Padding(
-    padding: const EdgeInsets.all(20.0),
-    child: FadeTransition(
-    opacity: _fadeAnimation,
-    child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: [
-    _buildActionButton(
-    icon: Icons.camera_alt,
-    label: "Scan",
-    gradient: LinearGradient(colors: [Colors.green[600]!, Colors.green[300]!]),
-    onPressed: _scanCertificate,
-    ),
-    _buildActionButton(
-    icon: _flashOn ? Icons.flash_on : Icons.flash_off,
-    label: "Flash",
-    gradient: LinearGradient(colors: [Colors.yellow[600]!, Colors.yellow[300]!]),
-    onPressed: _toggleFlash,
-    ),
-    _buildActionButton(
-    icon: Icons.flip_camera_android,
-    label: "Switch",
-    gradient: LinearGradient(colors: [Colors.blue[600]!, Colors.blue[300]!]),
-    onPressed: _switchCamera,
-    ),
-    ],
-    ),
-    ),
-    ),
-    ],
-    ),
-    ),
-    ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF1A1A2E), Color(0xFF2A2A4E)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: _isCameraReady
+                      ? FutureBuilder<void>(
+                    future: _initializeControllerFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: CameraPreview(_controller),
+                            ),
+                            _buildOverlay(),
+                          ],
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            "Camera Error",
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              color: Colors.red[400],
+                            ),
+                          ),
+                        );
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.purple[400]!),
+                          ),
+                        );
+                      }
+                    },
+                  )
+                      : Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.purple[400]!),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildActionButton(
+                        icon: Icons.camera_alt,
+                        label: "Scan",
+                        gradient: LinearGradient(colors: [Colors.green[600]!, Colors.green[300]!]),
+                        onPressed: _scanCertificate,
+                      ),
+                      _buildActionButton(
+                        icon: _flashOn ? Icons.flash_on : Icons.flash_off,
+                        label: "Flash",
+                        gradient: LinearGradient(colors: [Colors.yellow[600]!, Colors.yellow[300]!]),
+                        onPressed: _toggleFlash,
+                      ),
+                      _buildActionButton(
+                        icon: Icons.flip_camera_android,
+                        label: "Switch",
+                        gradient: LinearGradient(colors: [Colors.blue[600]!, Colors.blue[300]!]),
+                        onPressed: _switchCamera,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -190,7 +190,7 @@ class _ScanCertificatesScreenState extends State<ScanCertificatesScreen> with Si
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.greenAccent.withOpacity(0.3),
+              color: Color(0x4C000000), // Replaced Colors.black.withOpacity(0.3)
               blurRadius: 20,
               spreadRadius: 5,
             ),
@@ -230,7 +230,7 @@ class _ScanCertificatesScreenState extends State<ScanCertificatesScreen> with Si
         elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ).copyWith(
-        overlayColor: MaterialStateProperty.all(Colors.white.withOpacity(0.1)),
+        overlayColor: WidgetStateProperty.all(Color(0x1AFFFFFF)), // Replaced Colors.white.withOpacity(0.1)
       ),
       child: Container(
         decoration: BoxDecoration(

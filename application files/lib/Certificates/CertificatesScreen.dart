@@ -158,7 +158,7 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Color(0x4C000000), // Replaced Colors.black.withOpacity(0.3)
               blurRadius: 10,
               offset: Offset(0, 5),
             ),
@@ -169,7 +169,7 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Color(0x33FFFFFF), // Replaced Colors.white.withOpacity(0.2)
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: Colors.white, size: 34),
