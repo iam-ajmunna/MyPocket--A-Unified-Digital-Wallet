@@ -3,28 +3,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MyPocket',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: DocumentManagerScreen(),
-    );
-  }
-}
-
 class DocumentManagerScreen extends StatefulWidget {
+  const DocumentManagerScreen({super.key});
+
   @override
   _DocumentManagerScreenState createState() => _DocumentManagerScreenState();
 }
 
 class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
   final ImagePicker _picker = ImagePicker();
-  List<File> _documents = [];
+  final List<File> _documents = [];
 
   Future<void> _scanDocument() async {
     final XFile? pickedFile = await _picker.pickImage(
@@ -100,8 +88,8 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _scanDocument,
-        child: Icon(Icons.camera_alt),
         backgroundColor: Colors.deepPurple,
+        child: Icon(Icons.camera_alt),
       ),
     );
   }
@@ -153,7 +141,7 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
 class EditDocumentScreen extends StatelessWidget {
   final List<File> documents;
 
-  EditDocumentScreen({required this.documents});
+  const EditDocumentScreen({super.key, required this.documents});
 
   @override
   Widget build(BuildContext context) {
