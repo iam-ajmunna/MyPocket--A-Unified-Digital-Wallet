@@ -5,6 +5,8 @@ import 'transaction.dart';
 import 'WalletScreen.dart';
 import 'PaymentsScreen.dart';
 import 'bkashpayscreen.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MobileTopUpScreen extends StatefulWidget {
   @override
@@ -16,6 +18,15 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
   final _mobileNumberController = TextEditingController();
   final _amountController = TextEditingController();
   final _pinController = TextEditingController();
+
+  // Variables for user inputs
+  String _mobileNumber = '';
+  double _amount = 0.0;
+  String _pin = '';
+
+  // Validation error messages
+  String? _mobileNumberError;
+  String? _amountError;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -69,46 +80,75 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
     await prefs.setStringList('transactions', transactionStrings);
   }
 
+  bool _validateInput() {
+    setState(() {
+      _mobileNumberError = null;
+      _amountError = null;
+    });
+
+    _mobileNumber = _mobileNumberController.text;
+    _amount = double.tryParse(_amountController.text) ?? 0.0;
+
+    if (_mobileNumber.length != 11 || !_mobileNumber.startsWith('01')) {
+      setState(() {
+        _mobileNumberError =
+            'Mobile number must be 11 digits and start with 01';
+      });
+      return false;
+    }
+
+    if (_amount <= 0 || _amount > 1000) {
+      setState(() {
+        _amountError = 'Amount must be between 1 and 1000';
+      });
+      return false;
+    }
+
+    return true;
+  }
+
   void _confirmTransaction() async {
-    if (_mobileNumberController.text.isEmpty ||
-        _amountController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please fill all fields'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    if (!_validateInput()) {
       return;
     }
+
+    _pin = _pinController.text;
 
     // Show PIN confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: const Color(0xFFE0E3E7),
           title: Text('Confirm Transaction'),
           content: TextField(
             controller: _pinController,
             decoration: InputDecoration(
               labelText: 'Enter PIN',
-              labelStyle: TextStyle(color: Colors.white54),
+              labelStyle: TextStyle(color: Colors.grey),
               filled: true,
-              fillColor: Colors.grey[800],
+              fillColor: Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.black),
             obscureText: true,
             keyboardType: TextInputType.number,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.indigoAccent,
+                ),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
+                // Corrected PIN verification
                 if (_pinController.text == '1234') {
                   Navigator.pop(context, true);
                 } else {
@@ -120,7 +160,12 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
                   );
                 }
               },
-              child: Text('Confirm'),
+              child: Text(
+                'Confirm',
+                style: TextStyle(
+                  color: Colors.indigoAccent,
+                ),
+              ),
             ),
           ],
         );
@@ -131,7 +176,7 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
       // Add transaction to history
       _addTransaction(
         'Mobile Top-Up',
-        double.parse(_amountController.text),
+        _amount,
         'Success',
       );
 
@@ -146,6 +191,12 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
       _mobileNumberController.clear();
       _amountController.clear();
       _pinController.clear();
+
+      // Clear error messages
+      setState(() {
+        _mobileNumberError = null;
+        _amountError = null;
+      });
     }
   }
 
@@ -165,23 +216,21 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
       body: Container(
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFFE0E3E7),
+          color:Color.fromARGB(241, 244, 248, 255),
         ),
         child: Column(
           children: [
             SizedBox(
               height: 80,
             ),
-            // Logo
             Container(
               child: Image.asset(
-                'Mobile-Top-Up.png', // Add bKash logo to your assets folder
+                'Mobile-Top-Up.png',
                 width: 450,
                 height: 220,
               ),
             ),
             const SizedBox(height: 20),
-            // Mobile Number Input
             TextField(
               controller: _mobileNumberController,
               decoration: InputDecoration(
@@ -192,12 +241,12 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
+                errorText: _mobileNumberError,
               ),
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.black),
               keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 20),
-            // Amount Input
             TextField(
               controller: _amountController,
               decoration: InputDecoration(
@@ -208,12 +257,12 @@ class _MobileTopUpScreenState extends State<MobileTopUpScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
+                errorText: _amountError,
               ),
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.black),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 20),
-            // Recharge Button
             ElevatedButton(
               onPressed: _confirmTransaction,
               style: ElevatedButton.styleFrom(
