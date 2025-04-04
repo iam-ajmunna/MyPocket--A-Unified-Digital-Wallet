@@ -4,6 +4,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:mypocket/Home/WalletScreen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -14,6 +16,13 @@ class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool obscureText = true;
+
+  // Variables for user inputs
+  String _loginEmail = '';
+  String _loginPassword = '';
+  String _signUpFullName = '';
+  String _signUpEmail = '';
+  String _signUpPassword = '';
 
   @override
   void initState() {
@@ -27,8 +36,6 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-// Not For Me
-/* This is the Whole Body that is Containing a Container Under a Column */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,10 +44,7 @@ class _LoginScreenState extends State<LoginScreen>
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-
-            // This is the Begining of the container
             children: [
-              // This container Shows the Brand And Logo
               Container(
                 height: 200,
                 width: 420,
@@ -59,8 +63,6 @@ class _LoginScreenState extends State<LoginScreen>
                   ),
                 ),
               ),
-
-              // This Container is the Tab View
               Container(
                 width: 550,
                 padding: EdgeInsets.all(20),
@@ -116,7 +118,6 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-// This Widget is for the Create Account Tab
   Widget _buildSignUpTab() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,13 +136,13 @@ class _LoginScreenState extends State<LoginScreen>
           style: TextStyle(color: Colors.grey),
         ),
         SizedBox(height: 20),
-        _buildTextField('Full Name'),
+        _buildTextField('Full Name', (value) => _signUpFullName = value),
         SizedBox(height: 20),
-        _buildTextField('Email'),
+        _buildTextField('Email', (value) => _signUpEmail = value),
         SizedBox(height: 20),
-        _buildPasswordField('Password'),
+        _buildPasswordField('Password', (value) => _signUpPassword = value),
         SizedBox(height: 20),
-        _buildMainButton('Get Started'),
+        _buildMainButton('Get Started', _handleSignUp),
         SizedBox(height: 20),
         Center(
             child: Text(
@@ -152,12 +153,11 @@ class _LoginScreenState extends State<LoginScreen>
           ),
         )),
         SizedBox(height: 20),
-        _buildSocialButtons(), // This Creates the Social button
+        _buildSocialButtons(),
       ],
     );
   }
 
-// This Widget is for the Log In Page
   Widget _buildLoginTab() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,11 +176,11 @@ class _LoginScreenState extends State<LoginScreen>
           style: TextStyle(color: Colors.grey),
         ),
         SizedBox(height: 20),
-        _buildTextField('Email'),
+        _buildTextField('Email', (value) => _loginEmail = value),
         SizedBox(height: 20),
-        _buildPasswordField('Password'),
+        _buildPasswordField('Password', (value) => _loginPassword = value),
         SizedBox(height: 20),
-        _buildMainButton('Login'),
+        _buildMainButton('Login', _handleLogin),
         SizedBox(height: 20),
         Center(
             child: Text('Or Log In with',
@@ -194,9 +194,9 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-//This widget is for the Text Fields
-  Widget _buildTextField(String label) {
+  Widget _buildTextField(String label, Function(String) onChanged) {
     return TextField(
+      onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
@@ -221,23 +221,21 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-//This Widget is for the Password Field
-  Widget _buildPasswordField(String label) {
+  Widget _buildPasswordField(String label, Function(String) onChanged) {
     return TextField(
-      obscureText: obscureText, // Use the class-level variable
+      onChanged: onChanged,
+      obscureText: obscureText,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
         fillColor: const Color.fromARGB(255, 255, 255, 255),
         suffixIcon: IconButton(
           icon: Icon(
-            obscureText
-                ? Icons.visibility_off
-                : Icons.visibility, // Update the icon dynamically
+            obscureText ? Icons.visibility_off : Icons.visibility,
           ),
           onPressed: () {
             setState(() {
-              obscureText = !obscureText; // Toggle password visibility
+              obscureText = !obscureText;
             });
           },
         ),
@@ -258,30 +256,10 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-// This widget is for the Login or Get Started Button
-  Widget _buildMainButton(String text) {
+  Widget _buildMainButton(String text, VoidCallback onPressed) {
     return Center(
       child: ElevatedButton(
-        /* Going to The Dashboard from here */
-
-        onPressed: () {
-          // Space for having validation here, e.g., checking if the email and password are correct
-          bool isValidInput = true; // Replace this with actual validation
-
-          if (isValidInput) {
-            // Navigate to WalletScreen if the input is valid
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => WalletScreen()),
-            );
-            // ignore: dead_code
-          } else {
-            // You can show an error message or a dialog here if the input is invalid
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Invalid credentials, please try again.')),
-            );
-          }
-        },
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color.fromARGB(255, 173, 139, 252),
           shape: RoundedRectangleBorder(
@@ -300,7 +278,6 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-//This Widget is for the Social Button
   Widget _buildSocialButtons() {
     return Column(
       children: [
@@ -317,37 +294,9 @@ class _LoginScreenState extends State<LoginScreen>
       child: ElevatedButton.icon(
         onPressed: () async {
           if (text == 'Continue with Google') {
-            // Google Sign-In Logic
-            try {
-              GoogleSignInAccount? user = await _googleSignIn.signIn();
-              if (user != null) {
-                // User successfully signed in
-                print('Google User Info: ${user.displayName}, ${user.email}');
-                // Handle user data, for example:
-                // - Navigate to the next screen
-                // - Store user info in the database
-              } else {
-                print('Google Sign-In canceled by user.');
-              }
-            } catch (error) {
-              print('Error during Google Sign-In: $error');
-            }
+            _handleGoogleSignIn();
           } else if (text == 'Continue with Facebook') {
-            // Facebook Sign-In Logic
-            try {
-              final LoginResult result = await FacebookAuth.instance.login();
-              if (result.status == LoginStatus.success) {
-                final userData = await FacebookAuth.instance.getUserData();
-                print(
-                    'Facebook User Info: ${userData['name']}, ${userData['email']}');
-                // Handle user data
-              } else {
-                print(
-                    'Facebook Sign-In canceled or failed: ${result.status}, ${result.message}');
-              }
-            } catch (error) {
-              print('Error during Facebook Sign-In: $error');
-            }
+            _handleFacebookSignIn();
           }
         },
         icon: icon is IconData
@@ -379,6 +328,90 @@ class _LoginScreenState extends State<LoginScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _handleLogin() async {
+    // try {
+    //   UserCredential userCredential = await FirebaseAuth.instance
+    //       .signInWithEmailAndPassword(email: _loginEmail, password: _loginPassword);
+    //   print('Logged in: ${userCredential.user?.uid}');
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => WalletScreen()),
+    //   );
+    // } on FirebaseAuthException catch (e) {
+    //   print('Firebase Auth Exception: ${e.code}');
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('Login failed: ${e.message}')),
+    //   );
+    // }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => WalletScreen()),
+    );
+  }
+
+  Future<void> _handleSignUp() async {
+    // try {
+    //   UserCredential userCredential = await FirebaseAuth.instance
+    //       .createUserWithEmailAndPassword(email: _signUpEmail, password: _signUpPassword);
+    //   await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+    //     'fullName': _signUpFullName,
+    //     'email': _signUpEmail,
+    //   });
+    //   print('Signed up: ${userCredential.user?.uid}');
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => WalletScreen()),
+    //   );
+    // } on FirebaseAuthException catch (e) {
+    //   print('Firebase Auth Exception: ${e.code}');
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('Sign up failed: ${e.message}')),
+    //   );
+    // }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => WalletScreen()),
+    );
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      GoogleSignInAccount? user = await _googleSignIn.signIn();
+      if (user != null) {
+        print('Google User Info: ${user.displayName}, ${user.email}');
+        // Handle user data and navigate
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => WalletScreen()),
+        );
+      } else {
+        print('Google Sign-In canceled by user.');
+      }
+    } catch (error) {
+      print('Error during Google Sign-In: $error');
+    }
+  }
+
+  Future<void> _handleFacebookSignIn() async {
+    try {
+      final LoginResult result = await FacebookAuth.instance.login();
+      if (result.status == LoginStatus.success) {
+        final userData = await FacebookAuth.instance.getUserData();
+        print('Facebook User Info: ${userData['name']}, ${userData['email']}');
+        // Handle user data and navigate
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => WalletScreen()),
+        );
+      } else {
+        print(
+            'Facebook Sign-In canceled or failed: ${result.status}, ${result.message}');
+      }
+    } catch (error) {
+      print('Error during Facebook Sign-In: $error');
+    }
   }
 }
 
