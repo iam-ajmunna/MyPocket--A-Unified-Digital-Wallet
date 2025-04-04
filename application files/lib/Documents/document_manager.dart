@@ -4,15 +4,13 @@ import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 
 class DocumentManagerScreen extends StatefulWidget {
-  const DocumentManagerScreen({super.key});
-
   @override
   _DocumentManagerScreenState createState() => _DocumentManagerScreenState();
 }
 
 class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
   final ImagePicker _picker = ImagePicker();
-  final List<File> _documents = [];
+  List<File> _documents = [];
 
   Future<void> _scanDocument() async {
     final XFile? pickedFile = await _picker.pickImage(
@@ -37,11 +35,84 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
   }
 
   void _openEditPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditDocumentScreen(documents: _documents),
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          height: 400,
+          child: _documents.isEmpty
+              ? Center(child: Text('No Documents Available'))
+              : ListView.builder(
+            itemCount: _documents.length,
+            itemBuilder: (context, index) {
+              return Card(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading: Icon(Icons.edit_document, color: Colors.deepPurple),
+                  title: Text('Document ${index + 1}'),
+                  subtitle: Text('Tap to Edit'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => _deleteDocument(index),
+                  ),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Edit functionality coming soon!')),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _showUploadedDocuments() {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          height: 400,
+          child: _documents.isEmpty
+              ? Center(child: Text('No Uploaded Documents'))
+              : ListView.builder(
+            itemCount: _documents.length,
+            itemBuilder: (context, index) {
+              return Card(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading: Icon(Icons.insert_drive_file, color: Colors.deepPurple),
+                  title: Text('Uploaded Document ${index + 1}'),
+                  subtitle: Text('Scanned via Camera'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.share, color: Colors.blue),
+                        onPressed: () => _shareDocument(_documents[index]),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deleteDocument(index),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -71,7 +142,7 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
                 _featureTile(Icons.scanner, 'Scan', Colors.greenAccent, _scanDocument),
                 _featureTile(Icons.edit, 'Edit', Colors.orangeAccent, _openEditPage),
                 _featureTile(Icons.swap_horiz, 'Convert', Colors.lightGreen, () {}),
-                _featureTile(Icons.lightbulb, 'Uploaded Document', Colors.amberAccent, () {}),
+                _featureTile(Icons.folder, 'Uploaded Documents', Colors.amberAccent, _showUploadedDocuments),
               ],
             ),
             SizedBox(height: 15),
@@ -88,8 +159,8 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _scanDocument,
-        backgroundColor: Colors.deepPurple,
         child: Icon(Icons.camera_alt),
+        backgroundColor: Colors.deepPurple,
       ),
     );
   }
@@ -133,37 +204,6 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
             PopupMenuItem(value: 'Delete', child: Text('Delete')),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class EditDocumentScreen extends StatelessWidget {
-  final List<File> documents;
-
-  const EditDocumentScreen({super.key, required this.documents});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Edit Documents')),
-      body: documents.isEmpty
-          ? Center(child: Text('No Documents Available'))
-          : ListView.builder(
-        itemCount: documents.length,
-        itemBuilder: (context, index) {
-          return Card(
-            margin: EdgeInsets.all(8.0),
-            child: ListTile(
-              leading: Icon(Icons.insert_drive_file, color: Colors.deepPurple),
-              title: Text('Document ${index + 1}'),
-              subtitle: Text('Tap to Edit'),
-              onTap: () {
-                // Add functionality to edit document
-              },
-            ),
-          );
-        },
       ),
     );
   }
