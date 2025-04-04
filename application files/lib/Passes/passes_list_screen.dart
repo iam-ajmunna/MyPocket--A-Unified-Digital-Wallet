@@ -82,17 +82,19 @@ class _PassesListScreenState extends State<PassesListScreen> {
 
   Future<void> _saveEventTickets() async {
     final prefs = await SharedPreferences.getInstance();
-    final tickets = _eventTickets.map((ticket) =>
-    '${ticket.id}|${ticket.eventName}|${ticket.venue}|${ticket.date.toIso8601String()}|${ticket.seat}'
-    ).toList();
+    final tickets = _eventTickets
+        .map((ticket) =>
+            '${ticket.id}|${ticket.eventName}|${ticket.venue}|${ticket.date.toIso8601String()}|${ticket.seat}')
+        .toList();
     await prefs.setStringList('eventTickets', tickets);
   }
 
   Future<void> _saveColors() async {
     final prefs = await SharedPreferences.getInstance();
-    final colors = _cardColors.entries.map((entry) =>
-    '${entry.key}:${entry.value.colors[0].value};${entry.value.colors[1].value}'
-    ).join(',');
+    final colors = _cardColors.entries
+        .map((entry) =>
+            '${entry.key}:${entry.value.colors[0].value};${entry.value.colors[1].value}')
+        .join(',');
     await prefs.setString('eventTicketColors', colors);
   }
 
@@ -104,7 +106,8 @@ class _PassesListScreenState extends State<PassesListScreen> {
   void _addEventTicket(EventTicket ticket) {
     setState(() {
       _eventTickets.add(ticket);
-      _cardColors[ticket.id] = _gradients[_eventTickets.length % _gradients.length];
+      _cardColors[ticket.id] =
+          _gradients[_eventTickets.length % _gradients.length];
       _buttonAnimations[ticket.id + '_delete'] = false;
       _saveAll();
     });
@@ -135,7 +138,8 @@ class _PassesListScreenState extends State<PassesListScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey[900],
         title: Text('Delete Ticket', style: TextStyle(color: Colors.white)),
-        content: Text('Delete ${ticket.eventName}?', style: TextStyle(color: Colors.white54)),
+        content: Text('Delete ${ticket.eventName}?',
+            style: TextStyle(color: Colors.white54)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -195,7 +199,8 @@ class _PassesListScreenState extends State<PassesListScreen> {
               SizedBox(height: 20),
               _buildDetailRow(Icons.place, 'Venue', ticket.venue),
               SizedBox(height: 15),
-              _buildDetailRow(Icons.calendar_today, 'Date', ticket.formattedDate),
+              _buildDetailRow(
+                  Icons.calendar_today, 'Date', ticket.formattedDate),
               SizedBox(height: 15),
               _buildDetailRow(Icons.access_time, 'Time', ticket.formattedTime),
               SizedBox(height: 15),
@@ -269,7 +274,8 @@ class _PassesListScreenState extends State<PassesListScreen> {
     };
 
     for (var ticket in _eventTickets) {
-      final ticketDate = DateTime(ticket.date.year, ticket.date.month, ticket.date.day);
+      final ticketDate =
+          DateTime(ticket.date.year, ticket.date.month, ticket.date.day);
 
       if (ticketDate.isBefore(today)) {
         grouped['Past']!.add(ticket);
@@ -413,7 +419,11 @@ class _PassesListScreenState extends State<PassesListScreen> {
                                 duration: Duration(milliseconds: 100),
                                 curve: Curves.easeInOut,
                                 transform: Matrix4.identity()
-                                  ..scale(_buttonAnimations[ticket.id + '_delete'] ?? false ? 0.9 : 1.0),
+                                  ..scale(_buttonAnimations[
+                                              ticket.id + '_delete'] ??
+                                          false
+                                      ? 0.9
+                                      : 1.0),
                                 child: Container(
                                   padding: EdgeInsets.all(8),
                                   child: Icon(
@@ -436,17 +446,10 @@ class _PassesListScreenState extends State<PassesListScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildInfoRow(
-                                Icons.place,
-                                'Venue',
-                                ticket.venue
-                            ),
+                            _buildInfoRow(Icons.place, 'Venue', ticket.venue),
                             SizedBox(height: 12),
-                            _buildInfoRow(
-                                Icons.calendar_today,
-                                'Date',
-                                ticket.formattedDate
-                            ),
+                            _buildInfoRow(Icons.calendar_today, 'Date',
+                                ticket.formattedDate),
                           ],
                         ),
                       ),
@@ -455,17 +458,10 @@ class _PassesListScreenState extends State<PassesListScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildInfoRow(
-                                Icons.access_time,
-                                'Time',
-                                ticket.formattedTime
-                            ),
+                            _buildInfoRow(Icons.access_time, 'Time',
+                                ticket.formattedTime),
                             SizedBox(height: 12),
-                            _buildInfoRow(
-                                Icons.chair,
-                                'Seat',
-                                ticket.seat
-                            ),
+                            _buildInfoRow(Icons.chair, 'Seat', ticket.seat),
                           ],
                         ),
                       ),
@@ -501,33 +497,33 @@ class _PassesListScreenState extends State<PassesListScreen> {
       ),
       body: _eventTickets.isEmpty
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.event_available, size: 60, color: Colors.purple),
-            SizedBox(height: 20),
-            Text(
-              'No Event Tickets',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                color: Colors.white54,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.event_available, size: 60, color: Colors.purple),
+                  SizedBox(height: 20),
+                  Text(
+                    'No Event Tickets',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      color: Colors.white54,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Add your first event ticket',
+                    style: TextStyle(color: Colors.white54),
+                  ),
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _buildGroupedTickets(),
               ),
             ),
-            SizedBox(height: 10),
-            Text(
-              'Add your first event ticket',
-              style: TextStyle(color: Colors.white54),
-            ),
-          ],
-        ),
-      )
-          : SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _buildGroupedTickets(),
-        ),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
