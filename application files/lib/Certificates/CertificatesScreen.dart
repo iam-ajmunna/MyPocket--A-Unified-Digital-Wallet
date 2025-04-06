@@ -4,6 +4,7 @@ import 'package:mypocket/Documents/SendToSocialScreen.dart';
 import 'package:mypocket/Documents/UploadToDriveScreen.dart';
 import 'ScanCertificatesScreen.dart';
 import 'CertificatesListScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CertificatesScreen extends StatefulWidget {
   @override

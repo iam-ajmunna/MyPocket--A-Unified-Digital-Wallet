@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mypocket/Home/WalletScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class InfoPage extends StatefulWidget {
   @override

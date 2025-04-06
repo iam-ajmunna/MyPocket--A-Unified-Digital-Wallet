@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UploadToDriveScreen extends StatefulWidget {
   @override
