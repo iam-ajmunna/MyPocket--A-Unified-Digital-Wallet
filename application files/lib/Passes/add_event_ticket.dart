@@ -24,16 +24,16 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
   @override
   void initState() {
     super.initState();
-    _eventNameController = TextEditingController(
-        text: widget.existingTicket?.eventName ?? '');
-    _venueController = TextEditingController(
-        text: widget.existingTicket?.venue ?? '');
+    _eventNameController =
+        TextEditingController(text: widget.existingTicket?.eventName ?? '');
+    _venueController =
+        TextEditingController(text: widget.existingTicket?.venue ?? '');
     _dateController = TextEditingController(
         text: widget.existingTicket != null
             ? DateFormat('yyyy-MM-dd').format(widget.existingTicket!.date)
             : '');
-    _seatController = TextEditingController(
-        text: widget.existingTicket?.seat ?? '');
+    _seatController =
+        TextEditingController(text: widget.existingTicket?.seat ?? '');
     _selectedDate = widget.existingTicket?.date;
   }
 
@@ -136,7 +136,7 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
                 label: 'Event Name',
                 icon: Icons.event,
                 validator: (value) =>
-                value!.isEmpty ? 'Please enter event name' : null,
+                    value!.isEmpty ? 'Please enter event name' : null,
               ),
               SizedBox(height: 20),
               _buildTextField(
@@ -144,7 +144,7 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
                 label: 'Venue',
                 icon: Icons.place,
                 validator: (value) =>
-                value!.isEmpty ? 'Please enter venue' : null,
+                    value!.isEmpty ? 'Please enter venue' : null,
               ),
               SizedBox(height: 20),
               GestureDetector(
@@ -155,7 +155,7 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
                     label: 'Date',
                     icon: Icons.calendar_today,
                     validator: (value) =>
-                    value!.isEmpty ? 'Please select date' : null,
+                        value!.isEmpty ? 'Please select date' : null,
                   ),
                 ),
               ),
@@ -165,7 +165,7 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
                 label: 'Seat',
                 icon: Icons.chair,
                 validator: (value) =>
-                value!.isEmpty ? 'Please enter seat info' : null,
+                    value!.isEmpty ? 'Please enter seat info' : null,
               ),
               SizedBox(height: 30),
               ElevatedButton(
