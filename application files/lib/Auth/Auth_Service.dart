@@ -1,19 +1,37 @@
+// Auth_Service.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Email & Password Sign Up
+  // Email & Password Sign Up and Store to Firestore
   Future<User?> createUserWithEmailAndPassword(
-      String email, String password) async {
+      String fullName, String email, String password) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
-      return result.user;
+      User? user = result.user;
+
+      if (user != null) {
+        // Store additional user info in Firestore
+        await _firestore.collection('Users').doc(user.uid).set({
+          'uid': user.uid,
+          'fullName': fullName,
+          'email': email,
+          // Add any other relevant information you want to store
+        });
+        return user;
+      }
+      return null;
     } on FirebaseAuthException catch (e) {
       print(e.message);
+      throw e;
+    } catch (e) {
+      print("Error creating user and storing data: $e");
       throw e;
     }
   }
@@ -31,42 +49,60 @@ class AuthService {
     }
   }
 
-  // Google Sign In
+  // Google Sign In and Store to Firestore if new user
   Future<User?> signInWithGoogle({String? accessToken, String? idToken}) async {
     try {
-      // This can be used if you're implementing the sign-in directly in AuthService
-      // final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      // final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-
-      // Create a credential with the tokens
       final credential = GoogleAuthProvider.credential(
         accessToken: accessToken,
         idToken: idToken,
       );
-
-      // Sign in with Firebase using the Google credential
       final UserCredential userCredential =
-      await _auth.signInWithCredential(credential);
+          await _auth.signInWithCredential(credential);
+      final User? user = userCredential.user;
 
-      return userCredential.user;
+      if (user != null) {
+        final userDoc =
+            await _firestore.collection('Users').doc(user.uid).get();
+        if (!userDoc.exists) {
+          await _firestore.collection('Users').doc(user.uid).set({
+            'uid': user.uid,
+            'fullName': user.displayName,
+            'email': user.email,
+            // Add any other relevant information
+          });
+        }
+      }
+      return user;
     } catch (e) {
       print("Error signing in with Google: $e");
       throw e;
     }
   }
 
-  // Facebook Sign In
+  // Facebook Sign In and Store to Firestore if new user
   Future<User?> signInWithFacebook({String? accessToken}) async {
     try {
-      // Create a credential using the access token
       final OAuthCredential facebookAuthCredential =
-      FacebookAuthProvider.credential(accessToken!);
-
-      // Sign in with Firebase using the Facebook credential
+          FacebookAuthProvider.credential(accessToken!);
       final UserCredential userCredential =
-      await _auth.signInWithCredential(facebookAuthCredential);
+          await _auth.signInWithCredential(facebookAuthCredential);
+      final User? user = userCredential.user;
 
-      return userCredential.user;
+      if (user != null) {
+        final userDoc =
+            await _firestore.collection('Users').doc(user.uid).get();
+        if (!userDoc.exists) {
+          // You might want to fetch more user data from Facebook Graph API
+          // to get the full name. For simplicity, we'll just store basic info.
+          await _firestore.collection('Users').doc(user.uid).set({
+            'uid': user.uid,
+            // 'fullName': ..., // Consider fetching from Facebook
+            'email': user.email, // May not always be available
+            // Add any other relevant information
+          });
+        }
+      }
+      return user;
     } catch (e) {
       print("Error signing in with Facebook: $e");
       throw e;
