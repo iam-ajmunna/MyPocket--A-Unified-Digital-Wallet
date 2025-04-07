@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mypocket/Home/WalletScreen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'scan_document.dart';
 
 class MyDivider extends StatelessWidget {
   const MyDivider({
@@ -42,11 +42,25 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
   final ImagePicker _picker = ImagePicker();
   List<File> _documents = [];
 
-  Future<void> _scanDocument() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.rear,
+  // Opens camera for scanning
+  Future<void> _openCameraToScan() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ScanCameraScreen(
+          onScanned: (File image) {
+            setState(() {
+              _documents.add(image);
+            });
+          },
+        ),
+      ),
     );
+  }
+
+  // Upload from device (gallery)
+  Future<void> _uploadFromDevice() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _documents.add(File(pickedFile.path));
@@ -214,7 +228,7 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _scanDocument,
+        onPressed: _openCameraToScan,
         child: Icon(Icons.camera_alt),
         backgroundColor: Colors.deepPurple,
       ),
