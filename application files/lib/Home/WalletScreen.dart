@@ -13,6 +13,7 @@ import 'mobiletopupscreen.dart';
 import 'paymentsscreen.dart';
 import 'package:mypocket/Profile/user_profile.dart';
 import 'package:intl/intl.dart'; // Import the intl package
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Constants for UI elements and text
 const double cardHeight = 210.0;
