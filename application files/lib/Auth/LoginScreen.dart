@@ -1,3 +1,4 @@
+// LoginScreen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -147,12 +148,12 @@ class _LoginScreenState extends State<LoginScreen>
         SizedBox(height: 20),
         Center(
             child: Text(
-              'Or sign up with',
-              style: GoogleFonts.roboto(
-                textStyle: Theme.of(context).textTheme.headlineMedium,
-                fontSize: 12,
-              ),
-            )),
+          'Or sign up with',
+          style: GoogleFonts.roboto(
+            textStyle: Theme.of(context).textTheme.headlineMedium,
+            fontSize: 12,
+          ),
+        )),
         SizedBox(height: 20),
         _buildSocialButtons(),
       ],
@@ -302,15 +303,15 @@ class _LoginScreenState extends State<LoginScreen>
         },
         icon: icon is IconData
             ? Icon(
-          icon,
-          color: Colors.black,
-          size: 20,
-        )
+                icon,
+                color: Colors.black,
+                size: 20,
+              )
             : SvgPicture.asset(
-          icon,
-          height: 20,
-          width: 20,
-        ),
+                icon,
+                height: 20,
+                width: 20,
+              ),
         label: Text(
           text,
           style: GoogleFonts.manrope(
@@ -353,7 +354,10 @@ class _LoginScreenState extends State<LoginScreen>
   Future<void> _handleSignUp() async {
     try {
       final user = await _auth.createUserWithEmailAndPassword(
-          _signUpEmail, _signUpPassword);
+        _signUpFullName, // Pass the full name here
+        _signUpEmail,
+        _signUpPassword,
+      );
       if (user != null) {
         print('Sign up successful');
         Navigator.pushReplacement(
@@ -374,7 +378,7 @@ class _LoginScreenState extends State<LoginScreen>
       GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser != null) {
         final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+            await googleUser.authentication;
         final user = await _auth.signInWithGoogle(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
@@ -403,11 +407,9 @@ class _LoginScreenState extends State<LoginScreen>
       final LoginResult result = await FacebookAuth.instance.login();
       if (result.status == LoginStatus.success) {
         final userData = await FacebookAuth.instance.getUserData();
-        // Debug: Inspect the AccessToken object
         final accessToken = result.accessToken;
         print('AccessToken: $accessToken');
         print('AccessToken type: ${accessToken.runtimeType}');
-        // Use the correct property (should be 'token' in flutter_facebook_auth)
         final String? fbToken = accessToken?.token;
         if (fbToken == null) {
           throw Exception('Facebook token is null');

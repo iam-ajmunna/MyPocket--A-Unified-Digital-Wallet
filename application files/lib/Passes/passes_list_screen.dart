@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mypocket/Home/WalletScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'add_event_ticket.dart';
 import 'event_ticket.dart';
@@ -480,39 +481,48 @@ class _PassesListScreenState extends State<PassesListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1A2E),
+      backgroundColor: Color.fromARGB(241, 244, 248, 255),
       appBar: AppBar(
-        title: Text('Event Tickets', style: GoogleFonts.poppins()),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+        title: Text(
+          'Event Tickets',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.home),
+            onPressed: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => WalletScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: _eventTickets.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.event_available, size: 60, color: Colors.purple),
+                  Icon(Icons.event_available,
+                      size: 60, color: Colors.indigoAccent),
                   SizedBox(height: 20),
                   Text(
                     'No Event Tickets',
                     style: GoogleFonts.poppins(
                       fontSize: 18,
-                      color: Colors.white54,
+                      color: Colors.grey,
                     ),
                   ),
                   SizedBox(height: 10),
                   Text(
                     'Add your first event ticket',
-                    style: TextStyle(color: Colors.white54),
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
@@ -535,7 +545,7 @@ class _PassesListScreenState extends State<PassesListScreen> {
             ),
           );
         },
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.indigoAccent,
         child: Icon(Icons.add, color: Colors.white),
       ),
     );
