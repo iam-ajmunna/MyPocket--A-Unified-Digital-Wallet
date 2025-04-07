@@ -1,52 +1,27 @@
 {
   "project_info": {
-    "project_number": "896943800550",
-    "firebase_url": "https://mypocket--an-unified-wallet-default-rtdb.firebaseio.com",
-    "project_id": "mypocket--an-unified-wallet",
-    "storage_bucket": "mypocket--an-unified-wallet.firebasestorage.app"
+    "project_number": "128150028593",
+    "firebase_url": "https://my-pocket-fc2b6-default-rtdb.firebaseio.com",
+    "project_id": "my-pocket-fc2b6",
+    "storage_bucket": "my-pocket-fc2b6.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:896943800550:android:0d146d6d1e9caeff143b27",
+        "mobilesdk_app_id": "1:128150028593:android:ee96508fe1923808df3010",
         "android_client_info": {
           "package_name": "com.nexus.mypocket"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "896943800550-rhqm4t8ea103q6pp13j5j2t9oeukn42g.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.nexus.mypocket",
-            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
-          }
-        },
-        {
-          "client_id": "896943800550-inhpmjb4d9k6eebmj191lb39prpqod0c.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC3kVsyflE9YUN_NK0rxGtgpZ-_7cFWVIA"
+          "current_key": "AIzaSyAgwyJqTmvxlOI2D0q9tsZmH9Cv8M8KJko"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "896943800550-inhpmjb4d9k6eebmj191lb39prpqod0c.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "896943800550-94k4mrvnj5no0p5r7p41nem89psn9lds.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.nexus.mypocket"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
