@@ -10,7 +10,7 @@ import 'dart:io';
 import 'package:image_cropper/image_cropper.dart'; // Import the image_cropper package
 import 'package:camera/camera.dart'; // Import the camera package
 // import 'package:universal_html/html.dart' as web; // Import for web compatibility - removed to fix error
-
+//import 'package:firebase_auth/firebase_auth.dart';
 // Divider Class
 class MyDivider extends StatelessWidget {
   const MyDivider({
