@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mypocket/Home/WalletScreen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'scan_document.dart';
 
 class MyDivider extends StatelessWidget {
   const MyDivider({
@@ -42,11 +42,25 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
   final ImagePicker _picker = ImagePicker();
   List<File> _documents = [];
 
-  Future<void> _scanDocument() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.rear,
+  // Opens camera for scanning
+  Future<void> _openCameraToScan() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ScanCameraScreen(
+          onScanned: (File image) {
+            setState(() {
+              _documents.add(image);
+            });
+          },
+        ),
+      ),
     );
+  }
+
+  // Upload from device (gallery)
+  Future<void> _uploadFromDevice() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _documents.add(File(pickedFile.path));
@@ -77,30 +91,30 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
           child: _documents.isEmpty
               ? Center(child: Text('No Documents Available'))
               : ListView.builder(
-                  itemCount: _documents.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      margin: EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        leading:
-                            Icon(Icons.edit_document, color: Colors.deepPurple),
-                        title: Text('Document ${index + 1}'),
-                        subtitle: Text('Tap to Edit'),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteDocument(index),
-                        ),
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content:
-                                    Text('Edit functionality coming soon!')),
-                          );
-                        },
-                      ),
+            itemCount: _documents.length,
+            itemBuilder: (context, index) {
+              return Card(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading:
+                  Icon(Icons.edit_document, color: Colors.deepPurple),
+                  title: Text('Document ${index + 1}'),
+                  subtitle: Text('Tap to Edit'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => _deleteDocument(index),
+                  ),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content:
+                          Text('Edit functionality coming soon!')),
                     );
                   },
                 ),
+              );
+            },
+          ),
         );
       },
     );
@@ -119,33 +133,33 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
           child: _documents.isEmpty
               ? Center(child: Text('No Uploaded Documents'))
               : ListView.builder(
-                  itemCount: _documents.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      margin: EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        leading: Icon(Icons.insert_drive_file,
-                            color: Colors.deepPurple),
-                        title: Text('Uploaded Document ${index + 1}'),
-                        subtitle: Text('Scanned via Camera'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.share, color: Colors.blue),
-                              onPressed: () =>
-                                  _shareDocument(_documents[index]),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _deleteDocument(index),
-                            ),
-                          ],
-                        ),
+            itemCount: _documents.length,
+            itemBuilder: (context, index) {
+              return Card(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading: Icon(Icons.insert_drive_file,
+                      color: Colors.deepPurple),
+                  title: Text('Uploaded Document ${index + 1}'),
+                  subtitle: Text('Scanned via Camera or Uploaded'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.share, color: Colors.blue),
+                        onPressed: () =>
+                            _shareDocument(_documents[index]),
                       ),
-                    );
-                  },
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deleteDocument(index),
+                      ),
+                    ],
+                  ),
                 ),
+              );
+            },
+          ),
         );
       },
     );
@@ -187,14 +201,10 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
               mainAxisSpacing: 16,
               childAspectRatio: 1.2,
               children: [
-                _featureTile(
-                    Icons.scanner, 'Scan', Colors.greenAccent, _scanDocument),
-                _featureTile(
-                    Icons.edit, 'Edit', Colors.orangeAccent, _openEditPage),
-                _featureTile(
-                    Icons.swap_horiz, 'Convert', Colors.lightGreen, () {}),
-                _featureTile(Icons.folder, 'Uploaded Documents',
-                    Colors.amberAccent, _showUploadedDocuments),
+                _featureTile(Icons.upload, 'Upload', Colors.greenAccent, _uploadFromDevice),
+                _featureTile(Icons.edit, 'Edit', Colors.orangeAccent, _openEditPage),
+                _featureTile(Icons.swap_horiz, 'Convert', Colors.lightGreen, () {}),
+                _featureTile(Icons.folder, 'Uploaded Documents', Colors.amberAccent, _showUploadedDocuments),
               ],
             ),
             SizedBox(height: 15),
@@ -203,18 +213,18 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
             Expanded(
               child: _documents.isEmpty
                   ? Center(
-                      child: Text('No Documents',
-                          style: TextStyle(color: Colors.grey, fontSize: 18)))
+                  child: Text('No Documents',
+                      style: TextStyle(color: Colors.grey, fontSize: 18)))
                   : ListView.builder(
-                      itemCount: _documents.length,
-                      itemBuilder: (context, index) => _documentTile(index),
-                    ),
+                itemCount: _documents.length,
+                itemBuilder: (context, index) => _documentTile(index),
+              ),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _scanDocument,
+        onPressed: _openCameraToScan,
         child: Icon(Icons.camera_alt),
         backgroundColor: Colors.deepPurple,
       ),
