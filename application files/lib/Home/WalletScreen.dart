@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mypocket/Certificates/CertificatesScreen.dart';
+import 'package:mypocket/Documents/document_manager.dart';
 import 'package:mypocket/Passes/event_ticket.dart';
 import 'package:mypocket/Passes/passes_list_screen.dart';
 import 'package:mypocket/Transit/transit_list_screen.dart';
@@ -13,6 +15,8 @@ import 'mobiletopupscreen.dart';
 import 'paymentsscreen.dart';
 import 'package:mypocket/Profile/user_profile.dart';
 import 'package:intl/intl.dart'; // Import the intl package
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Constants for UI elements and text
 const double cardHeight = 210.0;
@@ -29,10 +33,6 @@ const Color dividerColor = Color(0xFFE0E3E7);
 const double addNewCardButtonIconSize = 30.0;
 const double addNewCardButtonPadding = 8.0;
 const double appBarRadius = 18.0;
-
-// Dummy data for user and balance (will be replaced with backend data)
-const String userName = "Tasmitun";
-const String userBalance = "\$79,456.88";
 
 // Card colors
 final List<LinearGradient> cardColors = [
@@ -58,57 +58,80 @@ final List<LinearGradient> cardColors = [
   ),
 ];
 
+class CardData {
+  String cardId;
+  String bankName;
+  String cardNumber;
+  DateTime? expiryDate;
+  String expiryDateString;
+  String cvv;
+  String cardType;
+  double? balance; // Add balance to CardData
+
+  CardData({
+    required this.cardId,
+    required this.bankName,
+    required this.cardNumber,
+    this.expiryDate,
+    required this.expiryDateString,
+    required this.cvv,
+    required this.cardType,
+    this.balance, // Initialize balance
+  });
+
+  factory CardData.fromFirestore(Map<String, dynamic>? data, String id) {
+    data ??= {};
+    return CardData(
+      cardId: id,
+      bankName: data['bankName'] as String? ?? '',
+      cardNumber: data['cardNumber']?.toString() ?? '',
+      expiryDate: (data['expiryDate'] as Timestamp?)?.toDate(),
+      expiryDateString: (data['expiryDate'] as Timestamp?)?.toDate() != null
+          ? DateFormat('MM/yy')
+              .format((data['expiryDate'] as Timestamp?)!.toDate()!)
+          : '',
+      cvv: data['cvv']?.toString() ?? '',
+      cardType: data['cardType'] as String? ?? '',
+      balance: (data['balance'] as num?)?.toDouble() ?? 0.00, // Fetch balance
+    );
+  }
+}
+
 class WalletScreen extends StatefulWidget {
   @override
   _WalletScreenState createState() => _WalletScreenState();
 }
 
 class _WalletScreenState extends State<WalletScreen> {
-  // List to hold card data.  Each card is a map of String keys and String values.
-  List<Map<String, String>> cards = [];
+  // List to hold card data.  Each card is a map of String keys and dynamic values.
+  List<CardData> cards = [];
 
   // Controllers for the text fields in the Add New Card dialog.
   final bankNameController = TextEditingController();
   final cardNumberController = TextEditingController();
   final expiryDateController = TextEditingController();
   final cvvController = TextEditingController();
-
-  // Selected card type from the dropdown.
   String? selectedCardType;
-
-  // Index of the currently focused card in the carousel.
   int _carouselCurrentIndex = 0;
-
-  // Flag to control the visibility of the Add New Card button.
   bool _showAddNewCardButton = true;
-
-  // PageController for the main page view.
   late PageController _pageController;
-
-  // Controller for the bottom navigation bar.
   late NotchBottomBarController _controller;
-
-  // Index of the currently selected page.
   int _selectedIndex = 2;
-
-  // Controller for the card carousel.
   final CarouselSliderController _carouselController =
       CarouselSliderController();
-
-  // Form key for validation
   final _formKey = GlobalKey<FormState>();
-
-  // Index of the card to be deleted
   int? _cardToDeleteIndex;
+
+  String? _userName;
+  String? _userBalance;
 
   @override
   void initState() {
     super.initState();
-    _loadCards(); // Load cards from shared preferences.
-    _pageController = PageController(
-        initialPage: _selectedIndex); // Initialize page controller
-    _controller = NotchBottomBarController(
-        index: _selectedIndex); // Initialize bottom bar controller
+    _loadUserData();
+    _loadCards();
+    _pageController = PageController(initialPage: _selectedIndex);
+    _controller = NotchBottomBarController(index: _selectedIndex);
   }
 
   @override
@@ -123,74 +146,132 @@ class _WalletScreenState extends State<WalletScreen> {
     super.dispose();
   }
 
-  // Load card data from shared preferences.
-  _loadCards() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String>? savedCards = prefs.getStringList('cards');
-    if (savedCards != null) {
+  Future<void> _loadUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
+        if (userDoc.exists) {
+          final userData =
+              userDoc.data() as Map<String, dynamic>?; // Safely get data
+          setState(() {
+            _userName = userData?['fullName'] as String? ??
+                'Guest'; // Safely access 'name'
+            _userBalance = (userData?['balance']?.toString()) ??
+                '0.00 '; // Safely access 'balance'
+          });
+        }
+      } catch (e) {
+        print("Error fetching user data: $e");
+      }
+    }
+  }
+
+  Future<void> _loadCards() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final CollectionReference cardsCollection = FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .collection('cards');
+
+        final QuerySnapshot cardsSnapshot = await cardsCollection.get();
+        List<CardData> loadedCards = [];
+
+        for (var doc in cardsSnapshot.docs) {
+          final data = doc.data() as Map<String, dynamic>?;
+          loadedCards.add(CardData.fromFirestore(data, doc.id));
+        }
+
+        setState(() {
+          cards = loadedCards;
+          _showAddNewCardButton = cards.isEmpty;
+          _userBalance = cards.isNotEmpty
+              ? cards[_carouselCurrentIndex].balance?.toString() ?? '\$0.00'
+              : '\$0.00'; // Initial balance
+        });
+      } catch (e) {
+        print("Error fetching cards: $e");
+      }
+    }
+  }
+
+  void _updateUserBalanceForCurrentCard(int index) {
+    if (cards.isNotEmpty && index < cards.length) {
       setState(() {
-        cards = savedCards.map((card) {
-          final parts = card.split(',');
-          return {
-            'bankName': parts[0],
-            'cardNumber': parts[1],
-            'expiryDate': parts[2],
-            'cvv': parts[3],
-            'cardType': parts[4],
-          };
-        }).toList();
-        _showAddNewCardButton =
-            cards.isEmpty; // Only show if there are no cards.
+        _userBalance = cards[index].balance?.toString() ?? '\$0.00';
       });
     } else {
       setState(() {
-        _showAddNewCardButton =
-            true; //show add new card button if there are no saved cards
+        _userBalance = '\$0.00';
       });
     }
   }
 
-  // Save card data to shared preferences.
-  _saveCard(String bankName, String cardNumber, String expiryDate, String cvv,
-      String cardType) async {
-    final prefs = await SharedPreferences.getInstance();
-    cards.add({
-      'bankName': bankName,
-      'cardNumber': cardNumber,
-      'expiryDate': expiryDate,
-      'cvv': cvv,
-      'cardType': cardType,
-    });
-    List<String> cardList = cards.map((card) {
-      return '${card['bankName']},${card['cardNumber']},${card['expiryDate']},${card['cvv']},${card['cardType']}';
-    }).toList();
-    prefs.setStringList('cards', cardList);
-  }
-
-  // Add a new card.
-  _addCard(BuildContext context) {
+  Future<void> _addCard(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
-      _saveCard(
-        bankNameController.text,
-        cardNumberController.text,
-        expiryDateController.text,
-        cvvController.text,
-        selectedCardType!,
-      );
-      bankNameController.clear();
-      cardNumberController.clear();
-      expiryDateController.clear();
-      cvvController.clear();
-      setState(() {
-        selectedCardType = null;
-        _showAddNewCardButton = false; // Hide the button after adding a card
-        _loadCards();
-      });
-      Navigator.pop(context);
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          final CollectionReference cardsCollection = FirebaseFirestore.instance
+              .collection('Users')
+              .doc(user.uid)
+              .collection('cards');
+
+          await cardsCollection.add({
+            'bankName': bankNameController.text,
+            'cardNumber': int.parse(cardNumberController.text),
+            'expiryDate': DateFormat('MM/yy').parse(expiryDateController.text),
+            'cvv': int.parse(cvvController.text),
+            'cardType': selectedCardType,
+          });
+
+          _loadCards();
+          Navigator.pop(context);
+          _clearCardForm();
+        } catch (e) {
+          print("Error adding card: $e");
+        }
+      }
     }
   }
 
-  // Show the Add New Card dialog.
+  void _clearCardForm() {
+    bankNameController.clear();
+    cardNumberController.clear();
+    expiryDateController.clear();
+    cvvController.clear();
+    setState(() {
+      selectedCardType = null;
+      _showAddNewCardButton = false;
+    });
+  }
+
+  Future<void> _deleteCard(int index) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && cards.isNotEmpty) {
+      try {
+        final cardIdToDelete =
+            cards[index].cardId; // Access cardId from CardData
+        if (cardIdToDelete != null) {
+          await FirebaseFirestore.instance
+              .collection('Users')
+              .doc(user.uid)
+              .collection('cards')
+              .doc(cardIdToDelete)
+              .delete();
+          _loadCards();
+        }
+      } catch (e) {
+        print("Error deleting card: $e");
+      }
+    }
+  }
+
   void _showAddCardDialog() {
     showDialog(
       context: context,
@@ -200,10 +281,10 @@ class _WalletScreenState extends State<WalletScreen> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           title: Text('Add New Card',
               style: GoogleFonts.poppins(
-                  color: const Color.fromARGB(255, 0, 0, 0))),
+                color: const Color.fromARGB(255, 0, 0, 0),
+              )),
           backgroundColor: const Color.fromARGB(241, 244, 253, 255),
           content: Form(
-            //Wrap the Column with a form
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -225,27 +306,28 @@ class _WalletScreenState extends State<WalletScreen> {
                     }),
                 const SizedBox(height: 10),
                 TextFormField(
-                    controller: cardNumberController,
-                    style: const TextStyle(color: Colors.black),
-                    decoration: const InputDecoration(
-                        labelText: 'Card Number',
-                        labelStyle: TextStyle(
-                            color: const Color.fromARGB(137, 0, 0, 0)),
-                        filled: true,
-                        fillColor: Colors.white),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter card number';
-                      }
-                      if (value.length < 16 || value.length > 19) {
-                        return 'Invalid card number length';
-                      }
-                      return null;
-                    },
-                    inputFormatters: [
-                      //LengthLimitingTextInputFormatter(19), //removed this and added validation
-                    ]),
+                  controller: cardNumberController,
+                  style: const TextStyle(color: Colors.black),
+                  decoration: const InputDecoration(
+                      labelText: 'Card Number',
+                      labelStyle:
+                          TextStyle(color: const Color.fromARGB(137, 0, 0, 0)),
+                      filled: true,
+                      fillColor: Colors.white),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter card number';
+                    }
+                    if (value.length < 16 || value.length > 19) {
+                      return 'Invalid card number length';
+                    }
+                    return null;
+                  },
+                  //inputFormatters: [
+                  //  LengthLimitingTextInputFormatter(19),
+                  //],
+                ),
                 const SizedBox(height: 10),
                 TextFormField(
                     controller: expiryDateController,
@@ -293,7 +375,6 @@ class _WalletScreenState extends State<WalletScreen> {
                         firstDate: DateTime.now(),
                         lastDate: DateTime(DateTime.now().year + 10),
                       );
-
                       if (pickedDate != null) {
                         // Format the selected date as MM/YY
                         final formattedDate =
@@ -303,27 +384,28 @@ class _WalletScreenState extends State<WalletScreen> {
                     }),
                 const SizedBox(height: 10),
                 TextFormField(
-                    controller: cvvController,
-                    style: const TextStyle(color: Colors.black),
-                    decoration: const InputDecoration(
-                        labelText: 'CVV',
-                        labelStyle: TextStyle(
-                            color: const Color.fromARGB(137, 0, 0, 0)),
-                        filled: true,
-                        fillColor: Colors.white),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter CVV';
-                      }
-                      if (value.length != 3) {
-                        return 'CVV must be 3 digits';
-                      }
-                      return null;
-                    },
-                    inputFormatters: [
-                      //LengthLimitingTextInputFormatter(3), // Removed and added validation
-                    ]),
+                  controller: cvvController,
+                  style: const TextStyle(color: Colors.black),
+                  decoration: const InputDecoration(
+                      labelText: 'CVV',
+                      labelStyle:
+                          TextStyle(color: const Color.fromARGB(137, 0, 0, 0)),
+                      filled: true,
+                      fillColor: Colors.white),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter CVV';
+                    }
+                    if (value.length != 3) {
+                      return 'CVV must be 3 digits';
+                    }
+                    return null;
+                  },
+                  //inputFormatters: [
+                  //  LengthLimitingTextInputFormatter(3),
+                  //],
+                ),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
@@ -341,7 +423,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     dropdownColor: Colors.white,
                     icon:
                         const Icon(Icons.arrow_drop_down, color: Colors.black),
-                    //underline: const SizedBox(), // Removed underline
+                    //underline: const SizedBox(),
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedCardType = newValue;
@@ -405,61 +487,54 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
   // Show card details in a dialog.
-  void _showCardDetails(Map<String, String> card) {
+  void _showCardDetails(CardData card) {
+    // Use CardData
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          title: Text(card['bankName'] ?? 'Unknown Bank',
+          title: Text(card.bankName ?? 'Unknown Bank', // Access properties
               style: const TextStyle(color: Colors.black)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Card Number: **** **** **** ${card['cardNumber']?.substring(card['cardNumber']!.length - 4) ?? "0000"}",
-                style: const TextStyle(fontSize: 16, color: Colors.black),
-              ),
-              const SizedBox(height: 10),
-              Text("Expiry Date: ${card['expiryDate'] ?? "MM/YY"}",
-                  style: const TextStyle(fontSize: 16, color: Colors.black)),
-              const SizedBox(height: 10),
-              const Text("CVV: ***",
-                  style: TextStyle(fontSize: 16, color: Colors.black)),
-              const SizedBox(height: 10),
-              Text("Card Type: ${card['cardType']}",
-                  style: const TextStyle(fontSize: 16, color: Colors.black)),
+              Text('Card Number: ${card.cardNumber}',
+                  style: const TextStyle(color: Colors.black)),
+              Text('Expiry Date: ${card.expiryDateString}',
+                  style: const TextStyle(color: Colors.black)),
+              Text('CVV: ${card.cvv}',
+                  style: const TextStyle(color: Colors.black)),
+              Text('Card Type: ${card.cardType}',
+                  style: const TextStyle(color: Colors.black)),
             ],
           ),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(context),
-                child:
-                    const Text("Close", style: TextStyle(color: Colors.black))),
+                child: const Text('Close')),
           ],
         );
       },
     );
   }
 
-  // Function to delete a card at a given index
-  void _deleteCard(int index) {
-    setState(() {
-      cards.removeAt(_carouselCurrentIndex);
-      _saveCards(); // Save the updated card list
-      if (cards.isEmpty) {
-        _showAddNewCardButton = true;
-      }
-    });
-  }
-
   // Save the cards to shared preferences
   void _saveCards() async {
     final prefs = await SharedPreferences.getInstance();
     List<String> cardList = cards.map((card) {
-      return '${card['bankName']},${card['cardNumber']},${card['expiryDate']},${card['cvv']},${card['cardType']}';
+      return jsonEncode({
+        // Encode as JSON
+        'cardId': card.cardId, // Access properties using dot notation
+        'bankName': card.bankName,
+        'cardNumber': card.cardNumber,
+        'expiryDate': card.expiryDate?.toIso8601String(),
+        'expiryDateString': card.expiryDateString,
+        'cvv': card.cvv,
+        'cardType': card.cardType,
+      });
     }).toList();
     prefs.setStringList('cards', cardList);
   }
@@ -467,7 +542,6 @@ class _WalletScreenState extends State<WalletScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
     final cardWidth = screenWidth * cardWidthFactor;
 
     return Scaffold(
@@ -494,7 +568,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Welcome, " + userName,
+                          Text("Welcome, $_userName", // Corrected here
                               style: GoogleFonts.poppins(
                                   fontSize: 24,
                                   color: Colors.black,
@@ -529,7 +603,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(userBalance,
+                          Text(_userBalance ?? "\$0.00", // Corrected here
                               style: GoogleFonts.poppins(
                                   fontSize: 36,
                                   fontWeight: FontWeight.bold,
@@ -569,7 +643,8 @@ class _WalletScreenState extends State<WalletScreen> {
                                           TextButton(
                                             onPressed: () {
                                               // Delete the card
-                                              _deleteCard(_selectedIndex);
+                                              _deleteCard(
+                                                  _carouselCurrentIndex); // corrected
                                               Navigator.of(context)
                                                   .pop(); // Close dialog
                                             },
@@ -644,19 +719,24 @@ class _WalletScreenState extends State<WalletScreen> {
                           setState(() {
                             _carouselCurrentIndex = index;
                           });
+                          _updateUserBalanceForCurrentCard(
+                              index); // Update balance here
                         },
                       ),
                       itemBuilder: (context, index, realIndex) {
                         final card = cards[index];
-                        // Calculate scale based on the current index
+// Calculate scale based on the current index
                         double scale;
                         if (index == _carouselCurrentIndex) {
-                          scale = 1.0; // Full size for the focused card
+                          scale = 1.0;
+// Full size for the focused card
                         } else if (index == _carouselCurrentIndex - 1 ||
                             index == _carouselCurrentIndex + 1) {
-                          scale = 0.9; // Slightly smaller for adjacent cards
+                          scale = 0.9;
+// Slightly smaller for adjacent cards
                         } else {
-                          scale = 0.8; // Smaller for distant cards
+                          scale = 0.8;
+// Smaller for distant cards
                         }
 
                         return AnimatedScale(
@@ -672,7 +752,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       },
                     ),
                   ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 // Page Indicator
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -692,7 +772,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     );
                   }).toList(),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: pagePaddingHorizontal),
@@ -704,7 +784,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     color: dividerColor,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 // Making the Bottom Button Grids
 
                 Container(
@@ -756,8 +836,8 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
   // Build an individual card item for the carousel.
-  Widget _buildCarouselItem(BuildContext context, Map<String, String> card,
-      int index, double cardWidth) {
+  Widget _buildCarouselItem(
+      BuildContext context, CardData card, int index, double cardWidth) {
     return Container(
       width: cardWidth,
       height: cardHeight,
@@ -789,7 +869,7 @@ class _WalletScreenState extends State<WalletScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(card['bankName'] ?? "Unknown",
+          Text(card.bankName ?? "Unknown", // Use card.bankName
               style: GoogleFonts.poppins(
                   fontSize: 18,
                   color: Colors.white,
@@ -799,19 +879,19 @@ class _WalletScreenState extends State<WalletScreen> {
             children: [
               const SizedBox(height: 10),
               Text(
-                "**** **** **** ${card['cardNumber']?.substring(card['cardNumber']!.length - 4) ?? "0000"}",
+                "**** **** **** ${card.cardNumber.substring(card.cardNumber.length - 4)}", // Use card.cardNumber
                 style: const TextStyle(color: Colors.white54, fontSize: 22),
               ),
               const SizedBox(height: 10),
               Text(
-                "Expiry: ${card['expiryDate'] ?? "MM/YY"}",
+                "Expiry: ${card.expiryDateString ?? "MM/YY"}", // Use card.expiryDateString
                 style: const TextStyle(color: Colors.white54, fontSize: 14),
               ),
               const SizedBox(height: 10),
               const Text("CVV: ***",
                   style: TextStyle(color: Colors.white54, fontSize: 14)),
               const SizedBox(height: 1),
-              Text("Card Type: ${card['cardType']}",
+              Text("Card Type: ${card.cardType}", // Use card.cardType
                   style: const TextStyle(color: Colors.white54, fontSize: 14)),
             ],
           ),
@@ -1002,7 +1082,7 @@ Widget buildButtonGrid(BuildContext context) {
           onPressed: () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => PassesListScreen(),
+            builder: (context) => DocumentManagerScreen(),
           ),
         );
       }),

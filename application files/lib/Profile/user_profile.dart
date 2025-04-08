@@ -1,17 +1,15 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mypocket/Auth/LoginScreen.dart';
-import 'package:mypocket/Home/WalletScreen.dart';
-import 'package:mypocket/Profile/infoPage.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:image_cropper/image_cropper.dart'; // Import the image_cropper package
-import 'package:camera/camera.dart'; // Import the camera package
-// import 'package:universal_html/html.dart' as web; // Import for web compatibility - removed to fix error
+import 'package:camera/camera.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mypocket/Profile/infoPage.dart';
 
-// Divider Class
+// Divider Class (No changes needed)
 class MyDivider extends StatelessWidget {
   const MyDivider({
     Key? key,
@@ -40,41 +38,65 @@ class MyDivider extends StatelessWidget {
   }
 }
 
-// Profile Image Widget
+// Profile Image Widget (Modified to handle file and network)
 class _ProfileImage extends StatelessWidget {
   const _ProfileImage({
     Key? key,
     required this.profileImageUrl,
     required this.isLoading,
+    required this.onTap,
+    this.localImageFile, // Add this
   }) : super(key: key);
 
   final String profileImageUrl;
   final bool isLoading;
+  final VoidCallback? onTap;
+  final File? localImageFile; // Add this
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(60.0),
-          child: SizedBox(
-            width: 100.0,
-            height: 100.0,
-            child: isLoading
-                ? const CircularProgressIndicator()
-                : Image.network(
-                    profileImageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Image.network(
-                      'https://placehold.co/100x100/EEE/31343C?text=Error',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(60.0),
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+              child: isLoading
+                  ? const CircularProgressIndicator()
+                  : localImageFile != null
+                      ? kIsWeb // Check if running on web
+                          ? Image.network(
+                              profileImageUrl, // On web, treat the path as a URL if possible
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Image.network(
+                                'https://placehold.co/100x100/EEE/31343C?text=Error',
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Image.file(
+                              // On mobile, use Image.file
+                              localImageFile!,
+                              fit: BoxFit.cover,
+                            )
+                      : Image.network(
+                          profileImageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Image.network(
+                            'https://placehold.co/100x100/EEE/31343C?text=Error',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+            ),
           ),
         ),
       ),
@@ -82,7 +104,7 @@ class _ProfileImage extends StatelessWidget {
   }
 }
 
-// User Info Widget
+// User Info Widget (Modified to fetch from Firebase)
 class _UserInfo extends StatelessWidget {
   const _UserInfo({
     Key? key,
@@ -120,13 +142,13 @@ class _UserInfo extends StatelessWidget {
               letterSpacing: 0.0,
             ),
           ),
-        ),
+        )
       ],
     );
   }
 }
 
-// Profile Button Widget
+// Profile Button Widget (No changes needed)
 class _ProfileButton extends StatelessWidget {
   const _ProfileButton({
     Key? key,
@@ -188,7 +210,7 @@ class _ProfileButton extends StatelessWidget {
   }
 }
 
-// Logout Button Widget
+// Logout Button Widget (No changes needed)
 class _LogoutButton extends StatelessWidget {
   const _LogoutButton({Key? key}) : super(key: key);
 
@@ -246,122 +268,86 @@ class UserProfileView extends StatefulWidget {
 }
 
 class _UserProfileViewState extends State<UserProfileView> {
-  String profileImageUrl = 'assets/logo.png';
-  String userName = 'Guest User';
-  String userEmail = 'guest.user@example.com';
+  String profileImageUrl = 'assets/logo.png'; // Default
+  String userName = 'Guest User'; // Default
+  String userEmail = 'guest.user@example.com'; // Default
   bool isLoading = false;
   File? _profileImageFile;
-  CameraController? _cameraController; // Camera controller
+  final ImagePicker _picker = ImagePicker();
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Get instance
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; //instance
+  Uint8List? _profileImageBytesWeb;
 
   @override
   void initState() {
     super.initState();
-    // _loadUserData();
+    _loadUserProfile(); // Load user data on init
   }
 
-  @override
-  void dispose() {
-    _cameraController?.dispose(); // Dispose the camera controller
-    super.dispose();
-  }
-
-  // Initialize the camera
-  Future<void> _initializeCamera() async {
+  // Function to load user data from Firebase
+  Future<void> _loadUserProfile() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
-      final cameras = await availableCameras();
-      if (cameras.isNotEmpty) {
-        // check if cameras are available
-        final firstCamera = cameras.first;
-        _cameraController = CameraController(
-          firstCamera,
-          ResolutionPreset.medium, // You can change the resolution
-        );
-        await _cameraController!.initialize();
-        if (!mounted) return;
-        setState(() {});
-      } else {
-        print(
-            "No cameras available."); // Handle the case where no cameras are available.
+      final user = _auth.currentUser;
+      if (user != null) {
+        // Fetch additional user data from Firestore using the user.uid
+        final userDoc =
+            await _firestore.collection('Users').doc(user.uid).get();
+
+        if (userDoc.exists) {
+          final userData = userDoc.data();
+          setState(() {
+            userName =
+                userData?['fullName'] ?? 'No Name'; // Use a default if null
+            userEmail = user.email ?? 'No Email'; // Use a default if null
+            profileImageUrl = 'assets/logo.png';
+          });
+        } else {
+          setState(() {
+            userName = user.displayName ?? "Name Not Available";
+            userEmail = user.email ?? "Email Not Available";
+          });
+        }
       }
     } catch (e) {
-      print("Error initializing camera: $e");
+      print("Error loading user data: $e");
       // Handle error (e.g., show a message to the user)
-    }
-  }
-
-  Future<void> _pickAndCropImage(ImageSource source) async {
-    // Added source
-    if (_cameraController == null) {
-      await _initializeCamera();
-    }
-    final pickedFile =
-        await ImagePicker().pickImage(source: source); // Use source
-    if (pickedFile != null) {
-      File? croppedFile = await cropImage(File(pickedFile.path));
-      if (croppedFile != null) {
-        setState(() {
-          _profileImageFile = croppedFile;
-          profileImageUrl = croppedFile
-              .path; // Update the image URL  IMPORTANT - use croppedFile
-          // _uploadImageToFirebase();  // call firebase upload
-        });
-      }
-    }
-  }
-
-  Future<File?> cropImage(File imageFile) async {
-    try {
-      // added try catch
-      CroppedFile? croppedFile = await ImageCropper().cropImage(
-        sourcePath: imageFile.path,
-        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-        //       compressFormat: ImageFormat.jpg,
-        compressQuality: 100,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Crop Image',
-            toolbarColor: Colors.blue,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.original,
-            lockAspectRatio: true,
-          ),
-          IOSUiSettings(
-            title: 'Crop Image',
-          ),
-        ],
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load profile data: $e')),
       );
-      if (croppedFile != null) {
-        return File(croppedFile.path);
-      }
-      return null;
-    } catch (e) {
-      print("Error during image cropping: $e");
-      return null;
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
-  // // Future<void> _uploadImageToFirebase() async {
-  // //   try {
-  // //     User? user = FirebaseAuth.instance.currentUser;
-  // //     if (user != null && _profileImageFile != null) {
-  // //       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-  // //       Reference storageReference =
-  // //           FirebaseStorage.instance.ref().child('profile_images/$fileName');
-  // //       UploadTask uploadTask = storageReference.putFile(_profileImageFile!);
-  // //       await uploadTask.whenComplete(() => null);
-  // //       String imageUrl = await storageReference.getDownloadURL();
-  // //       setState(() {
-  // //         profileImageUrl = imageUrl;
-  // //       });
-  // //       await FirebaseFirestore.instance
-  // //           .collection('users')
-  // //           .doc(user.uid)
-  // //           .update({'profileImageUrl': imageUrl});
-  // //     }
-  // //   } catch (e) {
-  // //     print('Error uploading image: $e');
-  // //   }
-  // // }
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(source: source);
+      if (pickedFile != null) {
+        if (kIsWeb) {
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _profileImageBytesWeb = bytes;
+            profileImageUrl = pickedFile.path; // You might need to adjust this
+            _profileImageFile = null; // Ensure _profileImageFile is null on web
+          });
+        } else {
+          setState(() {
+            _profileImageFile = File(pickedFile.path);
+            profileImageUrl = pickedFile.path; // Update for local display
+            _profileImageBytesWeb =
+                null; // Ensure _profileImageBytesWeb is null on mobile
+          });
+        }
+      }
+    } catch (e) {
+      print("Error during pick and crop: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -371,9 +357,9 @@ class _UserProfileViewState extends State<UserProfileView> {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
-        backgroundColor: Color.fromARGB(241, 244, 248, 255),
+        backgroundColor: const Color.fromARGB(241, 244, 248, 255),
         appBar: AppBar(
-          backgroundColor: Color.fromARGB(241, 244, 248, 255),
+          backgroundColor: const Color.fromARGB(241, 244, 248, 255),
           automaticallyImplyLeading: false,
           actions: [
             Padding(
@@ -405,6 +391,79 @@ class _UserProfileViewState extends State<UserProfileView> {
               _ProfileImage(
                 profileImageUrl: profileImageUrl,
                 isLoading: isLoading,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      File? dialogProfileImageFile = _profileImageFile; //shadow
+                      return StatefulBuilder(
+                        builder: (context, setState) {
+                          return AlertDialog(
+                            backgroundColor: Colors.white,
+                            title: const Text('Change Profile Picture'),
+                            content: SingleChildScrollView(
+                              child: ListBody(
+                                children: <Widget>[
+                                  GestureDetector(
+                                    child: const Text('Take Photo'),
+                                    onTap: () async {
+                                      await _pickImage(ImageSource.camera);
+                                      setState(() {
+                                        dialogProfileImageFile =
+                                            _profileImageFile;
+                                      });
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  const Padding(padding: EdgeInsets.all(8.0)),
+                                  GestureDetector(
+                                    child: const Text('Choose from Gallery'),
+                                    onTap: () async {
+                                      await _pickImage(ImageSource.gallery);
+                                      setState(() {
+                                        dialogProfileImageFile =
+                                            _profileImageFile;
+                                      });
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  if (dialogProfileImageFile != null) {
+                                    // No upload to Firebase Storage
+                                    setState(() {
+                                      // Null check *inside* setState, using a local variable
+                                      final imageFile =
+                                          dialogProfileImageFile; // Create a local variable
+                                      if (imageFile != null) {
+                                        profileImageUrl = imageFile.path;
+                                        _profileImageFile = imageFile;
+                                      }
+                                    });
+                                    Navigator.of(context).pop();
+                                  } else {
+                                    //no new image
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                                child: const Text('Save'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+                localImageFile: kIsWeb ? null : _profileImageFile,
               ),
               _UserInfo(userName: userName, userEmail: userEmail),
               const MyDivider(height: 44.0),
@@ -416,10 +475,13 @@ class _UserProfileViewState extends State<UserProfileView> {
                     context: context,
                     builder: (BuildContext context) {
                       String newName = userName;
+                      File? dialogProfileImageFile =
+                          _profileImageFile; // Use _profileImageFile
                       return StatefulBuilder(
                         builder: (context, setState) {
                           return AlertDialog(
-                            title: Text('Edit Profile'),
+                            backgroundColor: Colors.white,
+                            title: const Text('Edit Profile'),
                             content: SingleChildScrollView(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -429,8 +491,9 @@ class _UserProfileViewState extends State<UserProfileView> {
                                       CircleAvatar(
                                         radius: 60,
                                         backgroundImage:
-                                            _profileImageFile != null
-                                                ? FileImage(_profileImageFile!)
+                                            dialogProfileImageFile != null
+                                                ? FileImage(
+                                                    dialogProfileImageFile!)
                                                 : NetworkImage(profileImageUrl)
                                                     as ImageProvider,
                                       ),
@@ -438,10 +501,18 @@ class _UserProfileViewState extends State<UserProfileView> {
                                         bottom: 0,
                                         right: 0,
                                         child: PopupMenuButton<ImageSource>(
-                                          // PopupMenuButton
-                                          onSelected: (ImageSource source) {
-                                            _pickAndCropImage(
-                                                source); // Pass source
+                                          onSelected:
+                                              (ImageSource source) async {
+                                            final pickedFile = await _picker
+                                                .pickImage(source: source);
+                                            if (pickedFile != null) {
+                                              final tempFile =
+                                                  File(pickedFile.path);
+                                              setState(() {
+                                                dialogProfileImageFile =
+                                                    tempFile;
+                                              });
+                                            }
                                           },
                                           itemBuilder: (
                                             BuildContext context,
@@ -469,8 +540,8 @@ class _UserProfileViewState extends State<UserProfileView> {
                                   ),
                                   TextField(
                                     onChanged: (value) => newName = value,
-                                    decoration:
-                                        InputDecoration(labelText: 'Name'),
+                                    decoration: const InputDecoration(
+                                        labelText: 'Name'),
                                     controller:
                                         TextEditingController(text: userName),
                                   ),
@@ -480,23 +551,46 @@ class _UserProfileViewState extends State<UserProfileView> {
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
-                                child: Text('Cancel'),
+                                child: const Text('Cancel'),
                               ),
                               ElevatedButton(
                                 onPressed: () async {
                                   setState(() {
                                     userName = newName;
+                                    isLoading =
+                                        true; //start loading, for the ui
                                   });
-                                  // User? user = FirebaseAuth.instance.currentUser;
-                                  // if (user != null) {
-                                  //   await FirebaseFirestore.instance
-                                  //       .collection('users')
-                                  //       .doc(user.uid)
-                                  //       .update({'name': newName});
-                                  // }
+                                  // No Firebase Storage upload
+                                  if (dialogProfileImageFile != null) {
+                                    setState(() {
+                                      // Add null check here using a local variable
+                                      final imageFile = dialogProfileImageFile;
+                                      if (imageFile != null) {
+                                        profileImageUrl = imageFile.path;
+                                        _profileImageFile = imageFile;
+                                      }
+                                    });
+                                  }
+                                  try {
+                                    await _firestore
+                                        .collection('Users')
+                                        .doc(_auth.currentUser?.uid)
+                                        .update({'fullName': newName});
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Failed to update profile: $e')),
+                                    );
+                                  }
+
+                                  setState(() {
+                                    isLoading =
+                                        false; //stop loading, for the ui
+                                  });
                                   Navigator.pop(context);
                                 },
-                                child: Text('Save'),
+                                child: const Text('Save'),
                               ),
                             ],
                           );

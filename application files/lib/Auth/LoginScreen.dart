@@ -1,11 +1,12 @@
+// LoginScreen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:mypocket/Home/WalletScreen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:mypocket/Auth/Auth_Service.dart';
+import 'package:mypocket/Home/WalletScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -16,13 +17,14 @@ class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool obscureText = true;
-
-  // Variables for user inputs
+  final AuthService _auth = AuthService();
+  final _storage = const FlutterSecureStorage();
   String _loginEmail = '';
   String _loginPassword = '';
   String _signUpFullName = '';
   String _signUpEmail = '';
   String _signUpPassword = '';
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 
   @override
   void initState() {
@@ -331,66 +333,72 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _handleLogin() async {
-    // try {
-    //   UserCredential userCredential = await FirebaseAuth.instance
-    //       .signInWithEmailAndPassword(email: _loginEmail, password: _loginPassword);
-    //   print('Logged in: ${userCredential.user?.uid}');
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute(builder: (context) => WalletScreen()),
-    //   );
-    // } on FirebaseAuthException catch (e) {
-    //   print('Firebase Auth Exception: ${e.code}');
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('Login failed: ${e.message}')),
-    //   );
-    // }
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => WalletScreen()),
-    );
+    try {
+      final user = await _auth.loginUserWithEmailAndPassword(
+          _loginEmail, _loginPassword);
+      if (user != null) {
+        print('Login successful');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => WalletScreen()),
+        );
+      }
+    } catch (e) {
+      print('Login failed: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: $e')),
+      );
+    }
   }
 
   Future<void> _handleSignUp() async {
-    // try {
-    //   UserCredential userCredential = await FirebaseAuth.instance
-    //       .createUserWithEmailAndPassword(email: _signUpEmail, password: _signUpPassword);
-    //   await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
-    //     'fullName': _signUpFullName,
-    //     'email': _signUpEmail,
-    //   });
-    //   print('Signed up: ${userCredential.user?.uid}');
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute(builder: (context) => WalletScreen()),
-    //   );
-    // } on FirebaseAuthException catch (e) {
-    //   print('Firebase Auth Exception: ${e.code}');
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('Sign up failed: ${e.message}')),
-    //   );
-    // }
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => WalletScreen()),
-    );
+    try {
+      final user = await _auth.createUserWithEmailAndPassword(
+        _signUpFullName, // Pass the full name here
+        _signUpEmail,
+        _signUpPassword,
+      );
+      if (user != null) {
+        print('Sign up successful');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => WalletScreen()),
+        );
+      }
+    } catch (e) {
+      print('Sign up failed: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sign up failed: $e')),
+      );
+    }
   }
 
   Future<void> _handleGoogleSignIn() async {
     try {
-      GoogleSignInAccount? user = await _googleSignIn.signIn();
-      if (user != null) {
-        print('Google User Info: ${user.displayName}, ${user.email}');
-        // Handle user data and navigate
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => WalletScreen()),
+      GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser != null) {
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+        final user = await _auth.signInWithGoogle(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
         );
+        if (user != null) {
+          print(
+              'Google Sign-In successful: ${googleUser.displayName}, ${googleUser.email}');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => WalletScreen()),
+          );
+        }
       } else {
         print('Google Sign-In canceled by user.');
       }
     } catch (error) {
       print('Error during Google Sign-In: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign-In failed: $error')),
+      );
     }
   }
 
@@ -399,20 +407,35 @@ class _LoginScreenState extends State<LoginScreen>
       final LoginResult result = await FacebookAuth.instance.login();
       if (result.status == LoginStatus.success) {
         final userData = await FacebookAuth.instance.getUserData();
-        print('Facebook User Info: ${userData['name']}, ${userData['email']}');
-        // Handle user data and navigate
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => WalletScreen()),
-        );
+        final accessToken = result.accessToken;
+        print('AccessToken: $accessToken');
+        print('AccessToken type: ${accessToken.runtimeType}');
+        final String? fbToken = accessToken?.token;
+        if (fbToken == null) {
+          throw Exception('Facebook token is null');
+        }
+        final user = await _auth.signInWithFacebook(accessToken: fbToken);
+        if (user != null) {
+          print(
+              'Facebook Sign-In successful: ${userData['name']}, ${userData['email']}');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => WalletScreen()),
+          );
+        }
       } else {
         print(
             'Facebook Sign-In canceled or failed: ${result.status}, ${result.message}');
       }
     } catch (error) {
       print('Error during Facebook Sign-In: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Facebook Sign-In failed: $error')),
+      );
     }
   }
 }
 
-GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+extension on AccessToken? {
+  String? get token => null;
+}

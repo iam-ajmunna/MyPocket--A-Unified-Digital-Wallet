@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mypocket/Home/WalletScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'add_transit_card.dart';
 import 'recharge_transit_card.dart';
@@ -85,17 +86,19 @@ class _TransitListScreenState extends State<TransitListScreen> {
 
   Future<void> _saveTransitCards() async {
     final prefs = await SharedPreferences.getInstance();
-    final cards = _transitCards.map((card) =>
-    '${card.id}|${card.name}|${card.cardNumber}|${card.expiryDate.toIso8601String()}|${card.transitType}|${card.balance}'
-    ).toList();
+    final cards = _transitCards
+        .map((card) =>
+            '${card.id}|${card.name}|${card.cardNumber}|${card.expiryDate.toIso8601String()}|${card.transitType}|${card.balance}')
+        .toList();
     await prefs.setStringList('transitCards', cards);
   }
 
   Future<void> _saveColors() async {
     final prefs = await SharedPreferences.getInstance();
-    final colors = _cardColors.entries.map((entry) =>
-    '${entry.key}:${entry.value.colors[0].value};${entry.value.colors[1].value}'
-    ).join(',');
+    final colors = _cardColors.entries
+        .map((entry) =>
+            '${entry.key}:${entry.value.colors[0].value};${entry.value.colors[1].value}')
+        .join(',');
     await prefs.setString('transitCardColors', colors);
   }
 
@@ -107,7 +110,8 @@ class _TransitListScreenState extends State<TransitListScreen> {
   void _addTransitCard(TransitCard card) {
     setState(() {
       _transitCards.add(card);
-      _cardColors[card.id] = _gradients[_transitCards.length % _gradients.length];
+      _cardColors[card.id] =
+          _gradients[_transitCards.length % _gradients.length];
       _buttonAnimations[card.id + '_add'] = false;
       _buttonAnimations[card.id + '_delete'] = false;
       _saveAll();
@@ -140,11 +144,12 @@ class _TransitListScreenState extends State<TransitListScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey[900],
         title: Text('Delete Card', style: TextStyle(color: Colors.white)),
-        content: Text('Delete ${card.name}?', style: TextStyle(color: Colors.white54)),
+        content: Text('Delete ${card.name}?',
+            style: TextStyle(color: Colors.white54)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.purple)),
+            child: Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -222,7 +227,8 @@ class _TransitListScreenState extends State<TransitListScreen> {
               SizedBox(height: 15),
               _buildDetailRow('Expiry Date', card.formattedExpiry),
               SizedBox(height: 15),
-              _buildDetailRow('Current Balance', '\$${card.balance.toStringAsFixed(2)}'),
+              _buildDetailRow(
+                  'Current Balance', '\$${card.balance.toStringAsFixed(2)}'),
               SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
@@ -309,226 +315,242 @@ class _TransitListScreenState extends State<TransitListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1A2E),
+      backgroundColor: const Color.fromARGB(241, 244, 248, 255),
       appBar: AppBar(
-        title: Text('Transit Cards', style: GoogleFonts.poppins()),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        title: Text(
+          'Transit Cards',
+          style: GoogleFonts.poppins(
+            textStyle: TextStyle(
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.home),
+            onPressed: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => WalletScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: _transitCards.isEmpty
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.credit_card, size: 60, color: Colors.purple),
-            SizedBox(height: 20),
-            Text(
-              'No Transit Cards',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                color: Colors.white54,
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Add your first transit card',
-              style: TextStyle(color: Colors.white54),
-            ),
-          ],
-        ),
-      )
-          : ListView.builder(
-        padding: EdgeInsets.all(16),
-        itemCount: _transitCards.length,
-        itemBuilder: (context, index) {
-          final card = _transitCards[index];
-          final gradient = _cardColors[card.id] ?? _gradients[0];
-
-          return Dismissible(
-            key: Key(card.id),
-            background: Container(
-              margin: EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              alignment: Alignment.centerRight,
-              padding: EdgeInsets.only(right: 20),
-              child: Icon(Icons.delete, color: Colors.red),
-            ),
-            direction: DismissDirection.endToStart,
-            confirmDismiss: (direction) async {
-              if (direction == DismissDirection.endToStart) {
-                _showDeleteDialog(card);
-                return false;
-              }
-              return null;
-            },
-            child: Card(
-              margin: EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              elevation: 3,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  gradient: gradient,
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(15),
-                  onTap: () => _showCardDetails(card),
-                  onLongPress: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddTransitCardScreen(
-                          existingCard: card,
-                          onSave: _updateTransitCard,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                card.name,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black.withOpacity(0.3),
-                                      blurRadius: 3,
-                                      offset: Offset(1, 1),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      _animateButton(card.id, 'add');
-                                      _showRechargeDialog(card);
-                                    },
-                                    child: AnimatedContainer(
-                                      duration: Duration(milliseconds: 100),
-                                      curve: Curves.easeInOut,
-                                      transform: Matrix4.identity()
-                                        ..scale(_buttonAnimations[card.id + '_add'] ?? false ? 0.9 : 1.0),
-                                      child: Container(
-                                        padding: EdgeInsets.all(8),
-                                        child: Icon(
-                                          Icons.add_circle,
-                                          color: Colors.green[200],
-                                          size: 28,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 4),
-                                  GestureDetector(
-                                    onTap: () {
-                                      _animateButton(card.id, 'delete');
-                                      _showDeleteDialog(card);
-                                    },
-                                    child: AnimatedContainer(
-                                      duration: Duration(milliseconds: 100),
-                                      curve: Curves.easeInOut,
-                                      transform: Matrix4.identity()
-                                        ..scale(_buttonAnimations[card.id + '_delete'] ?? false ? 0.9 : 1.0),
-                                      child: Container(
-                                        padding: EdgeInsets.all(8),
-                                        child: Icon(
-                                          Icons.delete,
-                                          color: Colors.red[200],
-                                          size: 28,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildInfoRow(
-                                      Icons.credit_card,
-                                      'Card Number',
-                                      '•••• •••• •••• ${card.lastFourDigits}'
-                                  ),
-                                  SizedBox(height: 12),
-                                  _buildInfoRow(
-                                      Icons.directions_transit,
-                                      'Type',
-                                      card.transitType
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildInfoRow(
-                                      Icons.calendar_today,
-                                      'Expiry',
-                                      card.formattedExpiry
-                                  ),
-                                  SizedBox(height: 12),
-                                  _buildInfoRow(
-                                      Icons.account_balance_wallet,
-                                      'Balance',
-                                      '\$${card.balance.toStringAsFixed(2)}'
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                      ],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.credit_card, size: 60, color: Colors.purple),
+                  SizedBox(height: 20),
+                  Text(
+                    'No Transit Cards',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      color: Colors.white54,
                     ),
                   ),
-                ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Add your first transit card',
+                    style: TextStyle(color: Colors.white54),
+                  ),
+                ],
               ),
+            )
+          : ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: _transitCards.length,
+              itemBuilder: (context, index) {
+                final card = _transitCards[index];
+                final gradient = _cardColors[card.id] ?? _gradients[0];
+
+                return Dismissible(
+                  key: Key(card.id),
+                  background: Container(
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.only(right: 20),
+                    child: Icon(Icons.delete, color: Colors.red),
+                  ),
+                  direction: DismissDirection.endToStart,
+                  confirmDismiss: (direction) async {
+                    if (direction == DismissDirection.endToStart) {
+                      _showDeleteDialog(card);
+                      return false;
+                    }
+                    return null;
+                  },
+                  child: Card(
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 3,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        gradient: gradient,
+                      ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(15),
+                        onTap: () => _showCardDetails(card),
+                        onLongPress: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddTransitCardScreen(
+                                existingCard: card,
+                                onSave: _updateTransitCard,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      card.name,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        shadows: [
+                                          Shadow(
+                                            color:
+                                                Colors.black.withOpacity(0.3),
+                                            blurRadius: 3,
+                                            offset: Offset(1, 1),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            _animateButton(card.id, 'add');
+                                            _showRechargeDialog(card);
+                                          },
+                                          child: AnimatedContainer(
+                                            duration:
+                                                Duration(milliseconds: 100),
+                                            curve: Curves.easeInOut,
+                                            transform: Matrix4.identity()
+                                              ..scale(_buttonAnimations[
+                                                          card.id + '_add'] ??
+                                                      false
+                                                  ? 0.9
+                                                  : 1.0),
+                                            child: Container(
+                                              padding: EdgeInsets.all(8),
+                                              child: Icon(
+                                                Icons.add_circle,
+                                                color: Colors.green[200],
+                                                size: 28,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 4),
+                                        GestureDetector(
+                                          onTap: () {
+                                            _animateButton(card.id, 'delete');
+                                            _showDeleteDialog(card);
+                                          },
+                                          child: AnimatedContainer(
+                                            duration:
+                                                Duration(milliseconds: 100),
+                                            curve: Curves.easeInOut,
+                                            transform: Matrix4.identity()
+                                              ..scale(_buttonAnimations[
+                                                          '${card.id}_delete'] ??
+                                                      false
+                                                  ? 0.9
+                                                  : 1.0),
+                                            child: Container(
+                                              padding: EdgeInsets.all(8),
+                                              child: Icon(
+                                                Icons.delete,
+                                                color: Colors.red[200],
+                                                size: 28,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        _buildInfoRow(
+                                            Icons.credit_card,
+                                            'Card Number',
+                                            '•••• •••• •••• ${card.lastFourDigits}'),
+                                        SizedBox(height: 12),
+                                        _buildInfoRow(Icons.directions_transit,
+                                            'Type', card.transitType),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: 20),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        _buildInfoRow(Icons.calendar_today,
+                                            'Expiry', card.formattedExpiry),
+                                        SizedBox(height: 12),
+                                        _buildInfoRow(
+                                            Icons.account_balance_wallet,
+                                            'Balance',
+                                            '\$${card.balance.toStringAsFixed(2)}'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -540,7 +562,7 @@ class _TransitListScreenState extends State<TransitListScreen> {
             ),
           );
         },
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.indigoAccent,
         child: Icon(Icons.add, color: Colors.white),
       ),
     );

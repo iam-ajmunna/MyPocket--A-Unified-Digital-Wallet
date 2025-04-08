@@ -224,7 +224,6 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
             ),
           ],
         ),
-        
         backgroundColor: Colors.white,
       ),
       body: Container(
