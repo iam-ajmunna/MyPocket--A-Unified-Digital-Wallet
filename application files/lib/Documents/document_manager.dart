@@ -91,30 +91,30 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
           child: _documents.isEmpty
               ? Center(child: Text('No Documents Available'))
               : ListView.builder(
-                  itemCount: _documents.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      margin: EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        leading:
-                            Icon(Icons.edit_document, color: Colors.deepPurple),
-                        title: Text('Document ${index + 1}'),
-                        subtitle: Text('Tap to Edit'),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteDocument(index),
-                        ),
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content:
-                                    Text('Edit functionality coming soon!')),
-                          );
-                        },
-                      ),
+            itemCount: _documents.length,
+            itemBuilder: (context, index) {
+              return Card(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading:
+                  Icon(Icons.edit_document, color: Colors.deepPurple),
+                  title: Text('Document ${index + 1}'),
+                  subtitle: Text('Tap to Edit'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => _deleteDocument(index),
+                  ),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content:
+                          Text('Edit functionality coming soon!')),
                     );
                   },
                 ),
+              );
+            },
+          ),
         );
       },
     );
@@ -133,33 +133,33 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
           child: _documents.isEmpty
               ? Center(child: Text('No Uploaded Documents'))
               : ListView.builder(
-                  itemCount: _documents.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      margin: EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        leading: Icon(Icons.insert_drive_file,
-                            color: Colors.deepPurple),
-                        title: Text('Uploaded Document ${index + 1}'),
-                        subtitle: Text('Scanned via Camera'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.share, color: Colors.blue),
-                              onPressed: () =>
-                                  _shareDocument(_documents[index]),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _deleteDocument(index),
-                            ),
-                          ],
-                        ),
+            itemCount: _documents.length,
+            itemBuilder: (context, index) {
+              return Card(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading: Icon(Icons.insert_drive_file,
+                      color: Colors.deepPurple),
+                  title: Text('Uploaded Document ${index + 1}'),
+                  subtitle: Text('Scanned via Camera or Uploaded'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.share, color: Colors.blue),
+                        onPressed: () =>
+                            _shareDocument(_documents[index]),
                       ),
-                    );
-                  },
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deleteDocument(index),
+                      ),
+                    ],
+                  ),
                 ),
+              );
+            },
+          ),
         );
       },
     );
@@ -201,14 +201,10 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
               mainAxisSpacing: 16,
               childAspectRatio: 1.2,
               children: [
-                _featureTile(
-                    Icons.scanner, 'Scan', Colors.greenAccent, _scanDocument),
-                _featureTile(
-                    Icons.edit, 'Edit', Colors.orangeAccent, _openEditPage),
-                _featureTile(
-                    Icons.swap_horiz, 'Convert', Colors.lightGreen, () {}),
-                _featureTile(Icons.folder, 'Uploaded Documents',
-                    Colors.amberAccent, _showUploadedDocuments),
+                _featureTile(Icons.upload, 'Upload', Colors.greenAccent, _uploadFromDevice),
+                _featureTile(Icons.edit, 'Edit', Colors.orangeAccent, _openEditPage),
+                _featureTile(Icons.swap_horiz, 'Convert', Colors.lightGreen, () {}),
+                _featureTile(Icons.folder, 'Uploaded Documents', Colors.amberAccent, _showUploadedDocuments),
               ],
             ),
             SizedBox(height: 15),
@@ -217,12 +213,12 @@ class _DocumentManagerScreenState extends State<DocumentManagerScreen> {
             Expanded(
               child: _documents.isEmpty
                   ? Center(
-                      child: Text('No Documents',
-                          style: TextStyle(color: Colors.grey, fontSize: 18)))
+                  child: Text('No Documents',
+                      style: TextStyle(color: Colors.grey, fontSize: 18)))
                   : ListView.builder(
-                      itemCount: _documents.length,
-                      itemBuilder: (context, index) => _documentTile(index),
-                    ),
+                itemCount: _documents.length,
+                itemBuilder: (context, index) => _documentTile(index),
+              ),
             ),
           ],
         ),
