@@ -35,7 +35,7 @@ class _AddTransitCardScreenState extends State<AddTransitCardScreen> {
   IconData _getSelectedIcon() {
     if (_selectedTransitType == null) return Icons.directions_transit;
     final type = _transitTypes.firstWhere(
-          (t) => t['name'] == _selectedTransitType,
+      (t) => t['name'] == _selectedTransitType,
       orElse: () => {'icon': Icons.directions_transit},
     );
     return type['icon'];
@@ -71,7 +71,7 @@ class _AddTransitCardScreenState extends State<AddTransitCardScreen> {
         return Theme(
           data: ThemeData.dark().copyWith(
             colorScheme: ColorScheme.dark(
-              primary: Colors.purple,
+              primary: Colors.indigoAccent,
               onPrimary: Colors.white,
               surface: Colors.grey[900]!,
               onSurface: Colors.white,
@@ -120,23 +120,20 @@ class _AddTransitCardScreenState extends State<AddTransitCardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1A2E),
+      backgroundColor: const Color.fromARGB(221, 244, 248, 255),
       appBar: AppBar(
         title: Text(
-          widget.existingCard != null ? 'Edit Transit Card' : 'Add Transit Card',
-          style: GoogleFonts.poppins(),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+          widget.existingCard != null
+              ? 'Edit Transit Card'
+              : 'Add Transit Card',
+          style: GoogleFonts.poppins(
+            textStyle: TextStyle(
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -173,17 +170,18 @@ class _AddTransitCardScreenState extends State<AddTransitCardScreen> {
               SizedBox(height: 20),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey[900],
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey),
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 12),
                 child: DropdownButtonFormField<String>(
                   value: _selectedTransitType,
                   decoration: InputDecoration(
                     labelText: 'Transit Type',
-                    labelStyle: TextStyle(color: Colors.white54),
+                    labelStyle: TextStyle(color: Colors.grey),
                     border: InputBorder.none,
-                    icon: Icon(_getSelectedIcon(), color: Colors.purple),
+                    icon: Icon(_getSelectedIcon(), color: Colors.indigoAccent),
                   ),
                   items: _transitTypes.map<DropdownMenuItem<String>>((type) {
                     return DropdownMenuItem<String>(
@@ -211,7 +209,7 @@ class _AddTransitCardScreenState extends State<AddTransitCardScreen> {
               ElevatedButton(
                 onPressed: _saveCard,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: Colors.indigoAccent,
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
@@ -245,21 +243,21 @@ class _AddTransitCardScreenState extends State<AddTransitCardScreen> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white54),
-        prefixIcon: Icon(icon, color: Colors.purple),
+        labelStyle: TextStyle(color: Colors.grey),
+        prefixIcon: Icon(icon, color: Colors.indigoAccent),
         filled: true,
-        fillColor: Colors.grey[900],
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.purple.withOpacity(0.5)),
+          borderSide: BorderSide(color: Colors.indigo.withOpacity(0.5)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.purple),
+          borderSide: BorderSide(color: Colors.indigoAccent),
         ),
       ),
       validator: validator,
