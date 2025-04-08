@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:googleapis/keep/v1.dart';
 import 'package:intl/intl.dart';
 import 'event_ticket.dart';
 
@@ -56,7 +57,7 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
         return Theme(
           data: ThemeData.dark().copyWith(
             colorScheme: ColorScheme.dark(
-              primary: Colors.purple,
+              primary: Colors.indigoAccent,
               onPrimary: Colors.white,
               surface: Colors.grey[900]!,
               onSurface: Colors.white,
@@ -107,23 +108,19 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1A2E),
+      backgroundColor: const Color.fromARGB(221, 244, 248, 255),
       appBar: AppBar(
         title: Text(
           widget.existingTicket != null ? 'Edit Ticket' : 'Add Event Ticket',
-          style: GoogleFonts.poppins(),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+          style: GoogleFonts.poppins(
+            textStyle: TextStyle(
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -131,6 +128,7 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
           key: _formKey,
           child: Column(
             children: [
+              SizedBox(height: 150),
               _buildTextField(
                 controller: _eventNameController,
                 label: 'Event Name',
@@ -171,7 +169,7 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
               ElevatedButton(
                 onPressed: _saveForm,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: Colors.indigoAccent,
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
@@ -200,24 +198,24 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
   }) {
     return TextFormField(
       controller: controller,
-      style: TextStyle(color: Colors.white),
+      style: TextStyle(color: Colors.black),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white54),
-        prefixIcon: Icon(icon, color: Colors.purple),
+        labelStyle: TextStyle(color: Colors.grey),
+        prefixIcon: Icon(icon, color: Colors.indigoAccent),
         filled: true,
-        fillColor: Colors.grey[900],
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.purple.withOpacity(0.5)),
+          borderSide: BorderSide(color: Colors.indigoAccent.withOpacity(0.5)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.purple),
+          borderSide: BorderSide(color: Colors.indigo),
         ),
       ),
       validator: validator,
