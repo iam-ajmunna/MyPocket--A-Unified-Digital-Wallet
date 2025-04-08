@@ -57,15 +57,18 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
             ),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.home, color: Colors.white),
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/home'); // Assuming '/home' is your home route
+            },
+            tooltip: 'Go to Home',
+          ),
+        ],
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1A1A2E), Color(0xFF2A2A4E)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        color: Colors.white, // Changed from gradient to solid white
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -79,7 +82,7 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
                     style: GoogleFonts.poppins(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black, // Changed from white to black for visibility
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -87,7 +90,7 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
                     "Scan, store, and share effortlessly",
                     style: GoogleFonts.poppins(
                       fontSize: 16,
-                      color: Colors.grey[300],
+                      color: Colors.grey[600], // Changed from grey[300] to grey[600] for better contrast
                       fontWeight: FontWeight.w300,
                     ),
                   ),
@@ -159,7 +162,7 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Color(0x4C000000), // Replaced Colors.black.withOpacity(0.3)
+              color: Color(0x4C000000),
               blurRadius: 10,
               offset: Offset(0, 5),
             ),
@@ -170,7 +173,7 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Color(0x33FFFFFF), // Replaced Colors.white.withOpacity(0.2)
+                color: Color(0x33FFFFFF),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: Colors.white, size: 34),

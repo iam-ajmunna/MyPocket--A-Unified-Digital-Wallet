@@ -12,23 +12,26 @@ class SendToSocialScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Send to WhatsApp/Messenger'),
-        backgroundColor: Colors.purple,
+        title: Text('Send to WhatsApp/Messenger', style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.grey[200], // Light grey for better contrast
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: Container(
         padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        color: Colors.white,
         child: Center(
           child: ElevatedButton(
             onPressed: _shareContent,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-            child: Text("Share via WhatsApp/Messenger", style: GoogleFonts.poppins(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.purpleAccent, // A slightly lighter purple
+              foregroundColor: Colors.white, // Ensure text is white
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15), // Add some padding
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Slightly rounded corners
+            ),
+            child: Text(
+              "Share via WhatsApp/Messenger",
+              style: GoogleFonts.poppins(fontSize: 16), // Slightly larger font
+            ),
           ),
         ),
       ),

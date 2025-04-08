@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
 
 class UploadToDriveScreen extends StatefulWidget {
   @override
@@ -40,9 +40,19 @@ class _UploadToDriveScreenState extends State<UploadToDriveScreen> {
       file.name = "Certificate_${DateTime.now().millisecondsSinceEpoch}.txt";
       file.mimeType = "text/plain";
 
-      final result = await driveApi.files.create(file, uploadMedia: drive.Media(Stream.value(utf8.encode("Sample Certificate")), 16));
+      try {
+        final result = await driveApi.files.create(file, uploadMedia: drive.Media(Stream.value(utf8.encode("Sample Certificate")), 16));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Uploaded to Drive: ${result.name}')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error uploading to Drive: $e')),
+        );
+      }
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Uploaded to Drive: ${result.name}')),
+        SnackBar(content: Text('Not signed in to Google.')),
       );
     }
   }
@@ -51,23 +61,26 @@ class _UploadToDriveScreenState extends State<UploadToDriveScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Upload to Drive'),
-        backgroundColor: Colors.purple,
+        title: Text('Upload to Drive', style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.grey[200],
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: Container(
         padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        color: Colors.white,
         child: Center(
           child: ElevatedButton(
             onPressed: _uploadToDrive,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-            child: Text("Upload to Google Drive", style: GoogleFonts.poppins(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.purpleAccent,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Text(
+              "Upload to Google Drive",
+              style: GoogleFonts.poppins(fontSize: 16),
+            ),
           ),
         ),
       ),
