@@ -26,8 +26,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           primarySwatch: Colors.purple,
           scaffoldBackgroundColor: const Color.fromARGB(255, 248, 248, 248)),
-          home: LoginScreen(),
-    //home: WalletScreen(),
+       //   home: LoginScreen(),
+    home: WalletScreen(),
     );
   }
 }
