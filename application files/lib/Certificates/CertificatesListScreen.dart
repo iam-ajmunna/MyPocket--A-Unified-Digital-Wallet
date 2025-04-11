@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -10,11 +9,12 @@ class Certificate {
   final String id;
   final String name;
   final String date;
+  File? file; // To store the file
 
-  Certificate({required this.id, required this.name, required this.date});
+  Certificate({required this.id, required this.name, required this.date, this.file});
 
   Map<String, dynamic> toMap() {
-    return {'id': id, 'name': name, 'date': date};
+    return {'id': id, 'name': name, 'date': date, 'file_path': file?.path};
   }
 
   factory Certificate.fromMap(Map<String, dynamic> map) {
@@ -22,6 +22,7 @@ class Certificate {
       id: map['id'],
       name: map['name'],
       date: map['date'],
+      file: map['file_path'] != null ? File(map['file_path']) : null,
     );
   }
 }
@@ -65,23 +66,71 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
     }
   }
 
-  // Upload from device (gallery)
-  Future<void> _uploadFromDevice() async {
+  Future<void> _uploadAndRename() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() {
-        final cert = Certificate(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          name: 'New Certificate',
-          date: DateTime.now().toString(),
-        );
-        certificates.add(cert); // Adding the uploaded certificate
-      });
-
-      final prefs = await SharedPreferences.getInstance();
-      final updatedList = certificates.map((c) => json.encode(c.toMap())).toList();
-      await prefs.setStringList('certificates', updatedList);
+      File file = File(pickedFile.path);
+      await _showRenameDialog(file);
     }
+  }
+
+  Future<void> _showRenameDialog(File file) async {
+    TextEditingController _nameController = TextEditingController();
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Rename Certificate'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(labelText: 'New Name'),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Rename'),
+              onPressed: () async {
+                if (_nameController.text.isNotEmpty) {
+                  final cert = Certificate(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    name: _nameController.text,
+                    date: DateTime.now().toString(),
+                    file: file,
+                  );
+                  setState(() {
+                    certificates.add(cert);
+                  });
+                  await _saveCertificates();
+                  Navigator.of(context).pop();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Please enter a name')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _saveCertificates() async {
+    final prefs = await SharedPreferences.getInstance();
+    final updatedList = certificates.map((c) => json.encode(c.toMap())).toList();
+    await prefs.setStringList('certificates', updatedList);
   }
 
   @override
@@ -93,25 +142,16 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w700,
             fontSize: 24,
-            color: Colors.white,
+            color: Colors.black87, // Changed app bar text color
             shadows: [Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
           ),
         ),
-        backgroundColor: Colors.purple[800],
+        backgroundColor: Colors.white, // Changed app bar background color
         elevation: 0,
         centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.purple[800]!, Colors.purple[400]!],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
       ),
       body: Container(
-        color: Colors.white, // Changed background color to white
+        color: Colors.white,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -125,7 +165,7 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
                     style: GoogleFonts.poppins(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black, // Changed text color to black
+                      color: Colors.black,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -133,21 +173,26 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
                     "All your documents in one place",
                     style: GoogleFonts.poppins(
                       fontSize: 16,
-                      color: Colors.grey[600], // Kept a grey color
+                      color: Colors.grey[600],
                       fontWeight: FontWeight.w300,
                     ),
                   ),
                   const SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: _uploadFromDevice,
-                    child: Text("Upload Certificate", style: TextStyle(fontSize: 16)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple[600], // Use backgroundColor instead of primary
-                      foregroundColor: Colors.white, // Text color for button
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center, // Center the button
+                    children: [
+                      ElevatedButton(
+                        onPressed: _uploadAndRename,
+                        child: Text("Upload Certificate", style: TextStyle(fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple[600],
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                   const SizedBox(height: 30),
                   Expanded(
@@ -172,7 +217,7 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            "Scan or upload to get started!",
+                            "Tap 'Upload Certificate' to get started!",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               color: Colors.grey[500],
@@ -217,9 +262,7 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
         setState(() {
           certificates.removeAt(index);
         });
-        final prefs = await SharedPreferences.getInstance();
-        final updatedList = certificates.map((c) => json.encode(c.toMap())).toList();
-        await prefs.setStringList('certificates', updatedList);
+        await _saveCertificates();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("${cert.name} removed"),
@@ -232,7 +275,7 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
         margin: EdgeInsets.symmetric(vertical: 12),
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.grey[100], // Light grey card background
+          color: Colors.grey[100],
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -247,7 +290,7 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue[100], // Light blue icon background
+                color: Colors.blue[100],
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.description, color: Colors.blue[400], size: 34),
@@ -262,7 +305,7 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
                     style: GoogleFonts.poppins(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87, // Dark text for card
+                      color: Colors.black87,
                     ),
                   ),
                   Text(

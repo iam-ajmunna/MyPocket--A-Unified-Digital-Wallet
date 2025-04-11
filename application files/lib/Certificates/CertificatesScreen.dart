@@ -5,6 +5,7 @@ import 'package:mypocket/Documents/UploadToDriveScreen.dart';
 import 'ScanCertificatesScreen.dart';
 import 'CertificatesListScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mypocket/Home/WalletScreen.dart'; // Assuming WalletScreen is your home screen
 
 class CertificatesScreen extends StatefulWidget {
   @override
@@ -41,34 +42,31 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w700,
             fontSize: 24,
-            color: Colors.white,
+            color: Colors.black87, // Changed app bar text color to black for white background
             shadows: [Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
           ),
         ),
-        backgroundColor: Colors.purple[800],
+        backgroundColor: Colors.white, // Changed app bar background color to white
         elevation: 0,
         centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.purple[800]!, Colors.purple[400]!],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        iconTheme: IconThemeData(color: Colors.purple[800]), // Set icon color if needed
         actions: [
           IconButton(
-            icon: Icon(Icons.home, color: Colors.white),
+            icon: Icon(Icons.home, color: Colors.purple[800]), // Home icon color
             onPressed: () {
-              Navigator.pushReplacementNamed(context, '/home'); // Assuming '/home' is your home route
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => WalletScreen(), // Navigate to WalletScreen
+                ),
+              );
             },
             tooltip: 'Go to Home',
           ),
         ],
+        // Removed flexibleSpace to have a solid white color
       ),
       body: Container(
-        color: Colors.white, // Changed from gradient to solid white
+        color: Colors.white, // Solid white background for the body
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -82,7 +80,7 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
                     style: GoogleFonts.poppins(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black, // Changed from white to black for visibility
+                      color: Colors.black,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -90,7 +88,7 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
                     "Scan, store, and share effortlessly",
                     style: GoogleFonts.poppins(
                       fontSize: 16,
-                      color: Colors.grey[600], // Changed from grey[300] to grey[600] for better contrast
+                      color: Colors.grey[600],
                       fontWeight: FontWeight.w300,
                     ),
                   ),
@@ -140,7 +138,7 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(context),
+      // Removed bottomNavigationBar
     );
   }
 
@@ -205,66 +203,6 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
             Icon(Icons.arrow_circle_right, color: Colors.white70, size: 28),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        boxShadow: [
-          BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, -2)),
-        ],
-      ),
-      child: BottomNavigationBar(
-        currentIndex: 4,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushReplacementNamed(context, '/bkash');
-              break;
-            case 1:
-              Navigator.pushReplacementNamed(context, '/mobile-topup');
-              break;
-            case 2:
-              Navigator.pushReplacementNamed(context, '/wallet');
-              break;
-            case 3:
-              Navigator.pushReplacementNamed(context, '/payments');
-              break;
-            case 4:
-              break;
-          }
-        },
-        backgroundColor: Colors.transparent,
-        selectedItemColor: Colors.purple[400],
-        unselectedItemColor: Colors.grey[500],
-        type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
-        unselectedLabelStyle: GoogleFonts.poppins(fontSize: 12),
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.payment, size: 28),
-            label: 'bKash',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.phone_iphone, size: 28),
-            label: 'Top-Up',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet_outlined, size: 28),
-            label: 'Wallet',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long, size: 28),
-            label: 'Payments',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.verified, size: 28),
-            label: 'Certificates',
-          ),
-        ],
       ),
     );
   }
