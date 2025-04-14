@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mypocket/Documents/SendToSocialScreen.dart';
-import 'package:mypocket/Documents/UploadToDriveScreen.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 import 'ScanCertificatesScreen.dart';
 import 'CertificatesListScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mypocket/Home/WalletScreen.dart'; // Assuming WalletScreen is your home screen
+import 'package:share_plus/share_plus.dart'; // Import the share_plus package
 
 class CertificatesScreen extends StatefulWidget {
   @override
@@ -33,6 +33,17 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
     super.dispose();
   }
 
+  Future<void> _navigateToGoogleDrive() async {
+    const String googleDriveUrl = 'https://drive.google.com/';
+    if (await canLaunchUrl(Uri.parse(googleDriveUrl))) {
+      await launchUrl(Uri.parse(googleDriveUrl));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open Google Drive.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,31 +53,30 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w700,
             fontSize: 24,
-            color: Colors.black87, // Changed app bar text color to black for white background
+            color: Colors.black87,
             shadows: [Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
           ),
         ),
-        backgroundColor: Colors.white, // Changed app bar background color to white
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.purple[800]), // Set icon color if needed
+        iconTheme: IconThemeData(color: Colors.purple[800]),
         actions: [
           IconButton(
-            icon: Icon(Icons.home, color: Colors.purple[800]), // Home icon color
+            icon: Icon(Icons.home, color: Colors.purple[800]),
             onPressed: () {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
-                  builder: (context) => WalletScreen(), // Navigate to WalletScreen
+                  builder: (context) => WalletScreen(),
                 ),
               );
             },
             tooltip: 'Go to Home',
           ),
         ],
-        // Removed flexibleSpace to have a solid white color
       ),
       body: Container(
-        color: Colors.white, // Solid white background for the body
+        color: Colors.white,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -119,7 +129,7 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
                           title: "Upload to Drive",
                           subtitle: "Securely back up online",
                           gradient: LinearGradient(colors: [Colors.orange[600]!, Colors.orange[300]!]),
-                          onTap: () => _navigateTo(context, UploadToDriveScreen()),
+                          onTap: _navigateToGoogleDrive, // Call _navigateToGoogleDrive directly
                         ),
                         _buildOptionTile(
                           context,
@@ -127,7 +137,10 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
                           title: "Share to Social",
                           subtitle: "Send via WhatsApp or more",
                           gradient: LinearGradient(colors: [Colors.purple[600]!, Colors.purple[300]!]),
-                          onTap: () => _navigateTo(context, SendToSocialScreen()),
+                          onTap: () async {
+                            await Share.share('Check out my certificate: [Link or Text]');
+                            print("Sharing initiated");
+                          },
                         ),
                       ],
                     ),
@@ -138,7 +151,6 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
           ),
         ),
       ),
-      // Removed bottomNavigationBar
     );
   }
 
