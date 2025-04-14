@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mypocket/Documents/SendToSocialScreen.dart';
-import 'package:mypocket/Documents/UploadToDriveScreen.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 import 'ScanCertificatesScreen.dart';
 import 'CertificatesListScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mypocket/Home/WalletScreen.dart'; // Assuming WalletScreen is your home screen
+import 'package:share_plus/share_plus.dart'; // Import the share_plus package
+import 'package:lottie/lottie.dart'; // Import Lottie for animations
 
 class CertificatesScreen extends StatefulWidget {
   @override
@@ -33,103 +34,133 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
     super.dispose();
   }
 
+  Future<void> _navigateToGoogleDrive() async {
+    const String googleDriveUrl = 'https://drive.google.com/';
+    if (await canLaunchUrl(Uri.parse(googleDriveUrl))) {
+      await launchUrl(Uri.parse(googleDriveUrl));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open Google Drive.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Certificates & Cards',
+          'Your Digital Certificates',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w700,
             fontSize: 24,
-            color: Colors.black87, // Changed app bar text color to black for white background
+            color: Colors.black87,
             shadows: [Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
           ),
         ),
-        backgroundColor: Colors.white, // Changed app bar background color to white
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.purple[800]), // Set icon color if needed
+        iconTheme: IconThemeData(color: Colors.purple[800]),
         actions: [
           IconButton(
-            icon: Icon(Icons.home, color: Colors.purple[800]), // Home icon color
+            icon: Icon(Icons.home_rounded, color: Colors.purple[800], size: 30),
             onPressed: () {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
-                  builder: (context) => WalletScreen(), // Navigate to WalletScreen
+                  builder: (context) => WalletScreen(),
                 ),
               );
             },
             tooltip: 'Go to Home',
           ),
         ],
-        // Removed flexibleSpace to have a solid white color
       ),
       body: Container(
-        color: Colors.white, // Solid white background for the body
+        color: Colors.white,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Your Certificates Hub",
+                    "Manage Smartly",
                     style: GoogleFonts.poppins(
-                      fontSize: 30,
+                      fontSize: 36,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      letterSpacing: 0.8,
+                      color: Colors.black87,
+                      letterSpacing: 0.5,
                     ),
                   ),
+                  const SizedBox(height: 8),
                   Text(
-                    "Scan, store, and share effortlessly",
+                    "Access and organize your important documents effortlessly.",
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       color: Colors.grey[600],
-                      fontWeight: FontWeight.w300,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Expanded(
+                    child: GridView.count(
+                      physics: BouncingScrollPhysics(),
+                      crossAxisCount: 2,
+                      childAspectRatio: 1.1,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      children: [
+                        _buildFeatureCard(
+                          context,
+                          icon: Icons.list_alt_rounded,
+                          title: "View All",
+                          subtitle: "Your Stored Certificates",
+                          gradient: LinearGradient(colors: [Colors.blue[400]!, Colors.blue[600]!], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                          onTap: () => _navigateTo(context, CertificatesListScreen()),
+                        ),
+                        _buildFeatureCard(
+                          context,
+                          icon: Icons.camera_alt_rounded,
+                          title: "Scan New",
+                          subtitle: "Capture and Save",
+                          gradient: LinearGradient(colors: [Colors.green[400]!, Colors.green[600]!], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                          onTap: () => _navigateTo(context, ScanCertificatesScreen()),
+                        ),
+                        _buildFeatureCard(
+                          context,
+                          icon: Icons.cloud_upload_rounded,
+                          title: "Drive Backup",
+                          subtitle: "Secure Online Storage",
+                          gradient: LinearGradient(colors: [Colors.orange[400]!, Colors.orange[600]!], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                          onTap: _navigateToGoogleDrive,
+                        ),
+                        _buildFeatureCard(
+                          context,
+                          icon: Icons.share_rounded,
+                          title: "Quick Share",
+                          subtitle: "Send to Others",
+                          gradient: LinearGradient(colors: [Colors.purple[400]!, Colors.purple[600]!], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                          onTap: () async {
+                            await Share.share('Check out my certificate: [Link or Text]');
+                            print("Sharing initiated");
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 30),
-                  Expanded(
-                    child: ListView(
-                      physics: BouncingScrollPhysics(),
-                      children: [
-                        _buildOptionTile(
-                          context,
-                          icon: Icons.library_books,
-                          title: "Certificates List",
-                          subtitle: "Browse all your documents",
-                          gradient: LinearGradient(colors: [Colors.blue[600]!, Colors.blue[300]!]),
-                          onTap: () => _navigateTo(context, CertificatesListScreen()),
-                        ),
-                        _buildOptionTile(
-                          context,
-                          icon: Icons.qr_code_scanner,
-                          title: "Scan Certificates",
-                          subtitle: "Capture new certificates",
-                          gradient: LinearGradient(colors: [Colors.green[600]!, Colors.green[300]!]),
-                          onTap: () => _navigateTo(context, ScanCertificatesScreen()),
-                        ),
-                        _buildOptionTile(
-                          context,
-                          icon: Icons.cloud_circle,
-                          title: "Upload to Drive",
-                          subtitle: "Securely back up online",
-                          gradient: LinearGradient(colors: [Colors.orange[600]!, Colors.orange[300]!]),
-                          onTap: () => _navigateTo(context, UploadToDriveScreen()),
-                        ),
-                        _buildOptionTile(
-                          context,
-                          icon: Icons.share_outlined,
-                          title: "Share to Social",
-                          subtitle: "Send via WhatsApp or more",
-                          gradient: LinearGradient(colors: [Colors.purple[600]!, Colors.purple[300]!]),
-                          onTap: () => _navigateTo(context, SendToSocialScreen()),
-                        ),
-                      ],
+                  Center(
+                    child: Opacity(
+                      opacity: 0.7,
+                      child: Text(
+                        "Keep your important documents safe and accessible.",
+                        style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[500]),
+                      ),
                     ),
                   ),
                 ],
@@ -138,11 +169,10 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
           ),
         ),
       ),
-      // Removed bottomNavigationBar
     );
   }
 
-  Widget _buildOptionTile(
+  Widget _buildFeatureCard(
       BuildContext context, {
         required IconData icon,
         required String title,
@@ -153,55 +183,46 @@ class _CertificatesScreenState extends State<CertificatesScreen> with SingleTick
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 12),
-        padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: gradient,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Color(0x4C000000),
-              blurRadius: 10,
-              offset: Offset(0, 5),
+              color: gradient.colors.first.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 6,
+              offset: Offset(0, 3),
             ),
           ],
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Color(0x33FFFFFF),
-                shape: BoxShape.circle,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.white, size: 48),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
-              child: Icon(icon, color: Colors.white, size: 34),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.white70,
+                ),
               ),
-            ),
-            Icon(Icons.arrow_circle_right, color: Colors.white70, size: 28),
-          ],
+            ],
+          ),
         ),
       ),
     );
