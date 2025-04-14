@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'transaction.dart';
-import 'WalletScreen.dart';
-import 'PaymentsScreen.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mypocket/Home/transaction.dart' as my_transaction;
+import 'package:mypocket/Home/WalletScreen.dart';
+import 'package:mypocket/Home/PaymentsScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BkashPayScreen extends StatefulWidget {
   @override
@@ -17,22 +17,74 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
   final _amountController = TextEditingController();
   final _pinController = TextEditingController();
 
-  // Variables for user inputs
   String _bkashId = '';
   double _amount = 0.0;
   String _pin = '';
-
-  // Validation error messages
   String? _bkashIdError;
   String? _amountError;
+  List<CardData> _cards = [];
+  String? _selectedCardId;
+  bool _isLoading = true;
 
-  // Variable for firebase pin
-  // String _firebasePin = '';
+  @override
+  void initState() {
+    super.initState();
+    _loadCards();
+  }
+
+  Future<void> _loadCards() async {
+    setState(() => _isLoading = true);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final QuerySnapshot cardsSnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .collection('cards')
+            .get();
+
+        List<CardData> loadedCards = [];
+        for (var doc in cardsSnapshot.docs) {
+          final data = doc.data() as Map<String, dynamic>?;
+          loadedCards.add(CardData.fromFirestore(data, doc.id));
+        }
+
+        setState(() {
+          _cards = loadedCards;
+          if (_cards.isNotEmpty) {
+            _selectedCardId = _cards.first.cardId;
+          }
+          _isLoading = false;
+        });
+      } catch (e) {
+        print("Error fetching cards: $e");
+        setState(() => _isLoading = false);
+      }
+    } else {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _updateCardBalance(String cardId, double newBalance) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .collection('cards')
+            .doc(cardId)
+            .update({'balance': newBalance});
+      } catch (e) {
+        print("Error updating card balance: $e");
+      }
+    }
+  }
 
   Future<void> _addTransaction(
       String type, double amount, String status) async {
     final prefs = await SharedPreferences.getInstance();
-    final transaction = Transaction(
+    final transaction = my_transaction.Transaction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       type: type,
       amount: amount,
@@ -69,6 +121,16 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
       return false;
     }
 
+    if (_selectedCardId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please select a card'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+
     return true;
   }
 
@@ -79,27 +141,34 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
 
     _pin = _pinController.text;
 
-    // Show PIN confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFFE0E3E7),
           title: Text('Confirm Transaction'),
-          content: TextField(
-            controller: _pinController,
-            decoration: InputDecoration(
-              labelText: 'Enter PIN',
-              labelStyle: TextStyle(color: Colors.grey),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Amount: ${_amount.toStringAsFixed(2)}'),
+              Text('Recipient: $_bkashId'),
+              SizedBox(height: 20),
+              TextField(
+                controller: _pinController,
+                decoration: InputDecoration(
+                  labelText: 'Enter PIN',
+                  labelStyle: TextStyle(color: Colors.grey),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                style: TextStyle(color: Colors.black),
+                obscureText: true,
+                keyboardType: TextInputType.number,
               ),
-            ),
-            style: TextStyle(color: Colors.black),
-            obscureText: true,
-            keyboardType: TextInputType.number,
+            ],
           ),
           actions: [
             TextButton(
@@ -113,33 +182,6 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                // Firebase PIN verification (Commented Out)
-                // try {
-                //   // Retrieve PIN from Firebase
-                //   DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc('your_user_id').get();
-                //   _firebasePin = userDoc.get('pin');
-                //
-                //   if (_pinController.text == _firebasePin) {
-                //     Navigator.pop(context, true);
-                //   } else {
-                //     ScaffoldMessenger.of(context).showSnackBar(
-                //       SnackBar(
-                //         content: Text('Invalid PIN'),
-                //         backgroundColor: Colors.red,
-                //       ),
-                //     );
-                //   }
-                // } catch (e) {
-                //   print('Error verifying PIN from Firebase: $e');
-                //   ScaffoldMessenger.of(context).showSnackBar(
-                //     SnackBar(
-                //       content: Text('Error verifying PIN'),
-                //       backgroundColor: Colors.red,
-                //     ),
-                //   );
-                // }
-
-                // Temporary PIN verification (Replace with Firebase)
                 if (_pinController.text == '1234') {
                   Navigator.pop(context, true);
                 } else {
@@ -164,30 +206,40 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
     );
 
     if (confirmed == true) {
-      // Add transaction to history
-      _addTransaction(
-        'bKash Pay',
-        _amount,
-        'Success',
-      );
+      final selectedCard = _cards.firstWhere((card) => card.cardId == _selectedCardId);
+      if (selectedCard.balance != null && selectedCard.balance! >= _amount) {
+        double newBalance = selectedCard.balance! - _amount;
+        await _updateCardBalance(selectedCard.cardId, newBalance);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Transfer successful!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+        _addTransaction(
+          'bKash Pay',
+          _amount,
+          'Success',
+        );
 
-      // Clear fields
-      _bkashIdController.clear();
-      _amountController.clear();
-      _pinController.clear();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Transfer successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
 
-      // Clear error messages
-      setState(() {
-        _bkashIdError = null;
-        _amountError = null;
-      });
+        _bkashIdController.clear();
+        _amountController.clear();
+        _pinController.clear();
+
+        setState(() {
+          _bkashIdError = null;
+          _amountError = null;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Insufficient balance in selected card'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -212,9 +264,7 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
                 color: Colors.black,
               ),
             ),
-            SizedBox(
-              width: 5,
-            ),
+            SizedBox(width: 5),
             Text(
               'Pay',
               style: TextStyle(
@@ -226,72 +276,123 @@ class _BkashPayScreenState extends State<BkashPayScreen> {
         ),
         backgroundColor: Colors.white,
       ),
-      body: Container(
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Color.fromARGB(241, 244, 248, 255),
-        ),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 180,
-            ),
-            Container(
-              child: Image.asset(
-                'bkash_logo_new.png',
-                width: 350,
-                height: 120,
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _bkashIdController,
-              decoration: InputDecoration(
-                labelText: 'bKash ID (Mobile Number)',
-                labelStyle: TextStyle(color: Colors.grey),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                errorText: _bkashIdError,
-              ),
-              style: TextStyle(color: Colors.black),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _amountController,
-              decoration: InputDecoration(
-                labelText: 'Amount',
-                labelStyle: TextStyle(color: Colors.grey),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                errorText: _amountError,
-              ),
-              style: TextStyle(color: Colors.black),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _confirmTransaction,
-              style: ElevatedButton.styleFrom(
-                fixedSize: Size(200, 50),
-                backgroundColor: Colors.indigoAccent,
-                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Color.fromARGB(241, 244, 248, 255),
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 20),
+              Container(
+                child: Image.asset(
+                  'bkash_logo_new.png',
+                  width: MediaQuery.of(context).size.width * 0.7,
+                  height: 100,
                 ),
               ),
-              child: Text(
-                'Transfer',
-                style: TextStyle(fontSize: 18, color: Colors.white),
+              const SizedBox(height: 20),
+              if (_cards.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedCardId,
+                    decoration: InputDecoration(
+                      labelText: 'Select Card',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    items: _cards.map((CardData card) {
+                      return DropdownMenuItem<String>(
+                        value: card.cardId,
+                        child: Text(
+                          '${card.bankName} (•••• ${card.cardNumber.substring(card.cardNumber.length - 4)}) - ${card.balance?.toStringAsFixed(2) ?? '0.00'}',
+                          style: TextStyle(color: Colors.black),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedCardId = newValue;
+                      });
+                    },
+                  ),
+                ),
+              if (_cards.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'No cards available. Please add a card first.',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: TextField(
+                  controller: _bkashIdController,
+                  decoration: InputDecoration(
+                    labelText: 'bKash ID (Mobile Number)',
+                    labelStyle: TextStyle(color: Colors.grey),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    errorText: _bkashIdError,
+                  ),
+                  style: TextStyle(color: Colors.black),
+                  keyboardType: TextInputType.phone,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: TextField(
+                  controller: _amountController,
+                  decoration: InputDecoration(
+                    labelText: 'Amount',
+                    labelStyle: TextStyle(color: Colors.grey),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    errorText: _amountError,
+                  ),
+                  style: TextStyle(color: Colors.black),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: _cards.isEmpty ? null : _confirmTransaction,
+                style: ElevatedButton.styleFrom(
+                  fixedSize: Size(200, 50),
+                  backgroundColor: _cards.isEmpty
+                      ? Colors.grey
+                      : Colors.indigoAccent,
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+                child: Text(
+                  'Transfer',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
