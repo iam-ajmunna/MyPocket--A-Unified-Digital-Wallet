@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mypocket/Certificates/CertificatesScreen.dart';
 import 'package:mypocket/Documents/document_manager.dart';
+import 'package:mypocket/Documents/document_selection_page.dart';
 import 'package:mypocket/Passes/event_ticket.dart';
 import 'package:mypocket/Passes/passes_list_screen.dart';
 import 'package:mypocket/Transit/transit_list_screen.dart';
@@ -88,7 +89,7 @@ class CardData {
       expiryDate: (data['expiryDate'] as Timestamp?)?.toDate(),
       expiryDateString: (data['expiryDate'] as Timestamp?)?.toDate() != null
           ? DateFormat('MM/yy')
-          .format((data['expiryDate'] as Timestamp?)!.toDate()!)
+              .format((data['expiryDate'] as Timestamp?)!.toDate()!)
           : '',
       cvv: data['cvv']?.toString() ?? '',
       cardType: data['cardType'] as String? ?? '',
@@ -118,7 +119,7 @@ class _WalletScreenState extends State<WalletScreen> {
   late NotchBottomBarController _controller;
   int _selectedIndex = 2;
   final CarouselSliderController _carouselController =
-  CarouselSliderController();
+      CarouselSliderController();
   final _formKey = GlobalKey<FormState>();
   int? _cardToDeleteIndex;
 
@@ -156,7 +157,7 @@ class _WalletScreenState extends State<WalletScreen> {
             .get();
         if (userDoc.exists) {
           final userData =
-          userDoc.data() as Map<String, dynamic>?; // Safely get data
+              userDoc.data() as Map<String, dynamic>?; // Safely get data
           setState(() {
             _userName = userData?['fullName'] as String? ??
                 'Guest'; // Safely access 'name'
@@ -311,7 +312,7 @@ class _WalletScreenState extends State<WalletScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           title: Text('Add New Card',
               style: GoogleFonts.poppins(
                 color: const Color.fromARGB(255, 0, 0, 0),
@@ -344,7 +345,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   decoration: const InputDecoration(
                       labelText: 'Card Number',
                       labelStyle:
-                      TextStyle(color: const Color.fromARGB(137, 0, 0, 0)),
+                          TextStyle(color: const Color.fromARGB(137, 0, 0, 0)),
                       filled: true,
                       fillColor: Colors.white),
                   keyboardType: TextInputType.number,
@@ -387,7 +388,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         final parts = value.split('/');
                         final month = int.parse(parts[0]);
                         final year =
-                        int.parse('20${parts[1]}'); // Assume 21st century
+                            int.parse('20${parts[1]}'); // Assume 21st century
                         final now = DateTime.now();
                         final expiryDate = DateTime(year, month);
 
@@ -411,7 +412,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       if (pickedDate != null) {
                         // Format the selected date as MM/YY
                         final formattedDate =
-                        DateFormat('MM/yy').format(pickedDate);
+                            DateFormat('MM/yy').format(pickedDate);
                         expiryDateController.text = formattedDate;
                       }
                     }),
@@ -422,7 +423,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   decoration: const InputDecoration(
                       labelText: 'CVV',
                       labelStyle:
-                      TextStyle(color: const Color.fromARGB(137, 0, 0, 0)),
+                          TextStyle(color: const Color.fromARGB(137, 0, 0, 0)),
                       filled: true,
                       fillColor: Colors.white),
                   keyboardType: TextInputType.number,
@@ -455,7 +456,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     style: const TextStyle(color: Colors.black),
                     dropdownColor: Colors.white,
                     icon:
-                    const Icon(Icons.arrow_drop_down, color: Colors.black),
+                        const Icon(Icons.arrow_drop_down, color: Colors.black),
                     //underline: const SizedBox(),
                     onChanged: (String? newValue) {
                       setState(() {
@@ -527,7 +528,7 @@ class _WalletScreenState extends State<WalletScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           title: Text(card.bankName ?? 'Unknown Bank', // Access properties
               style: const TextStyle(color: Colors.black)),
           content: Column(
@@ -854,9 +855,9 @@ class _WalletScreenState extends State<WalletScreen> {
               itemLabel: 'Payments'),
           const BottomBarItem(
               inActiveItem:
-              Icon(Icons.account_circle_sharp, color: Colors.grey),
+                  Icon(Icons.account_circle_sharp, color: Colors.grey),
               activeItem:
-              Icon(Icons.account_circle_sharp, color: Colors.indigoAccent),
+                  Icon(Icons.account_circle_sharp, color: Colors.indigoAccent),
               itemLabel: 'Profile'),
         ],
         onTap: (index) {
@@ -1031,11 +1032,11 @@ class MyDivider extends StatelessWidget {
 }
 
 Widget buildBodyButton(
-    BuildContext context, {
-      required String title,
-      required IconData icon,
-      VoidCallback? onPressed,
-    }) {
+  BuildContext context, {
+  required String title,
+  required IconData icon,
+  VoidCallback? onPressed,
+}) {
   return SizedBox(
     width: 100,
     height: 100,
@@ -1089,52 +1090,52 @@ Widget buildButtonGrid(BuildContext context) {
     children: [
       buildBodyButton(context, icon: Icons.event, title: 'Event Passes',
           onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => PassesListScreen(),
-              ),
-            );
-          }),
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => PassesListScreen(),
+          ),
+        );
+      }),
       buildBodyButton(context, icon: Icons.train, title: 'Transits',
           onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => TransitListScreen(),
-              ),
-            );
-          }),
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => TransitListScreen(),
+          ),
+        );
+      }),
       buildBodyButton(context,
-          icon: Icons.document_scanner, title: 'Statements', onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => PassesListScreen(),
-              ),
-            );
-          }),
+          icon: Icons.document_scanner, title: 'IDs & Passport', onPressed: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => DocumentSelectionPage(),
+          ),
+        );
+      }),
       buildBodyButton(context, icon: Icons.description, title: 'Documents',
           onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => DocumentManagerScreen(),
-              ),
-            );
-          }),
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => DocumentManagerScreen(),
+          ),
+        );
+      }),
       buildBodyButton(context, icon: Icons.school, title: 'Certificates',
           onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => CertificatesScreen(),
-              ),
-            );
-          }),
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => CertificatesScreen(),
+          ),
+        );
+      }),
       buildBodyButton(context, icon: Icons.widgets, title: 'More',
           onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => PassesListScreen(),
-              ),
-            );
-          }),
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => PassesListScreen(),
+          ),
+        );
+      }),
     ],
   );
 }
