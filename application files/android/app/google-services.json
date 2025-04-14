@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "128150028593",
+    "firebase_url": "https://my-pocket-fc2b6-default-rtdb.firebaseio.com",
+    "project_id": "my-pocket-fc2b6",
+    "storage_bucket": "my-pocket-fc2b6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:128150028593:android:ee96508fe1923808df3010",
+        "android_client_info": {
+          "package_name": "com.nexus.mypocket"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgwyJqTmvxlOI2D0q9tsZmH9Cv8M8KJko"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

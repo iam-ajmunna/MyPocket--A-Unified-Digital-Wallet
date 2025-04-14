@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:googleapis/keep/v1.dart';
 import 'package:intl/intl.dart';
 import 'event_ticket.dart';
 
@@ -24,16 +25,16 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
   @override
   void initState() {
     super.initState();
-    _eventNameController = TextEditingController(
-        text: widget.existingTicket?.eventName ?? '');
-    _venueController = TextEditingController(
-        text: widget.existingTicket?.venue ?? '');
+    _eventNameController =
+        TextEditingController(text: widget.existingTicket?.eventName ?? '');
+    _venueController =
+        TextEditingController(text: widget.existingTicket?.venue ?? '');
     _dateController = TextEditingController(
         text: widget.existingTicket != null
             ? DateFormat('yyyy-MM-dd').format(widget.existingTicket!.date)
             : '');
-    _seatController = TextEditingController(
-        text: widget.existingTicket?.seat ?? '');
+    _seatController =
+        TextEditingController(text: widget.existingTicket?.seat ?? '');
     _selectedDate = widget.existingTicket?.date;
   }
 
@@ -56,7 +57,7 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
         return Theme(
           data: ThemeData.dark().copyWith(
             colorScheme: ColorScheme.dark(
-              primary: Colors.purple,
+              primary: Colors.indigoAccent,
               onPrimary: Colors.white,
               surface: Colors.grey[900]!,
               onSurface: Colors.white,
@@ -107,23 +108,19 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1A2E),
+      backgroundColor: const Color.fromARGB(221, 244, 248, 255),
       appBar: AppBar(
         title: Text(
           widget.existingTicket != null ? 'Edit Ticket' : 'Add Event Ticket',
-          style: GoogleFonts.poppins(),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+          style: GoogleFonts.poppins(
+            textStyle: TextStyle(
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -131,12 +128,13 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
           key: _formKey,
           child: Column(
             children: [
+              SizedBox(height: 150),
               _buildTextField(
                 controller: _eventNameController,
                 label: 'Event Name',
                 icon: Icons.event,
                 validator: (value) =>
-                value!.isEmpty ? 'Please enter event name' : null,
+                    value!.isEmpty ? 'Please enter event name' : null,
               ),
               SizedBox(height: 20),
               _buildTextField(
@@ -144,7 +142,7 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
                 label: 'Venue',
                 icon: Icons.place,
                 validator: (value) =>
-                value!.isEmpty ? 'Please enter venue' : null,
+                    value!.isEmpty ? 'Please enter venue' : null,
               ),
               SizedBox(height: 20),
               GestureDetector(
@@ -155,7 +153,7 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
                     label: 'Date',
                     icon: Icons.calendar_today,
                     validator: (value) =>
-                    value!.isEmpty ? 'Please select date' : null,
+                        value!.isEmpty ? 'Please select date' : null,
                   ),
                 ),
               ),
@@ -165,13 +163,13 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
                 label: 'Seat',
                 icon: Icons.chair,
                 validator: (value) =>
-                value!.isEmpty ? 'Please enter seat info' : null,
+                    value!.isEmpty ? 'Please enter seat info' : null,
               ),
               SizedBox(height: 30),
               ElevatedButton(
                 onPressed: _saveForm,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: Colors.indigoAccent,
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
@@ -200,24 +198,24 @@ class _AddEventTicketScreenState extends State<AddEventTicketScreen> {
   }) {
     return TextFormField(
       controller: controller,
-      style: TextStyle(color: Colors.white),
+      style: TextStyle(color: Colors.black),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white54),
-        prefixIcon: Icon(icon, color: Colors.purple),
+        labelStyle: TextStyle(color: Colors.grey),
+        prefixIcon: Icon(icon, color: Colors.indigoAccent),
         filled: true,
-        fillColor: Colors.grey[900],
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.purple.withOpacity(0.5)),
+          borderSide: BorderSide(color: Colors.indigoAccent.withOpacity(0.5)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.purple),
+          borderSide: BorderSide(color: Colors.indigo),
         ),
       ),
       validator: validator,
