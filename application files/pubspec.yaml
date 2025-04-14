@@ -1,6 +1,6 @@
 name: mypocket
 description: "A Unified Digital Wallet."
-  # The following line prevents the package from being accidentally published to
+# The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
@@ -14,7 +14,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
   # In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
   # Read more about iOS versioning at
   # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-  # In Windows, build-name is used as the major, minor, and patch parts
+# In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 version: 1.0.0+1
 
@@ -65,6 +65,7 @@ dependencies:
   image_picker: ^1.1.2
   image_cropper: ^9.1.0
   json_path: ^0.7.5
+  qr_flutter: 4.1.0
   page_transition: ^2.2.1
   path_provider: ^2.1.5
   path_provider_android: ^2.2.16
