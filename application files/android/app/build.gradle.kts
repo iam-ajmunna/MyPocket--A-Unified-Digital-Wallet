@@ -5,19 +5,11 @@ plugins {
 }
 
 android {
-<<<<<<< HEAD
     namespace = "com.nexus.mypocket"
     compileSdk = 34
 
     defaultConfig {
         applicationId = "com.nexus.mypocket"
-=======
-    namespace = "com.example.testapp"
-    compileSdk = 34
-
-    defaultConfig {
-        applicationId = "com.example.testapp"
->>>>>>> efbe7be226cb82988e230e435421310d584df00c
         minSdk = 24
         targetSdk = 33
         versionCode = 1
