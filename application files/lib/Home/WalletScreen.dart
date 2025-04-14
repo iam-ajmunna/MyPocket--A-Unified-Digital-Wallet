@@ -213,6 +213,39 @@ class _WalletScreenState extends State<WalletScreen> {
     }
   }
 
+  Future<void> _updateCardBalance(String cardId, double newBalance) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .collection('cards')
+            .doc(cardId)
+            .update({'balance': newBalance});
+
+        // Update local state immediately
+        setState(() {
+          final cardIndex = cards.indexWhere((card) => card.cardId == cardId);
+          if (cardIndex != -1) {
+            cards[cardIndex].balance = newBalance;
+            if (_carouselCurrentIndex == cardIndex) {
+              _userBalance = newBalance.toStringAsFixed(2);
+            }
+          }
+        });
+      } catch (e) {
+        print("Error updating card balance: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update balance'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _addCard(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       final user = FirebaseAuth.instance.currentUser;

@@ -15,22 +15,23 @@ class EventTicket {
     required this.seat,
   });
 
-  String get formattedDate => DateFormat('MMM dd, yyyy').format(date);
-  String get formattedTime => DateFormat('hh:mm a').format(date);
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'eventName': eventName,
+      'venue': venue,
+      'date': date.toIso8601String(),
+      'seat': seat,
+    };
+  }
 
-  EventTicket copyWith({
-    String? id,
-    String? eventName,
-    String? venue,
-    DateTime? date,
-    String? seat,
-  }) {
+  factory EventTicket.fromMap(Map<String, dynamic> map) {
     return EventTicket(
-      id: id ?? this.id,
-      eventName: eventName ?? this.eventName,
-      venue: venue ?? this.venue,
-      date: date ?? this.date,
-      seat: seat ?? this.seat,
+      id: map['id'],
+      eventName: map['eventName'],
+      venue: map['venue'],
+      date: DateTime.parse(map['date']),
+      seat: map['seat'],
     );
   }
 }
