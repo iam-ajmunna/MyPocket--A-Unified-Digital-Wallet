@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class SendToSocialScreen extends StatelessWidget {
   Future<void> _shareContent() async {
@@ -10,29 +9,58 @@ class SendToSocialScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Send to WhatsApp/Messenger', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.grey[200], // Light grey for better contrast
-        iconTheme: IconThemeData(color: Colors.black),
-      ),
-      body: Container(
+    return GestureDetector(
+      onTap: _shareContent,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 12),
         padding: EdgeInsets.all(20),
-        color: Colors.white,
-        child: Center(
-          child: ElevatedButton(
-            onPressed: _shareContent,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purpleAccent, // A slightly lighter purple
-              foregroundColor: Colors.white, // Ensure text is white
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15), // Add some padding
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Slightly rounded corners
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [Colors.purple[600]!, Colors.purple[300]!]),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x4C000000),
+              blurRadius: 10,
+              offset: Offset(0, 5),
             ),
-            child: Text(
-              "Share via WhatsApp/Messenger",
-              style: GoogleFonts.poppins(fontSize: 16), // Slightly larger font
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Color(0x33FFFFFF),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.share_outlined, color: Colors.white, size: 34),
             ),
-          ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Share to Social",
+                    style: GoogleFonts.poppins(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    "Send via WhatsApp or more",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_circle_right, color: Colors.white70, size: 28),
+          ],
         ),
       ),
     );

@@ -2,19 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class Certificate {
   final String id;
   final String name;
   final String date;
-  File? file; // To store the file
+  final String category;
+  final String subCategory;
+  File? file;
 
-  Certificate({required this.id, required this.name, required this.date, this.file});
+  Certificate({
+    required this.id,
+    required this.name,
+    required this.date,
+    required this.category,
+    required this.subCategory,
+    this.file,
+  });
 
   Map<String, dynamic> toMap() {
-    return {'id': id, 'name': name, 'date': date, 'file_path': file?.path};
+    return {
+      'id': id,
+      'name': name,
+      'date': date,
+      'category': category,
+      'sub_category': subCategory,
+      'file_path': file?.path,
+    };
   }
 
   factory Certificate.fromMap(Map<String, dynamic> map) {
@@ -22,6 +38,8 @@ class Certificate {
       id: map['id'],
       name: map['name'],
       date: map['date'],
+      category: map['category'] ?? '',
+      subCategory: map['sub_category'] ?? '',
       file: map['file_path'] != null ? File(map['file_path']) : null,
     );
   }
@@ -33,8 +51,6 @@ class CertificatesListScreen extends StatefulWidget {
 }
 
 class _CertificatesListScreenState extends State<CertificatesListScreen> with SingleTickerProviderStateMixin {
-  List<Certificate> certificates = [];
-  final ImagePicker _picker = ImagePicker();
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
@@ -46,7 +62,6 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
       vsync: this,
     );
     _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-    _loadCertificates();
     _controller.forward();
   }
 
@@ -56,12 +71,252 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
     super.dispose();
   }
 
-  Future<void> _loadCertificates() async {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Certificate Categories',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            fontSize: 24,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.purple[400],
+        elevation: 3,
+        shadowColor: Colors.purple.withOpacity(0.4),
+        centerTitle: true,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.purple[50]!, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Explore Domains",
+                    style: GoogleFonts.poppins(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple[800],
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: ListView(
+                      physics: BouncingScrollPhysics(),
+                      children: [
+                        _buildCategoryCard(context, "ACADEMIC", Icons.school_rounded, Colors.blue[300]!),
+                        _buildCategoryCard(context, "OLYMPIAD", Icons.lightbulb_rounded, Colors.amber[300]!),
+                        _buildCategoryCard(context, "QUIZCOMP", Icons.quiz_rounded, Colors.teal[300]!),
+                        _buildCategoryCard(context, "BIZCOMP", Icons.business_rounded, Colors.orange[300]!),
+                        _buildCategoryCard(context, "SPORTS", Icons.accessibility_rounded, Colors.redAccent[200]!),
+                        _buildCategoryCard(context, "SKILLS", Icons.build_rounded, Colors.grey[400]!),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(BuildContext context, String category, IconData icon, Color color) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AcademicSubCategoryScreen(category: category),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(15),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Icon(icon, size: 36, color: color),
+              const SizedBox(width: 20),
+              Text(
+                category,
+                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black87),
+              ),
+              const Spacer(),
+              Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey[600]),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AcademicSubCategoryScreen extends StatefulWidget {
+  final String category;
+
+  AcademicSubCategoryScreen({required this.category});
+
+  @override
+  _AcademicSubCategoryScreenState createState() => _AcademicSubCategoryScreenState();
+}
+
+class _AcademicSubCategoryScreenState extends State<AcademicSubCategoryScreen> {
+  final List<String> academicSubCategories = ["SSC", "HSC", "UNDER GRAD", "GRAD", "PHD", "POST DOC"];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          widget.category,
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            fontSize: 24,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.blue[400],
+        elevation: 3,
+        shadowColor: Colors.blue.withOpacity(0.4),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue[50]!, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Academic Paths",
+                  style: GoogleFonts.poppins(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[800],
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: ListView.builder(
+                    physics: BouncingScrollPhysics(),
+                    itemCount: academicSubCategories.length,
+                    itemBuilder: (context, index) {
+                      final subCategory = academicSubCategories[index];
+                      return _buildSubCategoryCard(context, widget.category, subCategory, index);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubCategoryCard(BuildContext context, String category, String subCategory, int index) {
+    final colors = [Colors.lightBlue[300]!, Colors.blueAccent[200]!];
+    final startColor = colors[index % colors.length];
+    final endColor = colors[(index + 1) % colors.length];
+
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CertificateUploadScreen(category: category, subCategory: subCategory),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [startColor, endColor], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Icon(Icons.book_rounded, size: 32, color: Colors.white),
+              const SizedBox(width: 20),
+              Text(
+                subCategory,
+                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+              ),
+              const Spacer(),
+              Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CertificateUploadScreen extends StatefulWidget {
+  final String category;
+  final String subCategory;
+
+  CertificateUploadScreen({required this.category, required this.subCategory});
+
+  @override
+  _CertificateUploadScreenState createState() => _CertificateUploadScreenState();
+}
+
+class _CertificateUploadScreenState extends State<CertificateUploadScreen> {
+  List<Certificate> certificates = [];
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCertificates(widget.category, widget.subCategory);
+  }
+
+  Future<void> _loadCertificates(String category, String subCategory) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String>? certStrings = prefs.getStringList('certificates');
     if (certStrings != null) {
       setState(() {
-        certificates = certStrings.map((cert) => Certificate.fromMap(json.decode(cert))).toList();
+        certificates = certStrings
+            .map((cert) => Certificate.fromMap(json.decode(cert)))
+            .where((cert) => cert.category == category && cert.subCategory == subCategory)
+            .toList();
+      });
+    } else {
+      setState(() {
+        certificates = [];
       });
     }
   }
@@ -70,26 +325,22 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       File file = File(pickedFile.path);
-      await _showRenameDialog(file);
+      await _showRenameDialog(file, widget.category, widget.subCategory);
     }
   }
 
-  Future<void> _showRenameDialog(File file) async {
+  Future<void> _showRenameDialog(File file, String category, String subCategory) async {
     TextEditingController _nameController = TextEditingController();
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Rename Certificate'),
+          title: const Text('Name Your Document'),
           content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                TextField(
-                  controller: _nameController,
-                  decoration: InputDecoration(labelText: 'New Name'),
-                ),
-              ],
+            child: TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Document Name'),
             ),
           ),
           actions: <Widget>[
@@ -100,13 +351,15 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
               },
             ),
             TextButton(
-              child: const Text('Rename'),
+              child: const Text('Save'),
               onPressed: () async {
                 if (_nameController.text.isNotEmpty) {
                   final cert = Certificate(
                     id: DateTime.now().millisecondsSinceEpoch.toString(),
                     name: _nameController.text,
                     date: DateTime.now().toString(),
+                    category: category,
+                    subCategory: subCategory,
                     file: file,
                   );
                   setState(() {
@@ -116,7 +369,7 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Please enter a name')),
+                    SnackBar(content: Text('Please enter a document name')),
                   );
                 }
               },
@@ -133,194 +386,185 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
     await prefs.setStringList('certificates', updatedList);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Certificates List',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w700,
-            fontSize: 24,
-            color: Colors.black87, // Changed app bar text color
-            shadows: [Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
-          ),
-        ),
-        backgroundColor: Colors.white, // Changed app bar background color
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Container(
-        color: Colors.white,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Your Certificates",
-                    style: GoogleFonts.poppins(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  Text(
-                    "All your documents in one place",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center, // Center the button
-                    children: [
-                      ElevatedButton(
-                        onPressed: _uploadAndRename,
-                        child: Text("Upload Certificate", style: TextStyle(fontSize: 16)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple[600],
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                  Expanded(
-                    child: certificates.isEmpty
-                        ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.folder_open,
-                            size: 80,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            "No certificates added yet",
-                            style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            "Tap 'Upload Certificate' to get started!",
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                        : ListView.builder(
-                      physics: BouncingScrollPhysics(),
-                      itemCount: certificates.length,
-                      itemBuilder: (context, index) {
-                        final cert = certificates[index];
-                        return _buildCertificateCard(cert, index);
-                      },
-                    ),
-                  ),
-                ],
-              ),
+  Future<void> _renameCertificate(Certificate certificate) async {
+    TextEditingController _renameController = TextEditingController(text: certificate.name);
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Rename Document'),
+          content: SingleChildScrollView(
+            child: TextField(
+              controller: _renameController,
+              decoration: InputDecoration(labelText: 'New Name'),
             ),
           ),
-        ),
-      ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Keep Same'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Rename'),
+              onPressed: () async {
+                if (_renameController.text.isNotEmpty) {
+                  setState(() {
+                    final index = certificates.indexOf(certificate);
+                    if (index != -1) {
+                      certificates[index] = Certificate(
+                        id: certificate.id,
+                        name: _renameController.text,
+                        date: certificate.date,
+                        category: certificate.category,
+                        subCategory: certificate.subCategory,
+                        file: certificate.file,
+                      );
+                    }
+                  });
+                  await _saveCertificates();
+                  Navigator.of(context).pop();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Please enter a new name')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildCertificateCard(Certificate cert, int index) {
-    return Dismissible(
-      key: Key(cert.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: EdgeInsets.only(right: 20),
-        margin: EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [Colors.red[400]!, Colors.red[600]!]),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Icon(Icons.delete, color: Colors.white, size: 30),
-      ),
-      onDismissed: (direction) async {
-        setState(() {
-          certificates.removeAt(index);
-        });
-        await _saveCertificates();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("${cert.name} removed"),
-            backgroundColor: Colors.red[600],
-            behavior: SnackBarBehavior.floating,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+        title: Text(
+        widget.subCategory,
+        style: GoogleFonts.poppins(
+        fontWeight: FontWeight.w700,
+        fontSize: 24,
+        color: Colors.white,
+    ),
+    ),
+    backgroundColor: Colors.green[400],
+    elevation: 3,
+    shadowColor: Colors.green.withOpacity(0.4),
+    ),
+    body: Container(
+    decoration: BoxDecoration(
+    gradient: LinearGradient(
+    colors: [Colors.green[50]!, Colors.white],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    ),
+    ),
+    child: SafeArea(
+    child: Padding(
+    padding: const EdgeInsets.all(25.0),
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    Text(
+    "Welcome to ${widget.subCategory}!",
+    style: GoogleFonts.poppins(
+    fontSize: 28,
+    fontWeight: FontWeight.bold,
+    color: Colors.green[800],
+    letterSpacing: 0.5,
+    ),
+    ),
+    const SizedBox(height: 20),
+    ElevatedButton.icon(
+    onPressed: _uploadAndRename,
+    icon: Icon(Icons.cloud_upload_rounded, color: Colors.white),
+    label: Text("Upload Document", style: GoogleFonts.poppins(fontSize: 16, color: Colors.white)),
+    style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.green[600],
+    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    elevation: 2,
+    ),
+    ),
+    const SizedBox(height: 30),
+    Text(
+    "Your Documents:",
+    style: GoogleFonts.poppins(
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    color: Colors.black87,
+    ),
+    ),
+    const SizedBox(height: 10),
+    Expanded(
+    child: certificates.isEmpty
+    ? Center(
+    child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+    Icon(Icons.folder_open_rounded, size: 60, color: Colors.grey[400]),
+    const SizedBox(height: 10),
+    Text("No documents uploaded here yet.", style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+    ],
+    ),
+    )
+        : ListView.builder(
+    physics: BouncingScrollPhysics(),
+    itemCount: certificates.length,
+    itemBuilder: (context, index) {
+    final cert = certificates[index];
+    return _buildUploadedDocumentCard(cert);
+    },
+    ),
+
+    ),
+      ],
+    ),
+    ),
+    ),
+    ),
+    );
+  }
+
+  Widget _buildUploadedDocumentCard(Certificate cert) {
+    return GestureDetector(
+      onDoubleTap: () => _renameCertificate(cert),
+      child: Card(
+        margin: EdgeInsets.symmetric(vertical: 8),
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Icon(Icons.insert_drive_file_rounded, size: 30, color: Colors.blueAccent),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      cert.name,
+                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black87),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      "Uploaded on: ${cert.date.substring(0, 10)}",
+                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.edit_outlined, color: Colors.grey[600]),
+                onPressed: () => _renameCertificate(cert),
+              ),
+            ],
           ),
-        );
-      },
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 12),
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 10,
-              offset: Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue[100],
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.description, color: Colors.blue[400], size: 34),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    cert.name,
-                    style: GoogleFonts.poppins(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    "Date: ${cert.date}",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_circle_right, color: Colors.grey[600], size: 28),
-          ],
         ),
       ),
     );

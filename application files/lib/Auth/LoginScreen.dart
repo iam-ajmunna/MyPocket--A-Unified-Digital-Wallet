@@ -24,6 +24,16 @@ class _LoginScreenState extends State<LoginScreen>
   String _signUpFullName = '';
   String _signUpEmail = '';
   String _signUpPassword = '';
+  // New variables for phone verification
+  String _phoneNumber = '';
+  String _smsCode = '';
+  String? _verificationId;
+  int? _resendToken;
+  bool _isLoading = false;
+  String _errorMessage = '';
+  bool _isPhoneVerification =
+      false; // Track if phone verification is in progress
+
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 
   @override
@@ -42,10 +52,10 @@ class _LoginScreenState extends State<LoginScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 243, 243, 243),
-      body: Center(
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Container(
                 height: 200,
@@ -101,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                     SizedBox(height: 16),
                     Container(
-                      height: 570,
+                      height: 670,
                       child: TabBarView(
                         controller: _tabController,
                         children: [
@@ -137,10 +147,12 @@ class _LoginScreenState extends State<LoginScreen>
           "We are very happy to have you on board!",
           style: TextStyle(color: Colors.grey),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         _buildTextField('Full Name', (value) => _signUpFullName = value),
         SizedBox(height: 20),
         _buildTextField('Email', (value) => _signUpEmail = value),
+        SizedBox(height: 20),
+        _buildTextField('Phone', (value) => _signUpEmail = value),
         SizedBox(height: 20),
         _buildPasswordField('Password', (value) => _signUpPassword = value),
         SizedBox(height: 20),
@@ -179,6 +191,8 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         SizedBox(height: 20),
         _buildTextField('Email', (value) => _loginEmail = value),
+        SizedBox(height: 20),
+        _buildTextField('Phone', (value) => _signUpEmail = value),
         SizedBox(height: 20),
         _buildPasswordField('Password', (value) => _loginPassword = value),
         SizedBox(height: 20),

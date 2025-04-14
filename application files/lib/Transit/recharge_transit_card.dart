@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'transit_card.dart';
+import 'package:mypocket/Home/WalletScreen.dart';
 
 class RechargeTransitCardScreen extends StatefulWidget {
   final TransitCard transitCard;
@@ -17,17 +20,16 @@ class RechargeTransitCardScreen extends StatefulWidget {
 class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
   final _amountController = TextEditingController();
   final List<double> _quickAmounts = [10, 20, 50, 100];
-  List<Map<String, String>> _bankCards = [];
-  String? _selectedPaymentMethod;
+  List<CardData> _bankCards = [];
+  String? _selectedCardId;
   bool _isProcessingPayment = false;
+  double _newBalance = 0;
 
   @override
   void initState() {
     super.initState();
     _loadBankCards();
-    _amountController.addListener(() {
-      setState(() {});
-    });
+    _amountController.addListener(_updateTotal);
   }
 
   @override
@@ -36,31 +38,70 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
     super.dispose();
   }
 
+  void _updateTotal() {
+    final amount = double.tryParse(_amountController.text) ?? 0;
+    setState(() {
+      _newBalance = widget.transitCard.balance + amount;
+    });
+  }
+
   Future<void> _loadBankCards() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String>? savedCards = prefs.getStringList('cards');
-    if (savedCards != null) {
-      setState(() {
-        _bankCards = savedCards.map((card) {
-          final parts = card.split(',');
-          return {
-            'bankName': parts[0],
-            'cardNumber': parts[1],
-            'expiryDate': parts[2],
-            'cvv': parts[3],
-            'cardType': parts[4],
-          };
-        }).toList();
-      });
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final QuerySnapshot cardsSnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .collection('cards')
+            .get();
+
+        List<CardData> loadedCards = [];
+        for (var doc in cardsSnapshot.docs) {
+          final data = doc.data() as Map<String, dynamic>?;
+          loadedCards.add(CardData.fromFirestore(data, doc.id));
+        }
+
+        setState(() {
+          _bankCards = loadedCards;
+          if (_bankCards.isNotEmpty) {
+            _selectedCardId = _bankCards.first.cardId;
+          }
+        });
+      } catch (e) {
+        print("Error fetching cards: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load cards'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
-  void _recharge() {
-    if (_selectedPaymentMethod == null) {
+  Future<void> _updateCardBalance(String cardId, double newBalance) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .collection('cards')
+            .doc(cardId)
+            .update({'balance': newBalance});
+      } catch (e) {
+        print("Error updating card balance: $e");
+        throw e;
+      }
+    }
+  }
+
+  Future<void> _recharge() async {
+    if (_selectedCardId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please select a payment method'),
-          backgroundColor: Colors.red[400],
+          backgroundColor: Colors.red,
         ),
       );
       return;
@@ -71,7 +112,18 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please enter a valid amount'),
-          backgroundColor: Colors.red[400],
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final selectedCard = _bankCards.firstWhere((card) => card.cardId == _selectedCardId);
+    if (selectedCard.balance == null || selectedCard.balance! < amount) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Insufficient balance in selected card'),
+          backgroundColor: Colors.red,
         ),
       );
       return;
@@ -81,27 +133,41 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
       _isProcessingPayment = true;
     });
 
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        _isProcessingPayment = false;
-      });
+    try {
+      // Deduct from bank card
+      final newCardBalance = selectedCard.balance! - amount;
+      await _updateCardBalance(selectedCard.cardId, newCardBalance);
+
+      // Add to transit card
       widget.onRecharge(amount);
+
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Successfully recharged \$${amount.toStringAsFixed(2)}'),
-          backgroundColor: Colors.green[600],
+          content: Text('Successfully recharged \BDT${amount.toStringAsFixed(2)}'),
+          backgroundColor: Colors.green,
         ),
       );
-    });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Payment failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isProcessingPayment = false;
+      });
+    }
   }
 
   Widget _buildPaymentMethodSelector() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[900]!.withOpacity(0.7),
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.purple[400]!, width: 1.5),
+        border: Border.all(color: Colors.blue, width: 1.5),
       ),
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
@@ -110,37 +176,37 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
           Text(
             'SELECT PAYMENT METHOD',
             style: GoogleFonts.poppins(
-              color: Colors.white54,
+              color: Colors.grey[600],
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
           SizedBox(height: 8),
           DropdownButton<String>(
-            value: _selectedPaymentMethod,
+            value: _selectedCardId,
             isExpanded: true,
             underline: SizedBox(),
-            dropdownColor: Colors.grey[850],
+            dropdownColor: Colors.white,
             style: GoogleFonts.poppins(
-              color: Colors.white,
+              color: Colors.black,
               fontSize: 16,
             ),
-            icon: Icon(Icons.arrow_drop_down, color: Colors.purple[300]),
+            icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
             items: _bankCards.map((card) {
-              final lastFour = card['cardNumber']?.substring(card['cardNumber']!.length - 4) ?? '****';
+              final lastFour = card.cardNumber.substring(card.cardNumber.length - 4);
               return DropdownMenuItem<String>(
-                value: '${card['bankName']} •••• $lastFour',
+                value: card.cardId,
                 child: Row(
                   children: [
                     Container(
                       padding: EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.purple[800]!.withOpacity(0.5),
+                        color: Colors.blue.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.credit_card,
-                        color: Colors.white,
+                        color: Colors.blue,
                         size: 20,
                       ),
                     ),
@@ -149,17 +215,17 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          card['bankName'] ?? 'Bank',
+                          card.bankName,
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
-                          '•••• $lastFour',
+                          '•••• $lastFour • \BDT${card.balance?.toStringAsFixed(2) ?? '0.00'}',
                           style: GoogleFonts.poppins(
                             fontSize: 14,
-                            color: Colors.white70,
+                            color: Colors.grey[600],
                           ),
                         ),
                       ],
@@ -170,13 +236,13 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
             }).toList(),
             onChanged: (String? value) {
               setState(() {
-                _selectedPaymentMethod = value;
+                _selectedCardId = value;
               });
             },
             hint: Text(
               'Select your card',
               style: GoogleFonts.poppins(
-                color: Colors.white54,
+                color: Colors.grey[600],
               ),
             ),
           ),
@@ -194,34 +260,81 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.purple[800]!.withOpacity(0.8),
-              Colors.purple[600]!.withOpacity(0.8)
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.blue.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.purple[400]!, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.purple[800]!.withOpacity(0.3),
-              blurRadius: 8,
-              spreadRadius: 1,
-              offset: Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: Colors.blue, width: 1),
         ),
         child: Text(
-          '\$$amount',
+          '\BDT$amount',
           style: GoogleFonts.poppins(
-            color: Colors.white,
+            color: Colors.blue,
             fontWeight: FontWeight.bold,
             fontSize: 16,
-            letterSpacing: 0.5,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBalanceCard() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Current Balance',
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                '\BDT${widget.transitCard.balance.toStringAsFixed(2)}',
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          Divider(height: 30, thickness: 1),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'New Balance',
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                '\BDT${_newBalance.toStringAsFixed(2)}',
+                style: GoogleFonts.poppins(
+                  color: Colors.green,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -229,81 +342,30 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
   @override
   Widget build(BuildContext context) {
     final amount = double.tryParse(_amountController.text) ?? 0;
-    final isValidAmount = amount > 0;
+    final isValidAmount = amount > 0 && _selectedCardId != null;
 
     return Scaffold(
-      backgroundColor: Color(0xFF121212),
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(
-          'Recharge Card',
+          'Recharge Transit Card',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             fontSize: 20,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.blue,
         elevation: 0,
         centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Current Balance Card
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF1E1E1E),
-                    Color(0xFF2D2D2D),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'CURRENT BALANCE',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white54,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    '\$${widget.transitCard.balance.toStringAsFixed(2)}',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Balance Card
+            _buildBalanceCard(),
             SizedBox(height: 30),
 
             // Payment Method Selection
@@ -314,7 +376,7 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
             Text(
               'RECHARGE AMOUNT',
               style: GoogleFonts.poppins(
-                color: Colors.white54,
+                color: Colors.grey[600],
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
@@ -324,13 +386,23 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
               controller: _amountController,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
               style: GoogleFonts.poppins(
-                color: Colors.white,
+                color: Colors.black,
                 fontSize: 18,
               ),
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.attach_money, color: Colors.purple[300]),
+                prefixIcon: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 15.0),
+                  child: Text(
+                    'BDT',
+                    style: GoogleFonts.poppins(
+                      color: Colors.blue,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
                 filled: true,
-                fillColor: Colors.grey[900]!.withOpacity(0.7),
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -338,23 +410,22 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: Colors.purple[400]!,
+                    color: Colors.blue,
                     width: 1.5,
                   ),
                 ),
                 hintText: 'Enter amount',
                 hintStyle: GoogleFonts.poppins(
-                  color: Colors.white54,
+                  color: Colors.grey[400],
                 ),
               ),
             ),
             SizedBox(height: 25),
-
             // Quick Recharge Section
             Text(
               'QUICK RECHARGE',
               style: GoogleFonts.poppins(
-                color: Colors.white54,
+                color: Colors.grey[600],
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
@@ -369,56 +440,50 @@ class _RechargeTransitCardScreenState extends State<RechargeTransitCardScreen> {
             ),
             SizedBox(height: 30),
 
-            // Recharge Button - Updated with always visible background
-            // Recharge Button - Updated to be visible only when amount is entered
+            // Recharge Button
             SizedBox(
               width: double.infinity,
-              child: AnimatedOpacity(
-                opacity: isValidAmount ? 1.0 : 0.0,
-                duration: Duration(milliseconds: 300),
-                child: ElevatedButton(
-                  onPressed: isValidAmount ? _recharge : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple[600],
-                    padding: EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 5,
-                    shadowColor: Colors.purple[800]!.withOpacity(0.5),
+              child: ElevatedButton(
+                onPressed: isValidAmount && !_isProcessingPayment ? _recharge : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: _isProcessingPayment
-                      ? SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: Colors.white,
-                    ),
-                  )
-                      : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'RECHARGE NOW',
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.0,
-                          color: Colors.white,
-                        ),
+                  elevation: 5,
+                ),
+                child: _isProcessingPayment
+                    ? SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Colors.white,
+                  ),
+                )
+                    : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'RECHARGE NOW',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
-                      SizedBox(height: 4),
+                    ),
+                    if (isValidAmount) SizedBox(height: 4),
+                    if (isValidAmount)
                       Text(
-                        '\$${amount.toStringAsFixed(2)}',
+                        '\BDT${amount.toStringAsFixed(2)}',
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                           color: Colors.white.withOpacity(0.9),
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ),
