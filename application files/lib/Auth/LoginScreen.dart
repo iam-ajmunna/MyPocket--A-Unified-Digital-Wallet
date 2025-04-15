@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   Future<void> _loadStoredPhoneNumber() async {
     try {
-      _storedPhoneNumber = await _storage.read(key: 'phoneNumber');
+      _storedPhoneNumber = await _storage.read(key: 'phNumber');
       if (_storedPhoneNumber != null) {
         setState(() {
           _loginIdentifier = _storedPhoneNumber!;
@@ -500,5 +500,9 @@ class _LoginScreenState extends State<LoginScreen>
                 Text('Error signing in with Facebook (Facebook Auth): $e')),
       );
     }
+  }
+
+  void phoneAuthentication(String phNumber) {
+    AuthService().phoneAuthentication(phNumber);
   }
 }

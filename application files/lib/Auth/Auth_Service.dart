@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AuthService {
+class AuthService extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  var verificationId = ''.obs;
 
   // Email & Password Sign Up and Store to Firestore
   Future<User?> createUserWithEmailAndPassword(
@@ -135,5 +139,34 @@ class AuthService {
       print("Error signing out: $e");
       throw e;
     }
+  }
+
+  Future<void> phoneAuthentication(String phNumber) async {
+    await _auth.verifyPhoneNumber(
+      phoneNumber: phNumber,
+      verificationCompleted: (credential) async {
+        await _auth.signInWithCredential(credential);
+      },
+      codeSent: (verificationId, resendToken) {
+        this.verificationId.value = verificationId;
+      },
+      codeAutoRetrievalTimeout: (verificationId) {
+        this.verificationId.value = verificationId;
+      },
+      verificationFailed: (e) {
+        if (e.code == 'invalid-phone-number') {
+          Get.snackbar('Error', 'The provider phone number is not valid');
+        } else {
+          Get.snackbar('Error', 'Something went wrong. Try again.');
+        }
+      },
+    );
+  }
+
+  Future<bool> verifyOTP(String otp) async {
+    var credentials = await _auth.signInWithCredential(
+        PhoneAuthProvider.credential(
+            verificationId: verificationId.value, smsCode: otp));
+    return credentials.user != null ? true : false;
   }
 }
