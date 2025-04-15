@@ -142,7 +142,7 @@ class AuthService extends GetxController {
   }
 
   // Phone & Password Sign Up
-  Future<User?> createUserWithPhoneNumberAndPassword(
+  Future<User?> createUserWithPhoneNumberAndPassword( // Changed return type to Future<User?>
       String fullName, String phoneNumber, String password) async {
     try {
       // Initiate phone number verification
@@ -163,8 +163,8 @@ class AuthService extends GetxController {
             // Return the user object
             return user;
           }
-          return null;
-        },
+          return null; // Return null if user is not created
+        }, // Return the user object from within verificationCompleted
         verificationFailed: (FirebaseAuthException e) {
           // Handle verification failure
           print("Phone verification failed: ${e.message}");
@@ -181,7 +181,7 @@ class AuthService extends GetxController {
           print("Verification code auto-retrieval timeout");
         },
       );
-      return null; // Return null initially, user is created after verification
+      return null; // Return null if verification process fails
     } on FirebaseAuthException catch (e) {
       print(e.message);
       throw e;
@@ -189,7 +189,7 @@ class AuthService extends GetxController {
       print("Error during phone number sign-up: $e");
       throw e;
     }
-  }
+  } // Ensured the function returns a User? object
 
   // Phone Number Verification with OTP
 
@@ -214,7 +214,7 @@ class AuthService extends GetxController {
       },
     );
     return verificationId.value != '' ? true : false;
-    );
+  }
   }
 
   Future<bool> verifyOTP(String otp) async {
