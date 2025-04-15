@@ -122,7 +122,7 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
                         _buildCategoryCard(context, "OLYMPIAD", Icons.lightbulb_rounded, Colors.amber[300]!),
                         _buildCategoryCard(context, "QUIZCOMP", Icons.quiz_rounded, Colors.teal[300]!),
                         _buildCategoryCard(context, "BIZCOMP", Icons.business_rounded, Colors.orange[300]!),
-                        _buildCategoryCard(context, "SPORTS", Icons.accessibility_rounded, Colors.redAccent[200]!),
+                        _buildCategoryCard(context, "SPORTS", Icons.directions_run_rounded, Colors.redAccent[200]!),
                         _buildCategoryCard(context, "SKILLS", Icons.build_rounded, Colors.grey[400]!),
                       ],
                     ),
@@ -143,12 +143,21 @@ class _CertificatesListScreenState extends State<CertificatesListScreen> with Si
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AcademicSubCategoryScreen(category: category),
-            ),
-          );
+          if (category == "ACADEMIC") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AcademicSubCategoryScreen(category: category),
+              ),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CertificateUploadScreen(category: category, subCategory: ""),
+              ),
+            );
+          }
         },
         borderRadius: BorderRadius.circular(15),
         child: Padding(
@@ -336,7 +345,7 @@ class _CertificateUploadScreenState extends State<CertificateUploadScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Name Your Document'),
+          title: Text('Name Your ${widget.subCategory} Document'),
           content: SingleChildScrollView(
             child: TextField(
               controller: _nameController,
@@ -442,25 +451,25 @@ class _CertificateUploadScreenState extends State<CertificateUploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         title: Text(
-        widget.subCategory,
-        style: GoogleFonts.poppins(
-        fontWeight: FontWeight.w700,
-        fontSize: 24,
-        color: Colors.white,
-    ),
-    ),
-    backgroundColor: Colors.green[400],
-    elevation: 3,
-    shadowColor: Colors.green.withOpacity(0.4),
-    ),
-    body: Container(
-    decoration: BoxDecoration(
-    gradient: LinearGradient(
-    colors: [Colors.green[50]!, Colors.white],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
+          widget.subCategory,
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            fontSize: 24,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.green[400],
+        elevation: 3,
+        shadowColor: Colors.green.withOpacity(0.4),
+      ),
+      body: Container(
+      decoration: BoxDecoration(
+      gradient: LinearGradient(
+      colors: [Colors.green[50]!, Colors.white],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
     ),
     ),
     child: SafeArea(
@@ -513,20 +522,19 @@ class _CertificateUploadScreenState extends State<CertificateUploadScreen> {
     ),
     )
         : ListView.builder(
-    physics: BouncingScrollPhysics(),
-    itemCount: certificates.length,
-    itemBuilder: (context, index) {
-    final cert = certificates[index];
-    return _buildUploadedDocumentCard(cert);
-    },
+      physics: BouncingScrollPhysics(),
+      itemCount: certificates.length,
+      itemBuilder: (context, index) {
+        final cert = certificates[index];
+        return _buildUploadedDocumentCard(cert);
+      },
     ),
-
     ),
-      ],
-    ),
+    ],
     ),
     ),
     ),
+      ),
     );
   }
 

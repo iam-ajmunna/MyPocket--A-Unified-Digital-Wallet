@@ -1,4 +1,3 @@
-// Auth_Service.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -10,19 +9,18 @@ class AuthService {
 
   // Email & Password Sign Up and Store to Firestore
   Future<User?> createUserWithEmailAndPassword(
-      String fullName, String email, String password) async {
+      String fullName, String email, String password, String phNumber) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User? user = result.user;
 
       if (user != null) {
-        // Store additional user info in Firestore
         await _firestore.collection('Users').doc(user.uid).set({
           'uid': user.uid,
           'fullName': fullName,
           'email': email,
-          // Add any other relevant information you want to store
+          'phNumber': phNumber, // Store phone number
         });
         return user;
       }
@@ -38,18 +36,41 @@ class AuthService {
 
   // Email & Password Login
   Future<User?> loginUserWithEmailAndPassword(
-      String email, String password) async {
+      String identifier, String password) async {
     try {
+      // Try signing in with email.
       UserCredential result = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+        email: identifier, // Use identifier here
+        password: password,
+      );
       return result.user;
     } on FirebaseAuthException catch (e) {
-      print(e.message);
-      throw e;
+      if (e.code == 'user-not-found') {
+        // If email sign-in fails, try signing in with phone number.
+        final QuerySnapshot phoneResult = await _firestore
+            .collection('Users')
+            .where('phNumber', isEqualTo: identifier)
+            .limit(1)
+            .get();
+
+        if (phoneResult.docs.isNotEmpty) {
+          final String email = phoneResult.docs.first.get('email');
+          UserCredential result = await _auth.signInWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+          return result.user;
+        } else {
+          throw FirebaseAuthException(
+              code: 'user-not-found', message: 'User not found');
+        }
+      } else {
+        throw e;
+      }
     }
   }
 
-  // Google Sign In and Store to Firestore if new user
+  // Google Sign In
   Future<User?> signInWithGoogle({String? accessToken, String? idToken}) async {
     try {
       final credential = GoogleAuthProvider.credential(
@@ -58,54 +79,49 @@ class AuthService {
       );
       final UserCredential userCredential =
           await _auth.signInWithCredential(credential);
-      final User? user = userCredential.user;
-
-      if (user != null) {
-        final userDoc =
-            await _firestore.collection('Users').doc(user.uid).get();
-        if (!userDoc.exists) {
-          await _firestore.collection('Users').doc(user.uid).set({
-            'uid': user.uid,
-            'fullName': user.displayName,
-            'email': user.email,
-            // Add any other relevant information
-          });
-        }
-      }
-      return user;
+      return userCredential.user;
     } catch (e) {
       print("Error signing in with Google: $e");
       throw e;
     }
   }
 
-  // Facebook Sign In and Store to Firestore if new user
+  // Facebook Sign In
   Future<User?> signInWithFacebook({String? accessToken}) async {
     try {
       final OAuthCredential facebookAuthCredential =
           FacebookAuthProvider.credential(accessToken!);
       final UserCredential userCredential =
           await _auth.signInWithCredential(facebookAuthCredential);
-      final User? user = userCredential.user;
-
-      if (user != null) {
-        final userDoc =
-            await _firestore.collection('Users').doc(user.uid).get();
-        if (!userDoc.exists) {
-          // You might want to fetch more user data from Facebook Graph API
-          // to get the full name. For simplicity, we'll just store basic info.
-          await _firestore.collection('Users').doc(user.uid).set({
-            'uid': user.uid,
-            // 'fullName': ..., // Consider fetching from Facebook
-            'email': user.email, // May not always be available
-            // Add any other relevant information
-          });
-        }
-      }
-      return user;
+      return userCredential.user;
     } catch (e) {
       print("Error signing in with Facebook: $e");
       throw e;
+    }
+  }
+
+  // Get User Document by UID
+  Future<DocumentSnapshot?> getUserDocument(String uid) async {
+    try {
+      return await _firestore.collection('Users').doc(uid).get();
+    } catch (e) {
+      print("Error fetching user document: $e");
+      return null;
+    }
+  }
+
+  // Find Users by Phone Number
+  Future<List<DocumentSnapshot>> findUserByPhoneNumber(
+      String phoneNumber) async {
+    try {
+      final QuerySnapshot result = await _firestore
+          .collection('Users')
+          .where('phNumber', isEqualTo: phoneNumber)
+          .get();
+      return result.docs;
+    } catch (e) {
+      print("Error finding user by phone number: $e");
+      return [];
     }
   }
 
