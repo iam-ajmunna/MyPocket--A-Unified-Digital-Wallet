@@ -141,59 +141,7 @@ class AuthService extends GetxController {
     }
   }
 
-  // Phone & Password Sign Up
-  Future<User?> createUserWithPhoneNumberAndPassword(
-      String fullName, String phoneNumber, String password) async {
-    try {
-      // Initiate phone number verification
-      await _auth.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          // Auto-verification if SMS is intercepted
-          UserCredential result =
-              await _auth.signInWithCredential(credential);
-          User? user = result.user;
-          if (user != null) {
-            // Store user data in Firestore
-            await _firestore.collection('Users').doc(user.uid).set({
-              'uid': user.uid,
-              'fullName': fullName,
-              'phNumber': phoneNumber,
-            });
-            // Return the user object
-            return user;
-          }
-          return null;
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          // Handle verification failure
-          print("Phone verification failed: ${e.message}");
-          throw e;
-        },
-        codeSent: (String verificationId, int? resendToken) async {
-          // Store the verification ID for later use
-          this.verificationId.value = verificationId;
-          print("Verification code sent to $phoneNumber");
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          // Auto-retrieval timeout
-          this.verificationId.value = verificationId;
-          print("Verification code auto-retrieval timeout");
-        },
-      );
-      return null; // Return null initially, user is created after verification
-    } on FirebaseAuthException catch (e) {
-      print(e.message);
-      throw e;
-    } catch (e) {
-      print("Error during phone number sign-up: $e");
-      throw e;
-    }
-  }
-
-  // Phone Number Verification with OTP
-
-  Future<bool> phoneAuthentication(String phNumber) async {
+  Future<void> phoneAuthentication(String phNumber) async {
     await _auth.verifyPhoneNumber(
       phoneNumber: phNumber,
       verificationCompleted: (credential) async {
@@ -213,13 +161,12 @@ class AuthService extends GetxController {
         }
       },
     );
-    return verificationId.value != '' ? true : false;
-    );
   }
 
   Future<bool> verifyOTP(String otp) async {
-    var credentials = await _auth.signInWithCredential(PhoneAuthProvider.credential(
-        verificationId: verificationId.value, smsCode: otp));
+    var credentials = await _auth.signInWithCredential(
+        PhoneAuthProvider.credential(
+            verificationId: verificationId.value, smsCode: otp));
     return credentials.user != null ? true : false;
   }
 }

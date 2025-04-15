@@ -5,7 +5,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:mypocket/Auth/OTPScreen.dart';
 import 'package:mypocket/Auth/Auth_Service.dart';
 import 'package:mypocket/Home/WalletScreen.dart';
 
@@ -18,8 +17,6 @@ class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool obscureText = true;
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
   AuthService _auth = AuthService();
   final _storage = const FlutterSecureStorage();
   String _loginEmail = '';
@@ -34,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen>
   bool _isLoading = false;
   String _errorMessage = '';
   bool _isPhoneVerificationStage = false;
+  bool _isLoginWithEmail = true;
   String _loginPhoneNumber = '';
   String _loginIdentifier = '';
   String? _storedPhoneNumber; // Declare _storedPhoneNumber here
@@ -267,77 +265,37 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-Future<void> _handleLogin() async {
-  if (_loginIdentifier.isEmpty || _loginPassword.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content:
-              Text('Please enter your Email/Phone Number and Password.')),
-    );
-    return;
-  }
-
-  setState(() => _isLoading = true);
-
-  try {
-    final isEmail = _loginIdentifier.contains('@');
-    if (isEmail) {
-      // Email login
-      final user = await _auth.loginUserWithEmailAndPassword(
-        _loginIdentifier,
-        _loginPassword,
+  Future<void> _handleLogin() async {
+    if (_loginIdentifier.isEmpty || _loginPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Please enter your Email/Phone Number and Password.')),
       );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await _auth.loginUserWithEmailAndPassword(
+          _loginIdentifier, _loginPassword);
       if (user != null) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => WalletScreen()),
         );
       } else {
+        setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid Email or Password.')),
+          SnackBar(content: Text('Invalid Email/Phone Number or Password.')),
         );
       }
-    } else {
-      // Phone number login
-      final user = await _auth.verifyPhoneNumberAndPassword(
-        _loginIdentifier,
-        _loginPassword,
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: $e')),
       );
-      if (user) {
-        // If verification is successful, send OTP
-        await _auth.sendOtp(_loginIdentifier);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OTPScreen(
-              phoneNumber: _loginIdentifier,
-              onVerified: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => WalletScreen()),
-                );
-              },
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid Phone Number or Password.')),
-        );
-      }
-    }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Login failed: $e')),
-    );
-  } finally {
-    setState(() => _isLoading = false);
-  }
-}
-
-
-
-
     }
   }
 
@@ -544,27 +502,7 @@ Future<void> _handleLogin() async {
     }
   }
 
-  Future<void> _handleSignUpGetStarted() async {
-  if (_signUpFullName.isEmpty ||
-      _signUpEmail.isEmpty ||
-      _phoneNumber.isEmpty ||
-      _signUpPassword.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please fill in all the fields')),
-    );
-    return;
+  void phoneAuthentication(String phNumber) {
+    AuthService().phoneAuthentication(phNumber);
   }
-
-  await _auth.sendOtp(_phoneNumber);
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => OTPScreen(
-        phoneNumber: _phoneNumber,
-        fullName: _signUpFullName,
-        email: _signUpEmail,
-        password: _signUpPassword,
-      ),
-    ),
-  );}
 }
