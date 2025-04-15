@@ -13,7 +13,12 @@
           "package_name": "com.nexus.mypocket"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "128150028593-0b2tisdvn2ull5814cd111foi9qq6u4t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAgwyJqTmvxlOI2D0q9tsZmH9Cv8M8KJko"
@@ -21,7 +26,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "128150028593-0b2tisdvn2ull5814cd111foi9qq6u4t.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "128150028593-92kljjrsjsb5nk7qmgsri39tv4ka3fbc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.testapp"
+              }
+            }
+          ]
         }
       }
     }
