@@ -1,4 +1,4 @@
-// LoginScreen.dart
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -17,29 +17,52 @@ class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool obscureText = true;
-  final AuthService _auth = AuthService();
+  AuthService _auth = AuthService();
   final _storage = const FlutterSecureStorage();
   String _loginEmail = '';
   String _loginPassword = '';
   String _signUpFullName = '';
   String _signUpEmail = '';
   String _signUpPassword = '';
-  // New variables for phone verification
   String _phoneNumber = '';
   String _smsCode = '';
   String? _verificationId;
   int? _resendToken;
   bool _isLoading = false;
   String _errorMessage = '';
-  bool _isPhoneVerification =
-      false; // Track if phone verification is in progress
+  bool _isPhoneVerificationStage = false;
+  bool _isLoginWithEmail = true;
+  String _loginPhoneNumber = '';
+  String _loginIdentifier = '';
+  String? _storedPhoneNumber; // Declare _storedPhoneNumber here
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+  GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+  final FacebookAuth _facebookAuth =
+      FacebookAuth.instance; // Declare _facebookLogin here
+
+  final String? webClientId =
+      '346366146881-1ii03f5c66ced5o67a9k9t1jqgneelbg.apps.googleusercontent.com'; // Replace with your actual Web Client ID
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _googleSignIn = GoogleSignIn(clientId: webClientId);
+    _auth = AuthService();
+    _loadStoredPhoneNumber();
+  }
+
+  Future<void> _loadStoredPhoneNumber() async {
+    try {
+      _storedPhoneNumber = await _storage.read(key: 'phoneNumber');
+      if (_storedPhoneNumber != null) {
+        setState(() {
+          _loginIdentifier = _storedPhoneNumber!;
+        });
+      }
+    } catch (e) {
+      print('Error loading stored phone number: $e');
+    }
   }
 
   @override
@@ -48,15 +71,17 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 243, 243, 243),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              SizedBox(height: 20),
               Container(
                 height: 200,
                 width: 420,
@@ -91,6 +116,7 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     SizedBox(height: 20),
                     TabBar(
@@ -110,14 +136,17 @@ class _LoginScreenState extends State<LoginScreen>
                       ],
                     ),
                     SizedBox(height: 16),
-                    Container(
-                      height: 670,
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          _buildLoginTab(),
-                          _buildSignUpTab(),
-                        ],
+                    SizedBox(
+                      height: 660,
+                      child: Expanded(
+                        child: TabBarView(
+                          controller: _tabController,
+                          physics: NeverScrollableScrollPhysics(),
+                          children: [
+                            _buildLoginTab(),
+                            _buildSignUpTab(),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -152,24 +181,52 @@ class _LoginScreenState extends State<LoginScreen>
         SizedBox(height: 20),
         _buildTextField('Email', (value) => _signUpEmail = value),
         SizedBox(height: 20),
-        _buildTextField('Phone', (value) => _signUpEmail = value),
+        _buildTextField('Phone Number', (value) => _phoneNumber = value),
         SizedBox(height: 20),
         _buildPasswordField('Password', (value) => _signUpPassword = value),
         SizedBox(height: 20),
-        _buildMainButton('Get Started', _handleSignUp),
+        _buildMainButton('Get Started', _handleSignUpGetStarted),
         SizedBox(height: 20),
         Center(
-            child: Text(
-          'Or sign up with',
-          style: GoogleFonts.roboto(
-            textStyle: Theme.of(context).textTheme.headlineMedium,
-            fontSize: 12,
-          ),
-        )),
+            child: Text('Or sign up with',
+                style: GoogleFonts.roboto(
+                    textStyle: Theme.of(context).textTheme.headlineMedium,
+                    fontSize: 12))),
         SizedBox(height: 20),
         _buildSocialButtons(),
       ],
     );
+  }
+
+  Future<void> _handleSignUpGetStarted() async {
+    if (_signUpFullName.isEmpty ||
+        _signUpEmail.isEmpty ||
+        _phoneNumber.isEmpty ||
+        _signUpPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill in all the fields')),
+      );
+      return;
+    }
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await _auth.createUserWithEmailAndPassword(
+        _signUpFullName,
+        _signUpEmail,
+        _signUpPassword,
+        _phoneNumber,
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => WalletScreen()),
+      );
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sign-up failed: $e')),
+      );
+    }
   }
 
   Widget _buildLoginTab() {
@@ -186,13 +243,12 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         SizedBox(height: 5),
         Text(
-          "Its Nice to see you again!",
+          "It's Nice to see you again!",
           style: TextStyle(color: Colors.grey),
         ),
         SizedBox(height: 20),
-        _buildTextField('Email', (value) => _loginEmail = value),
-        SizedBox(height: 20),
-        _buildTextField('Phone', (value) => _signUpEmail = value),
+        _buildTextField(
+            'Email or Phone Number', (value) => _loginIdentifier = value),
         SizedBox(height: 20),
         _buildPasswordField('Password', (value) => _loginPassword = value),
         SizedBox(height: 20),
@@ -201,13 +257,46 @@ class _LoginScreenState extends State<LoginScreen>
         Center(
             child: Text('Or Log In with',
                 style: GoogleFonts.roboto(
-                  textStyle: Theme.of(context).textTheme.headlineMedium,
-                  fontSize: 12,
-                ))),
+                    textStyle: Theme.of(context).textTheme.headlineMedium,
+                    fontSize: 12))),
         SizedBox(height: 20),
         _buildSocialButtons(),
       ],
     );
+  }
+
+  Future<void> _handleLogin() async {
+    if (_loginIdentifier.isEmpty || _loginPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Please enter your Email/Phone Number and Password.')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await _auth.loginUserWithEmailAndPassword(
+          _loginIdentifier, _loginPassword);
+      if (user != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => WalletScreen()),
+        );
+      } else {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid Email/Phone Number or Password.')),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: $e')),
+      );
+    }
   }
 
   Widget _buildTextField(String label, Function(String) onChanged) {
@@ -346,110 +435,70 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Future<void> _handleLogin() async {
-    try {
-      final user = await _auth.loginUserWithEmailAndPassword(
-          _loginEmail, _loginPassword);
-      if (user != null) {
-        print('Login successful');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => WalletScreen()),
-        );
-      }
-    } catch (e) {
-      print('Login failed: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
-      );
-    }
-  }
-
-  Future<void> _handleSignUp() async {
-    try {
-      final user = await _auth.createUserWithEmailAndPassword(
-        _signUpFullName, // Pass the full name here
-        _signUpEmail,
-        _signUpPassword,
-      );
-      if (user != null) {
-        print('Sign up successful');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => WalletScreen()),
-        );
-      }
-    } catch (e) {
-      print('Sign up failed: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sign up failed: $e')),
-      );
-    }
-  }
-
   Future<void> _handleGoogleSignIn() async {
     try {
-      GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser != null) {
         final GoogleSignInAuthentication googleAuth =
             await googleUser.authentication;
-        final user = await _auth.signInWithGoogle(
+        final User? user = await _auth.signInWithGoogle(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
         if (user != null) {
-          print(
-              'Google Sign-In successful: ${googleUser.displayName}, ${googleUser.email}');
+          print('Google sign-in successful');
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => WalletScreen()),
           );
         }
-      } else {
-        print('Google Sign-In canceled by user.');
       }
-    } catch (error) {
-      print('Error during Google Sign-In: $error');
+    } catch (e) {
+      print('Error signing in with Google: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google Sign-In failed: $error')),
+        SnackBar(content: Text('Error signing in with Google: $e')),
       );
     }
   }
 
   Future<void> _handleFacebookSignIn() async {
     try {
-      final LoginResult result = await FacebookAuth.instance.login();
+      final LoginResult result = await _facebookAuth.login();
       if (result.status == LoginStatus.success) {
-        final userData = await FacebookAuth.instance.getUserData();
-        final accessToken = result.accessToken;
-        print('AccessToken: $accessToken');
-        print('AccessToken type: ${accessToken.runtimeType}');
-        final String? fbToken = accessToken?.token;
-        if (fbToken == null) {
-          throw Exception('Facebook token is null');
-        }
-        final user = await _auth.signInWithFacebook(accessToken: fbToken);
-        if (user != null) {
-          print(
-              'Facebook Sign-In successful: ${userData['name']}, ${userData['email']}');
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => WalletScreen()),
-          );
+        final AccessToken? accessToken = result.accessToken;
+        if (accessToken != null) {
+          try {
+            final User? user = await _auth.signInWithFacebook(
+                accessToken: accessToken.tokenString);
+            if (user != null) {
+              print('Facebook sign-in successful');
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => WalletScreen()),
+              );
+            }
+          } catch (e) {
+            print('Error signing in with Facebook (Firebase): $e');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content:
+                      Text('Error signing in with Facebook (Firebase): $e')),
+            );
+          }
         }
       } else {
-        print(
-            'Facebook Sign-In canceled or failed: ${result.status}, ${result.message}');
+        print('Facebook sign-in failed: ${result.status}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Facebook sign-in failed: ${result.status}')),
+        );
       }
-    } catch (error) {
-      print('Error during Facebook Sign-In: $error');
+    } catch (e) {
+      print('Error signing in with Facebook (Facebook Auth): $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Facebook Sign-In failed: $error')),
+        SnackBar(
+            content:
+                Text('Error signing in with Facebook (Facebook Auth): $e')),
       );
     }
   }
-}
-
-extension on AccessToken? {
-  String? get token => null;
 }
