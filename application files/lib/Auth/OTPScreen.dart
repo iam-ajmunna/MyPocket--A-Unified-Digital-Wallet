@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:get/get.dart';
+import 'package:mypocket/Auth/Auth_Service.dart';
 import '../Home/WalletScreen.dart';
 import 'api_service.dart';
 
@@ -33,7 +34,7 @@ class OTPScreen extends StatelessWidget {
             ),
             Text(
               tOtpSubTitle.toUpperCase(),
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 40.0),
             Text(
@@ -69,9 +70,9 @@ class OTPController extends GetxController {
   static OTPController get instance => Get.find();
 
   Future<void> verifyOTP(String otp) async {
-    var isVerified = await AuthenticationRepository.instance.verifyOTP(otp);
+    var isVerified = await AuthService().verifyOTP(otp);
     if (isVerified) {
-      Get.offAll(const WalletScreen());
+      Get.offAll(WalletScreen());
     } else {}
   }
 }
