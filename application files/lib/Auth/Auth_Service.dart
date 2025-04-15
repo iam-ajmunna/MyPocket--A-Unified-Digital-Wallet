@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AuthService {
+class AuthService extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  var verificationId = ''.obs;
 
   // Email & Password Sign Up and Store to Firestore
   Future<User?> createUserWithEmailAndPassword(
@@ -135,5 +139,85 @@ class AuthService {
       print("Error signing out: $e");
       throw e;
     }
+  }
+
+  // Phone & Password Sign Up
+  Future<User?> createUserWithPhoneNumberAndPassword(
+      String fullName, String phoneNumber, String password) async {
+    try {
+      // Initiate phone number verification
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // Auto-verification if SMS is intercepted
+          UserCredential result =
+              await _auth.signInWithCredential(credential);
+          User? user = result.user;
+          if (user != null) {
+            // Store user data in Firestore
+            await _firestore.collection('Users').doc(user.uid).set({
+              'uid': user.uid,
+              'fullName': fullName,
+              'phNumber': phoneNumber,
+            });
+            // Return the user object
+            return user;
+          }
+          return null;
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          // Handle verification failure
+          print("Phone verification failed: ${e.message}");
+          throw e;
+        },
+        codeSent: (String verificationId, int? resendToken) async {
+          // Store the verification ID for later use
+          this.verificationId.value = verificationId;
+          print("Verification code sent to $phoneNumber");
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          // Auto-retrieval timeout
+          this.verificationId.value = verificationId;
+          print("Verification code auto-retrieval timeout");
+        },
+      );
+      return null; // Return null initially, user is created after verification
+    } on FirebaseAuthException catch (e) {
+      print(e.message);
+      throw e;
+    } catch (e) {
+      print("Error during phone number sign-up: $e");
+      throw e;
+    }
+  }
+
+  // Phone Number Verification with OTP
+
+  Future<void> phoneAuthentication(String phNumber) async {
+    await _auth.verifyPhoneNumber(
+      phoneNumber: phNumber,
+      verificationCompleted: (credential) async {
+        await _auth.signInWithCredential(credential);
+      },
+      codeSent: (verificationId, resendToken) {
+        this.verificationId.value = verificationId;
+      },
+      codeAutoRetrievalTimeout: (verificationId) {
+        this.verificationId.value = verificationId;
+      },
+      verificationFailed: (e) {
+        if (e.code == 'invalid-phone-number') {
+          Get.snackbar('Error', 'The provider phone number is not valid');
+        } else {
+          Get.snackbar('Error', 'Something went wrong. Try again.');
+        }
+      },
+    );
+  }
+
+  Future<bool> verifyOTP(String otp) async {
+    var credentials = await _auth.signInWithCredential(PhoneAuthProvider.credential(
+        verificationId: verificationId.value, smsCode: otp));
+    return credentials.user != null ? true : false;
   }
 }
