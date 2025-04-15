@@ -193,7 +193,7 @@ class AuthService extends GetxController {
 
   // Phone Number Verification with OTP
 
-  Future<void> phoneAuthentication(String phNumber) async {
+  Future<bool> phoneAuthentication(String phNumber) async {
     await _auth.verifyPhoneNumber(
       phoneNumber: phNumber,
       verificationCompleted: (credential) async {
@@ -212,6 +212,8 @@ class AuthService extends GetxController {
           Get.snackbar('Error', 'Something went wrong. Try again.');
         }
       },
+    );
+    return verificationId.value != '' ? true : false;
     );
   }
 
