@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mypocket/Certificates/CertificatesScreen.dart';
 import 'package:mypocket/Documents/document_manager.dart';
-import 'package:mypocket/Documents/document_selection_page.dart';
+import 'package:mypocket/Documents/card_from_page.dart';
 import 'package:mypocket/Passes/event_ticket.dart';
 import 'package:mypocket/Passes/passes_list_screen.dart';
 import 'package:mypocket/Transit/transit_list_screen.dart';
@@ -1108,7 +1108,7 @@ Widget buildButtonGrid(BuildContext context) {
           icon: Icons.document_scanner, title: 'IDs & Passport', onPressed: () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => DocumentSelectionPage(),
+            builder: (context) => IdentityCardsPage(),
           ),
         );
       }),
