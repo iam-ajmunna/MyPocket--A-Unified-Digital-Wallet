@@ -53,6 +53,8 @@ dependencies:
   camera: ^0.10.5+10
   flutter_facebook_auth: ^7.1.1
   file_picker: 10.1.2
+  flutter_otp_text_field: ^1.5.1+1
+  get: ^4.7.2
   go_router: ^14.8.1
   google_fonts: ^6.2.1
   google_sign_in: ^6.3.0
