@@ -9,12 +9,14 @@ class OTPScreen extends StatelessWidget {
   final String tOTpTitle;
   final String tOtpSubTitle;
   final String tOtpMessage;
+  final String? phoneNumber;
 
   const OTPScreen({
     Key? key,
     required this.tOTpTitle,
     required this.tOtpSubTitle,
     required this.tOtpMessage,
+    this.phoneNumber,
   }) : super(key: key);
 
   @override
