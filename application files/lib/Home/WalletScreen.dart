@@ -8,6 +8,7 @@ import 'package:mypocket/Documents/card_from_page.dart';
 import 'package:mypocket/Passes/event_ticket.dart';
 import 'package:mypocket/Passes/passes_list_screen.dart';
 import 'package:mypocket/Transit/transit_list_screen.dart';
+import 'package:mypocket/notifications/noti_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'dart:ui';
