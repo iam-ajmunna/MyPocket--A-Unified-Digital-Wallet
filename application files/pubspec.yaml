@@ -36,6 +36,8 @@ dependencies:
   cloud_firestore_web: ^4.4.5
   collection: ^1.19.1
   cupertino_icons: ^1.0.8
+  firebase_messaging: ^15.2.5
+  flutter_local_notifications: ^19.1.0
   firebase_auth: ^5.5.1
   firebase_auth_platform_interface: ^7.6.1
   firebase_auth_web: ^5.14.1
