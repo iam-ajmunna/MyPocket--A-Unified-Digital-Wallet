@@ -67,6 +67,7 @@ class DefaultFirebaseOptions {
     projectId: 'my-pocket-fc2b6',
     databaseURL: 'https://my-pocket-fc2b6-default-rtdb.firebaseio.com',
     storageBucket: 'my-pocket-fc2b6.firebasestorage.app',
+    iosClientId: '128150028593-92kljjrsjsb5nk7qmgsri39tv4ka3fbc.apps.googleusercontent.com',
     iosBundleId: 'com.example.testapp',
   );
 
@@ -77,6 +78,7 @@ class DefaultFirebaseOptions {
     projectId: 'my-pocket-fc2b6',
     databaseURL: 'https://my-pocket-fc2b6-default-rtdb.firebaseio.com',
     storageBucket: 'my-pocket-fc2b6.firebasestorage.app',
+    iosClientId: '128150028593-92kljjrsjsb5nk7qmgsri39tv4ka3fbc.apps.googleusercontent.com',
     iosBundleId: 'com.example.testapp',
   );
 
@@ -90,4 +92,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'my-pocket-fc2b6.firebasestorage.app',
     measurementId: 'G-9XY66R1WPW',
   );
+
 }
