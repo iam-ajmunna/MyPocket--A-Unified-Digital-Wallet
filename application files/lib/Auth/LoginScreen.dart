@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mypocket/Auth/Auth_Service.dart';
 import 'package:mypocket/Home/WalletScreen.dart';
+import 'package:mypocket/notifications/noti_services.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -43,9 +44,17 @@ class _LoginScreenState extends State<LoginScreen>
   final String? webClientId =
       '346366146881-1ii03f5c66ced5o67a9k9t1jqgneelbg.apps.googleusercontent.com'; // Replace with your actual Web Client ID
 
+  NotificationServices notificationServices = NotificationServices();
   @override
   void initState() {
     super.initState();
+    notificationServices.requestNotificationPermission();
+    notificationServices.firebaseInit();
+  //  notificationServices.isTokenRefresh();
+    notificationServices.getDeviceToken().then((value) {
+      print('device token');
+      print(value);
+    });
     _tabController = TabController(length: 2, vsync: this);
     _googleSignIn = GoogleSignIn(clientId: webClientId);
     _auth = AuthService();
