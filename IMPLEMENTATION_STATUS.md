@@ -92,20 +92,20 @@
 **Objective:** Full auth flow with biometric gate required for app unlock and payment confirmation.
 
 **Planned Tasks**
-- [ ] Email/phone registration + login against NestJS backend
-- [ ] Biometric enrollment check (`local_auth`) with secure fallback (device PIN, not app PIN `1234`)
-- [ ] Biometric required to unlock app on launch/resume
-- [ ] Biometric required to confirm any payment/transaction action
-- [ ] Secure local token storage (`flutter_secure_storage`, hardware-backed)
-- [ ] Session timeout + auto-lock policy
+- [x] Email/phone registration + login against NestJS backend
+- [x] Biometric enrollment check (`local_auth`) with secure fallback (device PIN, not app PIN `1234`)
+- [x] Biometric required to unlock app on launch/resume
+- [x] Biometric required to confirm any payment/transaction action
+- [x] Secure local token storage (`flutter_secure_storage`, hardware-backed)
+- [x] Session timeout + auto-lock policy
 
-**Current Status:** In Progress
-**Validation Status:** In Progress
+**Current Status:** Complete
+**Validation Status:** Complete
 **Date Started:** 2026-08-05
-**Date Completed:** —
-**Notes:** Connecting Riverpod auth provider to NestJS authentication endpoints.
-**Known Issues:** None yet.
-**Next Actions:** Implement Riverpod login/register UI forms and biometric gate.
+**Date Completed:** 2026-08-05
+**Notes:** Feature spec `docs/features/auth-biometrics.md` created. Riverpod-driven `CleanLoginScreen` & `CleanRegisterScreen` built and connected to NestJS auth API. `BiometricGate` widget created with fingerprint/Face ID check, device PIN fallback, and app-resume auto-lock policy.
+**Known Issues:** None.
+**Next Actions:** Begin Milestone 4 (Cards & MFS Vault).
 
 ---
 
