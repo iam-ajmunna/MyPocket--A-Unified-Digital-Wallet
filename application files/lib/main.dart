@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:mypocket/Auth/LoginScreen.dart';
-import 'package:mypocket/Home/WalletScreen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart'; // Import the generated file
-
+import 'firebase_options.dart';
+import 'core/theme/app_theme.dart';
+import 'Auth/LoginScreen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
-// Note For Me
-/* Calling MyApp and Returning Material app for widgets
-   Calling Log In Screen
- */
-
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'MyPocket Digital Wallet',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          primarySwatch: Colors.purple,
-          scaffoldBackgroundColor: const Color.fromARGB(255, 248, 248, 248)),
-         home: LoginScreen(),
-    // home: WalletScreen(),
+      theme: AppTheme.lightTheme,
+      home: LoginScreen(),
     );
   }
 }

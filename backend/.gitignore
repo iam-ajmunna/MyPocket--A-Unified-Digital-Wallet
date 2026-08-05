@@ -1,0 +1,18 @@
+# Node dependencies
+node_modules/
+dist/
+coverage/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE & OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Prisma
+/prisma/migrations/*
+!/prisma/migrations/.keep

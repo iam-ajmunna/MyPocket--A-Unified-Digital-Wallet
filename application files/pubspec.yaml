@@ -109,6 +109,9 @@ dependencies:
   url_launcher_platform_interface: 2.3.2
   url_launcher_web: ^2.4.0
   url_launcher_windows: ^3.1.4
+  flutter_riverpod: ^2.5.1
+  dio: ^5.4.3
+  flutter_secure_storage: ^9.2.2
   flip_card: ^0.7.0
 
 

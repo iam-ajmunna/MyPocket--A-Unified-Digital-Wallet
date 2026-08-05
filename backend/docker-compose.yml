@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mypocket-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: mypocket_user
+      POSTGRES_PASSWORD: mypocket_secure_pass
+      POSTGRES_DB: mypocket_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mypocket_user -d mypocket_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mypocket-api
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://mypocket_user:mypocket_secure_pass@postgres:5432/mypocket_db?schema=public"
+      JWT_ACCESS_SECRET: "dev_super_secret_access_key_change_in_production_32bytes"
+      JWT_REFRESH_SECRET: "dev_super_secret_refresh_key_change_in_production_32bytes"
+      JWT_ACCESS_EXPIRES_IN: "15m"
+      JWT_REFRESH_EXPIRES_IN: "7d"
+      MASTER_KEY_HEX: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

@@ -1,0 +1,86 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.Uuid
+  email        String        @unique
+  phone        String        @unique
+  passwordHash String        @map("password_hash")
+  fullName     String        @map("full_name")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  refreshTokens RefreshToken[]
+  userKey       UserKey?
+  cards         BankCard[]
+  documents     Document[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tokenHash String   @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  isRevoked Boolean  @default(false) @map("is_revoked")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model UserKey {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @unique @map("user_id") @db.Uuid
+  wrappedDek String   @map("wrapped_dek") // DEK encrypted with server KEK (AES-256-GCM hex)
+  iv         String   // Initialization Vector (hex)
+  authTag    String   @map("auth_tag") // GCM Authentication Tag (hex)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_keys")
+}
+
+model BankCard {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  bankName          String    @map("bank_name")
+  lastFourDigits    String    @map("last_four_digits")
+  encryptedCardData String    @map("encrypted_card_data") // Ciphertext of card details
+  iv                String
+  authTag           String    @map("auth_tag")
+  confirmedAt       DateTime? @map("confirmed_at") // Immutability enforcement timestamp
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("bank_cards")
+}
+
+model Document {
+  id                 String    @id @default(uuid()) @db.Uuid
+  userId             String    @map("user_id") @db.Uuid
+  docType            String    @map("doc_type") // NID or PASSPORT
+  docNumberMasked    String    @map("doc_number_masked")
+  encryptedFields    String    @map("encrypted_fields") // Ciphertext of extracted JSON fields
+  encryptedRawScan   String?   @map("encrypted_raw_scan") // Ciphertext of raw scan image
+  iv                 String
+  authTag            String    @map("auth_tag")
+  confirmedAt        DateTime? @map("confirmed_at") // Immutability enforcement timestamp
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
