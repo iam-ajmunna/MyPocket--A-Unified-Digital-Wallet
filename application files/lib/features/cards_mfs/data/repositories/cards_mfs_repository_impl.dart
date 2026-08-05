@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
-import '../entities/bank_card_entity.dart';
-import '../entities/mfs_account_entity.dart';
-import '../repositories/cards_mfs_repository.dart';
+import '../../domain/entities/bank_card_entity.dart';
+import '../../domain/entities/mfs_account_entity.dart';
+import '../../domain/repositories/cards_mfs_repository.dart';
 
 class CardsMfsRepositoryImpl implements CardsMfsRepository {
   final ApiClient _apiClient;
@@ -21,35 +21,25 @@ class CardsMfsRepositoryImpl implements CardsMfsRepository {
   }
 
   @override
-  Future<BankCardEntity> createCard({
+  Future<BankCardEntity> addCard({
     required String bankName,
-    required String lastFourDigits,
-    required String expiryDate,
-    required String cardholderName,
+    required String cardHolderName,
+    required String cardNumber,
+    required String expiryMonthYear,
   }) async {
     try {
       final response = await _apiClient.dio.post(
         '/cards',
         data: {
           'bankName': bankName,
-          'lastFourDigits': lastFourDigits,
-          'expiryDate': expiryDate,
-          'cardholderName': cardholderName,
+          'cardHolderName': cardHolderName,
+          'cardNumber': cardNumber,
+          'expiryMonthYear': expiryMonthYear,
         },
       );
       return BankCardEntity.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception(e.response?.data?['message'] ?? 'Failed to create card');
-    }
-  }
-
-  @override
-  Future<BankCardEntity> confirmCard(String cardId) async {
-    try {
-      final response = await _apiClient.dio.post('/cards/$cardId/confirm');
-      return BankCardEntity.fromJson(response.data);
-    } on DioException catch (e) {
-      throw Exception(e.response?.data?['message'] ?? 'Failed to confirm card');
+      throw Exception(e.response?.data?['message'] ?? 'Failed to add bank card');
     }
   }
 
@@ -74,35 +64,21 @@ class CardsMfsRepositoryImpl implements CardsMfsRepository {
   }
 
   @override
-  Future<MfsAccountEntity> createMfsAccount({
-    required String provider,
+  Future<MfsAccountEntity> addMfsAccount({
+    required String providerName,
     required String accountNumber,
-    required String accountName,
-    bool smartSync = false,
   }) async {
     try {
       final response = await _apiClient.dio.post(
         '/mfs',
         data: {
-          'provider': provider,
+          'provider': providerName,
           'accountNumber': accountNumber,
-          'accountName': accountName,
-          'smartSync': smartSync,
         },
       );
       return MfsAccountEntity.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception(e.response?.data?['message'] ?? 'Failed to create MFS entry');
-    }
-  }
-
-  @override
-  Future<MfsAccountEntity> confirmMfsAccount(String mfsId) async {
-    try {
-      final response = await _apiClient.dio.post('/mfs/$mfsId/confirm');
-      return MfsAccountEntity.fromJson(response.data);
-    } on DioException catch (e) {
-      throw Exception(e.response?.data?['message'] ?? 'Failed to confirm MFS entry');
+      throw Exception(e.response?.data?['message'] ?? 'Failed to add MFS account');
     }
   }
 
@@ -111,7 +87,7 @@ class CardsMfsRepositoryImpl implements CardsMfsRepository {
     try {
       await _apiClient.dio.delete('/mfs/$mfsId');
     } on DioException catch (e) {
-      throw Exception(e.response?.data?['message'] ?? 'Failed to delete MFS entry');
+      throw Exception(e.response?.data?['message'] ?? 'Failed to delete MFS account');
     }
   }
 }

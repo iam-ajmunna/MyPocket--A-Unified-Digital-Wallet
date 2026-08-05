@@ -24,6 +24,7 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
   }
 
   void _handleLogin() {
+    FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
       ref.read(authNotifierProvider.notifier).login(
             _identifierController.text.trim(),
@@ -38,10 +39,21 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
 
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (next.errorMessage != null && next.errorMessage!.isNotEmpty) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
             backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else if (next.isAuthenticated && next.user != null) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Welcome back, ${next.user!.fullName}! Logged in successfully.'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }

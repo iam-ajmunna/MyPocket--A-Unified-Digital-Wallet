@@ -8,6 +8,9 @@ class MfsAccountEntity {
   final bool isImmutable;
   final DateTime? confirmedAt;
 
+  String get providerName => provider;
+  bool get isVerified => confirmedAt != null || isImmutable;
+
   MfsAccountEntity({
     required this.id,
     required this.provider,

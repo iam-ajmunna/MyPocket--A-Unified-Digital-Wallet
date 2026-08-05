@@ -62,14 +62,19 @@ class CardsMfsNotifier extends StateNotifier<CardsMfsState> {
     }
   }
 
-  Future<void> addCard(String bankName, String lastFourDigits, String expiryDate, String cardholderName) async {
+  Future<void> addCard({
+    required String bankName,
+    required String cardHolderName,
+    required String cardNumber,
+    required String expiryMonthYear,
+  }) async {
     state = state.copyWith(isLoading: true);
     try {
-      await _repository.createCard(
+      await _repository.addCard(
         bankName: bankName,
-        lastFourDigits: lastFourDigits,
-        expiryDate: expiryDate,
-        cardholderName: cardholderName,
+        cardHolderName: cardHolderName,
+        cardNumber: cardNumber,
+        expiryMonthYear: expiryMonthYear,
       );
       await loadAll();
     } catch (e) {
@@ -77,35 +82,16 @@ class CardsMfsNotifier extends StateNotifier<CardsMfsState> {
     }
   }
 
-  Future<void> confirmCard(String cardId) async {
+  Future<void> addMfsAccount({
+    required String providerName,
+    required String accountNumber,
+  }) async {
     state = state.copyWith(isLoading: true);
     try {
-      await _repository.confirmCard(cardId);
-      await loadAll();
-    } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
-    }
-  }
-
-  Future<void> addMfs(String provider, String accountNumber, String accountName, {bool smartSync = false}) async {
-    state = state.copyWith(isLoading: true);
-    try {
-      await _repository.createMfsAccount(
-        provider: provider,
+      await _repository.addMfsAccount(
+        providerName: providerName,
         accountNumber: accountNumber,
-        accountName: accountName,
-        smartSync: smartSync,
       );
-      await loadAll();
-    } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
-    }
-  }
-
-  Future<void> confirmMfs(String mfsId) async {
-    state = state.copyWith(isLoading: true);
-    try {
-      await _repository.confirmMfsAccount(mfsId);
       await loadAll();
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
@@ -122,7 +108,7 @@ class CardsMfsNotifier extends StateNotifier<CardsMfsState> {
     }
   }
 
-  Future<void> deleteMfs(String mfsId) async {
+  Future<void> deleteMfsAccount(String mfsId) async {
     state = state.copyWith(isLoading: true);
     try {
       await _repository.deleteMfsAccount(mfsId);

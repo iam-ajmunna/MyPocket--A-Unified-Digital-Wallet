@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CardsModule } from './cards/cards.module';
 import { MfsModule } from './mfs/mfs.module';
+import { DocumentsModule } from './documents/documents.module';
 import { HealthController } from './common/health.controller';
 
 @Module({
@@ -26,6 +27,7 @@ import { HealthController } from './common/health.controller';
     UsersModule,
     CardsModule,
     MfsModule,
+    DocumentsModule,
   ],
   controllers: [HealthController],
   providers: [

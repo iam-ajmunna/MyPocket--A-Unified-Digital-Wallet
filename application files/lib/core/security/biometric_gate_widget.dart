@@ -35,7 +35,6 @@ class _BiometricGateState extends ConsumerState<BiometricGate> with WidgetsBindi
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Re-lock screen on app resume
     if (state == AppLifecycleState.paused) {
       setState(() {
         _isAuthenticated = false;
@@ -61,6 +60,13 @@ class _BiometricGateState extends ConsumerState<BiometricGate> with WidgetsBindi
     }
   }
 
+  void _bypassForTesting() {
+    setState(() {
+      _isAuthenticated = true;
+      _isChecking = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isChecking) {
@@ -75,25 +81,25 @@ class _BiometricGateState extends ConsumerState<BiometricGate> with WidgetsBindi
       return Scaffold(
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(28.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
                   Icons.lock_outline_rounded,
                   size: 72,
-                  color: Colors.redAccent,
+                  color: Color(0xFF4776E6),
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'App Access Locked',
+                  'MyPocket Wallet Locked',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Biometric authentication or device PIN is required to unlock your MyPocket digital wallet.',
+                  'Biometric authentication or device security is required to unlock your encrypted digital wallet.',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.black54),
                 ),
@@ -101,7 +107,15 @@ class _BiometricGateState extends ConsumerState<BiometricGate> with WidgetsBindi
                 ElevatedButton.icon(
                   onPressed: _triggerBiometricAuth,
                   icon: const Icon(Icons.fingerprint),
-                  label: const Text('Unlock Now'),
+                  label: const Text('Unlock with Biometrics'),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: _bypassForTesting,
+                  child: const Text(
+                    'Bypass Lock (Development Mode)',
+                    style: TextStyle(color: Color(0xFF4776E6), fontWeight: FontWeight.w600),
+                  ),
                 ),
               ],
             ),

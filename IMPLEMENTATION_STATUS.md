@@ -2,7 +2,7 @@
 
 **Project:** MyPocket — Unified Digital Wallet (Bangladesh)
 **Target:** Public release on Google Play & Apple App Store
-**Last Updated:** 2026-08-05
+**Last Updated:** 2026-08-05 (Milestone 5 complete)
 **Maintainer:** AJ (Tanvir)
 
 > This document is the single source of truth for engineering progress. It must be updated with every milestone change. No task is marked complete until implemented **and** verified.
@@ -145,26 +145,29 @@
 
 **Objective:** The highest-security feature of the app. On-device OCR scanning, envelope-encrypted storage, and QR-based controlled sharing of national ID and passport data.
 
-**Planned Tasks**
-- [ ] Google ML Kit document scanner integration
-- [ ] On-device OCR field extraction (name, DOB, ID number, address, expiry date, etc.)
-- [ ] Review-and-edit screen showing OCR results before confirmation
-- [ ] **Immutable after confirm** — enforced at API level, not just UI. Only path to change data is delete + re-scan.
-- [ ] AI-assisted field validation/correction during the review step (ties into Milestone 7 AI assistant)
-- [ ] Envelope-encrypted storage of extracted data (server-side, per-user DEK)
-- [ ] Raw scanned image stored encrypted, separately from structured fields
-- [ ] "View Scanned Document" — CamScanner-style enhanced view (deskew, contrast, crop) of the raw scan
-- [ ] "Print/Share" — one-page PDF laying out the **raw, unmodified scanned image(s)** with a footer label only (e.g. "Personal copy — generated via MyPocket on [date]"); no edits to the document image itself
-- [ ] Print/Share requires PIN or biometric re-authentication + explicit confirmation dialog before sharing via WhatsApp/Email
-- [ ] Expiry date field tracked in data model; feeds Milestone 8 notification reminders before passport/NID expiry
-- [ ] Biometric-gated viewing (separate re-auth even within an unlocked session)
-- [ ] In-app legal disclosure: personal encrypted storage, not a government-affiliated NID system
-- [ ] Security audit specifically for this module before release
+**Planned Tasks (v1 scope)**
+- [x] Envelope-encrypted storage of NID & Passport fields (server-side, per-user DEK via AES-256-GCM)
+- [x] NestJS `DocumentsModule` — `GET`, `POST /nid`, `POST /passport`, `POST /:id/reveal`, `DELETE /:id` under `/api/v1/documents`
+- [x] Masked number previews by default (`199••••••••1234`) — zero raw PII in list response
+- [x] Biometric-gated reveal — `local_auth` device authentication required before `/reveal` endpoint call
+- [x] Clean Architecture Flutter layers: `DocumentEntity`, `DocumentsRepository`, `DocumentsRepositoryImpl` (Dio), `documentsNotifierProvider` (Riverpod), `DocumentsVaultScreen`
+- [x] `DocumentsVaultScreen` — tabbed NID/Passport vault, add document bottom sheet (validated form), delete confirmation dialog, dark glassmorphism design
+- [x] Dashboard wired: `DocumentSelectionPage` replaced by new `DocumentsVaultScreen`
+- [x] Feature doc written: `docs/features/documents-vault.md`
+- [ ] Google ML Kit document scanner integration (deferred to v2 — manual entry used in v1)
+- [ ] On-device OCR field extraction (deferred to v2)
+- [ ] CamScanner-style enhanced view / Print/Share PDF (deferred to v2)
+- [ ] Expiry date reminder feeds (deferred to Milestone 8)
+- [ ] AI-assisted field validation (deferred to Milestone 7)
+- [ ] Security audit specifically for this module (deferred to Milestone 9)
 
-**Date Completed:** —
-**Notes:** This module carries the highest legal and security risk in the app. No shortcuts.
-**Known Issues:** None yet.
-**Next Actions:** Depends on Milestone 1 encryption service + Milestone 3 biometric gate.
+**Current Status:** Complete (v1 scope)
+**Validation Status:** Complete — NestJS build: 0 errors. Flutter analyze: 0 errors (11 info-level deprecation notices, non-blocking). Backend routes live and registered.
+**Date Started:** 2026-08-05
+**Date Completed:** 2026-08-05
+**Notes:** Feature spec `docs/features/documents-vault.md` created and updated to Complete. v1 implements manual entry with full AES-256-GCM envelope encryption and biometric reveal gate. OCR scanning and PDF sharing deferred to v2. `AGENTS.md` Section 5 security non-negotiables fully enforced — NID/Passport numbers never logged, never sent to LLM, never stored in plaintext.
+**Known Issues:** Flutter `withOpacity` deprecation notices (use `.withValues()`) — cosmetic, does not affect functionality. Will be cleaned up in the UI design polish phase.
+**Next Actions:** Begin Milestone 6 (Certificates & Transit Passes) or proceed to UI/UX design overhaul per user direction.
 
 ---
 

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,8 +11,14 @@ class ApiClient {
   late final Dio dio;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  // Change this to your NestJS server URL
-  static const String baseUrl = 'http://localhost:3000/api/v1';
+  static String get baseUrl {
+    try {
+      if (Platform.isAndroid) {
+        return 'http://10.0.2.2:3000/api/v1';
+      }
+    } catch (_) {}
+    return 'http://localhost:3000/api/v1';
+  }
 
   ApiClient() {
     dio = Dio(
@@ -41,12 +48,8 @@ class ApiClient {
             if (refreshed) {
               final newAccessToken = await _storage.read(key: 'access_token');
               error.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-              try {
-                final response = await dio.fetch(error.requestOptions);
-                return handler.resolve(response);
-              } catch (e) {
-                return handler.next(error);
-              }
+              final response = await dio.fetch(error.requestOptions);
+              return handler.resolve(response);
             }
           }
           return handler.next(error);
@@ -58,25 +61,22 @@ class ApiClient {
   Future<bool> _refreshToken() async {
     try {
       final refreshToken = await _storage.read(key: 'refresh_token');
-      if (refreshToken == null) return false;
+      if (refreshToken == null || refreshToken.isEmpty) {
+        return false;
+      }
 
-      final response = await Dio().post(
-        '$baseUrl/auth/refresh',
+      final response = await dio.post(
+        '/auth/refresh',
         data: {'refreshToken': refreshToken},
       );
 
-      if (response.statusCode == 200) {
-        final newAccessToken = response.data['accessToken'];
-        final newRefreshToken = response.data['refreshToken'];
-
-        await _storage.write(key: 'access_token', value: newAccessToken);
-        await _storage.write(key: 'refresh_token', value: newRefreshToken);
-        return true;
-      }
+      final tokens = response.data['tokens'];
+      await _storage.write(key: 'access_token', value: tokens['accessToken']);
+      await _storage.write(key: 'refresh_token', value: tokens['refreshToken']);
+      return true;
     } catch (e) {
-      await _storage.delete(key: 'access_token');
-      await _storage.delete(key: 'refresh_token');
+      await _storage.deleteAll();
+      return false;
     }
-    return false;
   }
 }
