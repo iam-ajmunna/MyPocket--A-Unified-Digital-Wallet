@@ -175,18 +175,31 @@
 
 **Objective:** Rebuild the certificate manager and transit pass features from the old prototype with the new secure architecture.
 
-**Planned Tasks**
-- [ ] Certificate category/upload system — same category structure as original (Academic w/ SSC-PhD subcategories, Olympiad, Quiz, Business, Sports, General Skills), rebuilt with encrypted storage
-- [ ] Transit card management (rebuilt, balances tied to backend, not raw SharedPreferences)
-- [ ] Full QR/NFC-simulated boarding flow retained — confirmed as a kept daily-utility feature, not deprioritized
+**Planned Tasks (v1 scope)**
+- [x] Feature spec created: `docs/features/certificates-transit.md`
+- [x] Prisma schema: `Certificate` model (encrypted storage, category/subCategory fields)
+- [x] Prisma schema: `TransitPass` model (encrypted card number, balance, revocable QR token)
+- [x] DB migrated: `prisma db push` + `prisma generate` — 0 errors
+- [x] User model: `certificates` and `transitPasses` relations added
+- [x] NestJS `CertificatesModule` — GET/POST/DELETE `/api/v1/certificates`
+- [x] NestJS `TransitModule` — GET/POST/POST recharge/POST QR refresh/DELETE `/api/v1/transit`
+- [x] Full AES-256-GCM encryption via `CryptoService` for both modules
+- [x] Last-4 masking for transit card numbers in API responses
+- [x] Revocable QR token (UUID reference, not raw card data) generated on add + refreshable on demand
+- [x] `CertificateEntity`, `TransitPassEntity` domain models with display helpers
+- [x] `CertificatesRepositoryImpl` + `CertificatesNotifier` Riverpod provider
+- [x] `TransitRepositoryImpl` + `TransitNotifier` Riverpod provider (load/add/recharge/refreshQr/delete)
+- [x] `CertificatesVaultScreen` — category filter chips, certificate cards, add bottom sheet (category/subCategory dropdowns), delete confirmation
+- [x] `TransitVaultScreen` — gradient transit cards by type, balance display, QR boarding sheet (qr_flutter), recharge dialog, refresh QR token, add transit pass bottom sheet
+- [x] Dashboard wired: `TransitListScreen` → `TransitVaultScreen`, `CertificatesListScreen` → `CertificatesVaultScreen`
 
-**Current Status:** Not Started
-**Validation Status:** Not Started
-**Date Started:** —
-**Date Completed:** —
-**Notes:** Lower priority than Milestones 3–5, but full scope retained per stakeholder confirmation.
-**Known Issues:** None yet.
-**Next Actions:** Scheduled after core security features ship.
+**Current Status:** Complete (v1 scope)
+**Validation Status:** Complete — NestJS build: 0 errors. Flutter analyze: 0 errors. DB schema synced.
+**Date Started:** 2026-08-05
+**Date Completed:** 2026-08-05
+**Notes:** Rebuilt from legacy SharedPreferences + local-file storage to proper backend-persisted, encrypted architecture. Category taxonomy (ACADEMIC/OLYMPIAD/QUIZCOMP/BIZCOMP/SPORTS/SKILLS + academic sub-levels SSC→PostDoc) and transit types (Metro/Bus/Train/Ferry/Tram/Subway/Light Rail/Bike Share) preserved exactly from legacy code. Transit QR uses a revocable UUID token — never raw card data in the QR payload, per AGENTS.md Section 5.
+**Known Issues:** None.
+**Next Actions:** Milestone 7 — AI Assistant (Moon) integration.
 
 ---
 

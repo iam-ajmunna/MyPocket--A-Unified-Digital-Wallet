@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../../../cards_mfs/presentation/screens/cards_mfs_screen.dart';
 import '../../../documents/presentation/screens/documents_vault_screen.dart';
-import '../../../../Transit/transit_list_screen.dart';
-import '../../../../Certificates/CertificatesListScreen.dart';
+import '../../../transit/presentation/screens/transit_vault_screen.dart';
+import '../../../certificates/presentation/screens/certificates_vault_screen.dart';
 
 class CleanDashboardScreen extends ConsumerWidget {
   const CleanDashboardScreen({super.key});
@@ -180,7 +180,7 @@ class CleanDashboardScreen extends ConsumerWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => TransitListScreen()),
+                        MaterialPageRoute(builder: (context) => const TransitVaultScreen()),
                       );
                     },
                   ),
@@ -193,7 +193,7 @@ class CleanDashboardScreen extends ConsumerWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => CertificatesListScreen()),
+                        MaterialPageRoute(builder: (context) => const CertificatesVaultScreen()),
                       );
                     },
                   ),

@@ -9,6 +9,8 @@ import { UsersModule } from './users/users.module';
 import { CardsModule } from './cards/cards.module';
 import { MfsModule } from './mfs/mfs.module';
 import { DocumentsModule } from './documents/documents.module';
+import { CertificatesModule } from './certificates/certificates.module';
+import { TransitModule } from './transit/transit.module';
 import { HealthController } from './common/health.controller';
 
 @Module({
@@ -28,6 +30,8 @@ import { HealthController } from './common/health.controller';
     CardsModule,
     MfsModule,
     DocumentsModule,
+    CertificatesModule,
+    TransitModule,
   ],
   controllers: [HealthController],
   providers: [

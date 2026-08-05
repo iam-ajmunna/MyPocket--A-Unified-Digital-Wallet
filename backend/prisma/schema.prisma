@@ -21,6 +21,8 @@ model User {
   cards         BankCard[]
   mfsAccounts   MfsAccount[]
   documents     Document[]
+  certificates  Certificate[]
+  transitPasses TransitPass[]
 
   @@map("users")
 }
@@ -101,4 +103,45 @@ model Document {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("documents")
+}
+
+model Certificate {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  name          String
+  issuer        String
+  issueDate     String   @map("issue_date")
+  category      String
+  subCategory   String?  @map("sub_category")
+  encryptedData String   @map("encrypted_data")
+  iv            String
+  authTag       String   @map("auth_tag")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("certificates")
+}
+
+model TransitPass {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  name           String
+  lastFourDigits String    @map("last_four_digits")
+  transitType    String    @map("transit_type")
+  expiryDate     String    @map("expiry_date")
+  balance        Float     @default(0)
+  qrToken        String?   @map("qr_token")
+  encryptedData  String    @map("encrypted_data")
+  iv             String
+  authTag        String    @map("auth_tag")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("transit_passes")
 }
