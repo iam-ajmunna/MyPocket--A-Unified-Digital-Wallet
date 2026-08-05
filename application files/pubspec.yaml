@@ -112,6 +112,7 @@ dependencies:
   flutter_riverpod: ^2.5.1
   dio: ^5.4.3
   flutter_secure_storage: ^9.2.2
+  local_auth: ^2.1.8
   flip_card: ^0.7.0
 
 
