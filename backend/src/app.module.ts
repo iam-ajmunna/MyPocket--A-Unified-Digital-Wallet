@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { CryptoModule } from './crypto/crypto.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { CardsModule } from './cards/cards.module';
+import { MfsModule } from './mfs/mfs.module';
 import { HealthController } from './common/health.controller';
 
 @Module({
@@ -16,12 +18,14 @@ import { HealthController } from './common/health.controller';
     }),
     ThrottlerModule.forRoot([{
       ttl: 60000,
-      limit: 100, // 100 requests per minute rate limit
+      limit: 100,
     }]),
     PrismaModule,
     CryptoModule,
     AuthModule,
     UsersModule,
+    CardsModule,
+    MfsModule,
   ],
   controllers: [HealthController],
   providers: [

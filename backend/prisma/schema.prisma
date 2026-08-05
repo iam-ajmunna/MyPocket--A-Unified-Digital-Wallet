@@ -19,6 +19,7 @@ model User {
   refreshTokens RefreshToken[]
   userKey       UserKey?
   cards         BankCard[]
+  mfsAccounts   MfsAccount[]
   documents     Document[]
 
   @@map("users")
@@ -40,9 +41,9 @@ model RefreshToken {
 model UserKey {
   id         String   @id @default(uuid()) @db.Uuid
   userId     String   @unique @map("user_id") @db.Uuid
-  wrappedDek String   @map("wrapped_dek") // DEK encrypted with server KEK (AES-256-GCM hex)
-  iv         String   // Initialization Vector (hex)
-  authTag    String   @map("auth_tag") // GCM Authentication Tag (hex)
+  wrappedDek String   @map("wrapped_dek")
+  iv         String
+  authTag    String   @map("auth_tag")
   createdAt  DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -55,10 +56,10 @@ model BankCard {
   userId            String    @map("user_id") @db.Uuid
   bankName          String    @map("bank_name")
   lastFourDigits    String    @map("last_four_digits")
-  encryptedCardData String    @map("encrypted_card_data") // Ciphertext of card details
+  encryptedCardData String    @map("encrypted_card_data")
   iv                String
   authTag           String    @map("auth_tag")
-  confirmedAt       DateTime? @map("confirmed_at") // Immutability enforcement timestamp
+  confirmedAt       DateTime? @map("confirmed_at")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
@@ -67,16 +68,33 @@ model BankCard {
   @@map("bank_cards")
 }
 
+model MfsAccount {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  provider      String    // bKash, Nagad, Upay
+  accountNumber String    @map("account_number")
+  accountName   String    @map("account_name")
+  qrCodeToken   String?   @map("qr_code_token") // Revocable reference token for payment QR
+  smartSync     Boolean   @default(false) @map("smart_sync") // Android Notification listener opt-in
+  confirmedAt   DateTime? @map("confirmed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("mfs_accounts")
+}
+
 model Document {
   id                 String    @id @default(uuid()) @db.Uuid
   userId             String    @map("user_id") @db.Uuid
-  docType            String    @map("doc_type") // NID or PASSPORT
+  docType            String    @map("doc_type")
   docNumberMasked    String    @map("doc_number_masked")
-  encryptedFields    String    @map("encrypted_fields") // Ciphertext of extracted JSON fields
-  encryptedRawScan   String?   @map("encrypted_raw_scan") // Ciphertext of raw scan image
+  encryptedFields    String    @map("encrypted_fields")
+  encryptedRawScan   String?   @map("encrypted_raw_scan")
   iv                 String
   authTag            String    @map("auth_tag")
-  confirmedAt        DateTime? @map("confirmed_at") // Immutability enforcement timestamp
+  confirmedAt        DateTime? @map("confirmed_at")
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")
 
