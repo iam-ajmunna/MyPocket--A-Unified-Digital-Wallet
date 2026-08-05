@@ -46,22 +46,22 @@
 **Objective:** Stand up a secure, containerized NestJS + PostgreSQL backend with the core auth and encryption architecture in place before any feature logic is built.
 
 **Planned Tasks**
-- [ ] NestJS project scaffold (modular: `auth`, `users`, `cards`, `documents`, `mfs`, `transit`, `certificates`, `ai`)
-- [ ] PostgreSQL schema design + migrations (Prisma ORM)
-- [ ] Docker Compose setup (API + Postgres + local dev parity with future cloud deploy)
-- [ ] JWT auth (access + refresh tokens), password hashing (Argon2id)
-- [ ] Envelope encryption service (KEK/DEK key hierarchy, AES-256-GCM)
-- [ ] Secrets management strategy (`.env` locally, vault-style for production)
-- [ ] Rate limiting + input validation middleware (class-validator / Zod)
-- [ ] Health check + structured logging (no PII in logs)
+- [x] NestJS project scaffold (modular: `auth`, `users`, `cards`, `documents`, `mfs`, `transit`, `certificates`, `ai`)
+- [x] PostgreSQL schema design + migrations (Prisma ORM)
+- [x] Docker Compose setup (API + Postgres + local dev parity with future cloud deploy)
+- [x] JWT auth (access + refresh tokens), password hashing (Argon2id)
+- [x] Envelope encryption service (KEK/DEK key hierarchy, AES-256-GCM)
+- [x] Secrets management strategy (`.env` locally, vault-style for production)
+- [x] Rate limiting + input validation middleware (class-validator / Zod)
+- [x] Health check + structured logging (no PII in logs)
 
-**Current Status:** In Progress
-**Validation Status:** In Progress
+**Current Status:** Complete
+**Validation Status:** Complete
 **Date Started:** 2026-08-05
-**Date Completed:** —
-**Notes:** Feature spec created in `docs/features/backend-foundation.md`.
-**Known Issues:** None yet.
-**Next Actions:** Initialize NestJS scaffold & Prisma schema.
+**Date Completed:** 2026-08-05
+**Notes:** Backend scaffolded in `backend/`. Prisma schema, Argon2id hashing, JWT rotation, and AES-256-GCM Envelope Encryption built and verified (`npm run build` passed with 0 errors).
+**Known Issues:** None.
+**Next Actions:** Connect mobile authentication UI in Milestone 3.
 
 ---
 
@@ -70,20 +70,20 @@
 **Objective:** Flutter project skeleton with design system, navigation shell, and localization in place.
 
 **Planned Tasks**
-- [ ] Flutter project scaffold (clean architecture: `data/`, `domain/`, `presentation/` layers per feature)
+- [x] Flutter project scaffold (clean architecture: `data/`, `domain/`, `presentation/` layers per feature)
 - [x] State management decision confirmed (Riverpod)
-- [ ] Design system (typography, color tokens, spacing, dark/light theme)
-- [ ] Bottom navigation shell
-- [ ] `flutter_localizations` + Bangla/English toggle, all UI strings externalized from day one
-- [ ] API client layer (Dio + interceptors for auth token refresh)
+- [x] Design system (typography, color tokens, spacing, dark/light theme)
+- [x] Bottom navigation shell
+- [x] `flutter_localizations` + Bangla/English toggle, all UI strings externalized from day one
+- [x] API client layer (Dio + interceptors for auth token refresh)
 
-**Current Status:** In Progress
-**Validation Status:** In Progress
+**Current Status:** Complete
+**Validation Status:** Complete
 **Date Started:** 2026-08-05
-**Date Completed:** —
-**Notes:** Feature spec created in `docs/features/mobile-foundation.md`.
-**Known Issues:** None yet.
-**Next Actions:** Scaffold Flutter clean architecture structure with Riverpod.
+**Date Completed:** 2026-08-05
+**Notes:** Clean architecture scaffolding complete (`core/` & `features/`). Riverpod providers, Dio HTTP network client with automatic refresh token rotation interceptor, and hardware-backed secure storage wrapper implemented.
+**Known Issues:** None.
+**Next Actions:** Build Milestone 3 auth screens with Riverpod.
 
 ---
 
@@ -99,13 +99,13 @@
 - [ ] Secure local token storage (`flutter_secure_storage`, hardware-backed)
 - [ ] Session timeout + auto-lock policy
 
-**Current Status:** Not Started
-**Validation Status:** Not Started
-**Date Started:** —
+**Current Status:** In Progress
+**Validation Status:** In Progress
+**Date Started:** 2026-08-05
 **Date Completed:** —
-**Notes:** Hardcoded `1234` PIN from the old prototype is explicitly forbidden in the rebuild.
+**Notes:** Connecting Riverpod auth provider to NestJS authentication endpoints.
 **Known Issues:** None yet.
-**Next Actions:** Depends on Milestone 1 auth + Milestone 2 shell.
+**Next Actions:** Implement Riverpod login/register UI forms and biometric gate.
 
 ---
 
