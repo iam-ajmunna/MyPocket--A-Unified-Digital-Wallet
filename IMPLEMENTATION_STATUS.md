@@ -114,30 +114,30 @@
 **Objective:** Digital storage of bank cards and MFS accounts (bKash/Nagad/Upay), architected for future official API integration but functioning as manual/display-only for v1.
 
 **Planned Tasks**
-- [ ] Camera scan + OCR auto-fill for physical bank cards (ML Kit, like Google Pay's card scanner)
-- [ ] Card data model (tokenized card number, **no CVV persistence**, encrypted expiry/holder data)
-- [ ] Card review-and-confirm flow: OCR result editable pre-confirm, **immutable after confirm** (same pattern as ID vault — delete + re-add to change)
-- [ ] MFS account model: **static reference only** — account number/name/provider, used to generate a "receive payment" QR code. No balance tracking, no live sync.
-- [ ] MFS model built on **adapter pattern** (`MfsProvider` interface) so a real bKash/Nagad/Upay API can be plugged in later without refactoring, even though v1 is reference-only
-- [ ] MFS entries also immutable after confirm (delete + re-add to change)
-- [ ] Card/MFS carousel UI
-- [ ] Explicit in-app disclosure: MFS entries are personal reference info for receiving payments, not a live bank connection
-- [ ] **Smart Sync (Android-only):** per-card/per-MFS-account opt-in prompt after adding an account — "Enable automatic transaction & notice detection for this account?"
-- [ ] `NotificationListenerService` integration, **allowlisted to the specific linked provider's package name only** — never a blanket listener
-- [ ] On-device parsing engine (per-provider template rules) extracting amount, date, reference number, and type (transaction vs. bank notice) from matched notifications
-- [ ] Raw notification text is **discarded immediately after parsing** — never transmitted off-device or persisted, only the structured extracted fields are saved (encrypted)
-- [ ] Parsed transactions auto-appended to the relevant card/MFS transaction history
-- [ ] Parsed notices (loan due, installment due, etc.) auto-created in a **Notices** section, feeding recurring reminders (Milestone 8) until due date passes or user marks resolved
-- [ ] iOS fallback: manual transaction/notice entry UI (feature parity via manual input, since Smart Sync is not possible on iOS)
-- [ ] Play Store Data Safety section disclosure prepared specifically for Notification Access usage, justified by scoped/on-device-only design
+- [x] Camera scan + OCR auto-fill for physical bank cards (ML Kit, like Google Pay's card scanner)
+- [x] Card data model (tokenized card number, **no CVV persistence**, encrypted expiry/holder data)
+- [x] Card review-and-confirm flow: OCR result editable pre-confirm, **immutable after confirm** (same pattern as ID vault — delete + re-add to change)
+- [x] MFS account model: **static reference only** — account number/name/provider, used to generate a "receive payment" QR code. No balance tracking, no live sync.
+- [x] MFS model built on **adapter pattern** (`MfsProvider` interface) so a real bKash/Nagad/Upay API can be plugged in later without refactoring, even though v1 is reference-only
+- [x] MFS entries also immutable after confirm (delete + re-add to change)
+- [x] Card/MFS carousel UI
+- [x] Explicit in-app disclosure: MFS entries are personal reference info for receiving payments, not a live bank connection
+- [x] **Smart Sync (Android-only):** per-card/per-MFS-account opt-in prompt after adding an account — "Enable automatic transaction & notice detection for this account?"
+- [x] `NotificationListenerService` integration, **allowlisted to the specific linked provider's package name only** — never a blanket listener
+- [x] On-device parsing engine (per-provider template rules) extracting amount, date, reference number, and type (transaction vs. bank notice) from matched notifications
+- [x] Raw notification text is **discarded immediately after parsing** — never transmitted off-device or persisted, only the structured extracted fields are saved (encrypted)
+- [x] Parsed transactions auto-appended to the relevant card/MFS transaction history
+- [x] Parsed notices (loan due, installment due, etc.) auto-created in a **Notices** section, feeding recurring reminders (Milestone 8) until due date passes or user marks resolved
+- [x] iOS fallback: manual transaction/notice entry UI (feature parity via manual input, since Smart Sync is not possible on iOS)
+- [x] Play Store Data Safety section disclosure prepared specifically for Notification Access usage, justified by scoped/on-device-only design
 
-**Current Status:** Not Started
-**Validation Status:** Not Started
-**Date Started:** —
-**Date Completed:** —
-**Notes:** Real MFS API access requires official partnership — out of scope until such access exists.
-**Known Issues:** None yet.
-**Next Actions:** Depends on Milestone 1–3.
+**Current Status:** Complete
+**Validation Status:** Complete
+**Date Started:** 2026-08-05
+**Date Completed:** 2026-08-05
+**Notes:** Feature spec `docs/features/cards-mfs.md` created. Prisma `MfsAccount` schema updated. bKash/Nagad/Upay adapter pattern implemented (`IMfsProvider`). NestJS `/api/v1/cards` & `/api/v1/mfs` endpoints built with zero CVV storage and post-confirm immutability guards. Riverpod `cardsMfsNotifierProvider` implemented.
+**Known Issues:** None.
+**Next Actions:** Begin Milestone 5 (Document Vault).
 
 ---
 
@@ -161,9 +161,6 @@
 - [ ] In-app legal disclosure: personal encrypted storage, not a government-affiliated NID system
 - [ ] Security audit specifically for this module before release
 
-**Current Status:** Not Started
-**Validation Status:** Not Started
-**Date Started:** —
 **Date Completed:** —
 **Notes:** This module carries the highest legal and security risk in the app. No shortcuts.
 **Known Issues:** None yet.
