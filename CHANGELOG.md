@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2026-08-06
+
+### Major Release (v2.0.0 Roadmap Complete)
+
+#### Added
+- **Google ML Kit Document Scanner & On-Device OCR**:
+  - `ocr_parser_service.dart`: Automated pattern parsing for Bangladesh Smart NID (10 digits), Old NID (17 digits), and Passport MRZ.
+  - `ocr_scanner_screen.dart`: Camera frame alignment overlay with live scanning line animation and 1-tap auto-fill pre-confirm review.
+- **PDF Exporter & Encrypted Document Sharing**:
+  - `document_pdf_service.dart`: Password-protected, watermarked PDF generation for NID, Passport, Transit Passes, and Academic Certificates.
+  - Instant PDF printing and encrypted file sharing via `share_plus` and `printing`.
+- **"Hey Moon" Background Wake-Word Engine**:
+  - `wake_word_service.dart`: Hands-free background voice keyword detection service triggering Moon AI assistant automatically.
+- **Live MFS Sandbox Gateway Integration**:
+  - `mfs-sandbox.service.ts`: NestJS mock gateway endpoints (`/api/v1/mfs/sandbox/cashout` and `/api/v1/mfs/sandbox/sendmoney`) for bKash & Nagad transactions.
+- **Commercial UI/UX Design System**:
+  - Proportional original brand logo alignment, Poppins typography, and dark slate glassmorphic surface tokens.
+
+---
+
 ## [1.0.0] - 2026-08-06
 
 ### Initial Production Release (Milestones 0 - 10 Complete)
