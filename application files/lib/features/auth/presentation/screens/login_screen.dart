@@ -70,10 +70,16 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(
-                    Icons.account_balance_wallet_rounded,
-                    size: 80,
-                    color: Color(0xFF4776E6),
+                  Image.asset(
+                    'assets/MyWalletLogo.png',
+                    height: 90,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 80,
+                        color: Color(0xFF6366F1),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   Text(

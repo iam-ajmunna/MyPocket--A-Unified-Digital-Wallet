@@ -66,8 +66,23 @@ class _CleanRegisterScreenState extends ConsumerState<CleanRegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Center(
+                  child: Image.asset(
+                    'assets/MyWalletLogo.png',
+                    height: 80,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 70,
+                        color: Color(0xFF6366F1),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Text(
                   'Join MyPocket',
+                  textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

@@ -26,21 +26,12 @@ class CleanDashboardScreen extends ConsumerWidget {
         elevation: 0,
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF6366F1), Color(0xFFA855F7)],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF6366F1).withOpacity(0.4),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 20),
+            Image.asset(
+              'assets/MyWallet White Logo.png',
+              height: 36,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset('assets/MyWalletLogo.png', height: 36);
+              },
             ),
             const SizedBox(width: 10),
             const Text(

@@ -136,6 +136,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/MyWalletLogo.png
+    - assets/MyWallet White Logo.png
     - assets/MyPocketBrand.png
     - assets/google_logo.svg
     - assets/facebook_logo.svg
