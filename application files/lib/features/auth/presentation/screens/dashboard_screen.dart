@@ -25,13 +25,14 @@ class CleanDashboardScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFF0F172A),
         elevation: 0,
         title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Image.asset(
               'assets/MyWallet White Logo.png',
-              height: 56,
+              height: 32,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
-                return Image.asset('assets/MyWalletLogo.png', height: 50, fit: BoxFit.contain);
+                return Image.asset('assets/MyWalletLogo.png', height: 32, fit: BoxFit.contain);
               },
             ),
             const SizedBox(width: 10),
