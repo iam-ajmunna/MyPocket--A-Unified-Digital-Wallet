@@ -12,8 +12,8 @@ class CleanLoginScreen extends ConsumerStatefulWidget {
 
 class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _identifierController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _identifierController = TextEditingController(text: 'user@example.com');
+  final _passwordController = TextEditingController(text: 'password123');
   bool _obscurePassword = true;
 
   @override
