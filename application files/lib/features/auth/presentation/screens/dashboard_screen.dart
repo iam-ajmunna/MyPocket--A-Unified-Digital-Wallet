@@ -28,9 +28,10 @@ class CleanDashboardScreen extends ConsumerWidget {
           children: [
             Image.asset(
               'assets/MyWallet White Logo.png',
-              height: 40,
+              height: 56,
+              fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
-                return Image.asset('assets/MyWalletLogo.png', height: 40);
+                return Image.asset('assets/MyWalletLogo.png', height: 50, fit: BoxFit.contain);
               },
             ),
             const SizedBox(width: 10),

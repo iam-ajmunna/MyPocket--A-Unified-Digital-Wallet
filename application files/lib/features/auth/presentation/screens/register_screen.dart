@@ -77,9 +77,10 @@ class _CleanRegisterScreenState extends ConsumerState<CleanRegisterScreen> {
                 Center(
                   child: Image.asset(
                     'assets/MyWallet White Logo.png',
-                    height: 80,
+                    height: 150,
+                    fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
-                      return Image.asset('assets/MyWalletLogo.png', height: 80);
+                      return Image.asset('assets/MyWalletLogo.png', height: 140, fit: BoxFit.contain);
                     },
                   ),
                 ),

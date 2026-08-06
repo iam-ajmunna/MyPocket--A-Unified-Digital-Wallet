@@ -66,9 +66,10 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
                   Center(
                     child: Image.asset(
                       'assets/MyWallet White Logo.png',
-                      height: 100,
+                      height: 170,
+                      fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
-                        return Image.asset('assets/MyWalletLogo.png', height: 90);
+                        return Image.asset('assets/MyWalletLogo.png', height: 150, fit: BoxFit.contain);
                       },
                     ),
                   ),
