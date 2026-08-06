@@ -33,7 +33,9 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       title: 'MyPocket Digital Wallet',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
+      theme: AppTheme.darkTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.dark,
       home: BiometricGate(
         child: authState.isAuthenticated
             ? const CleanDashboardScreen()

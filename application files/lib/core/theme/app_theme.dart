@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF6366F1); // Indigo
-  static const Color secondaryColor = Color(0xFFA855F7); // Purple
-  static const Color accentColor = Color(0xFF06B6D4); // Cyan
-  static const Color darkBackground = Color(0xFF0F172A); // Slate 900
-  static const Color darkSurface = Color(0xFF1E293B); // Slate 800
-  static const Color lightBackground = Color(0xFFF8FAFC);
-  static const Color lightSurface = Colors.white;
+  // Brand Colors
+  static const Color primary = Color(0xFF6366F1); // Electric Indigo
+  static const Color secondary = Color(0xFFA855F7); // Glowing Purple
+  static const Color accent = Color(0xFF06B6D4); // Neon Cyan
+  static const Color success = Color(0xFF10B981); // Emerald Green
+  static const Color warning = Color(0xFFF59E0B); // Amber Warning
+  static const Color error = Color(0xFFEF4444); // Crimson Red
+
+  // Dark Theme Surfaces
+  static const Color darkBackground = Color(0xFF0B0F19); // Rich Slate 950
+  static const Color darkCardSurface = Color(0xFF1E293B); // Slate 800
+  static const Color darkGlassBorder = Color(0x336366F1); // Indigo Border Glow
 
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
@@ -17,25 +22,19 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient cardGradientVisa = LinearGradient(
-    colors: [Color(0xFF0F172A), Color(0xFF1E1B4B)],
+  static const LinearGradient meshHeaderGradient = LinearGradient(
+    colors: [Color(0xFF4F46E5), Color(0xFF7C3AED), Color(0xFFC084FC)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient cardGradientMastercard = LinearGradient(
-    colors: [Color(0xFFB91C1C), Color(0xFF7C2D12)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  static const LinearGradient mfsBkashGradient = LinearGradient(
+  static const LinearGradient bkashGradient = LinearGradient(
     colors: [Color(0xFFE11D48), Color(0xFFBE123C)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient mfsNagadGradient = LinearGradient(
+  static const LinearGradient nagadGradient = LinearGradient(
     colors: [Color(0xFFEA580C), Color(0xFFC2410C)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -47,42 +46,63 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
-  static ThemeData get lightTheme {
+  static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      primaryColor: primaryColor,
-      scaffoldBackgroundColor: lightBackground,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
-        primary: primaryColor,
-        secondary: secondaryColor,
-        surface: lightSurface,
+      brightness: Brightness.dark,
+      primaryColor: primary,
+      scaffoldBackgroundColor: darkBackground,
+      colorScheme: const ColorScheme.dark(
+        primary: primary,
+        secondary: secondary,
+        surface: darkCardSurface,
+        background: darkBackground,
+        error: error,
       ),
-      textTheme: GoogleFonts.poppinsTextTheme(),
+      textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
       appBarTheme: AppBarTheme(
-        backgroundColor: lightBackground,
+        backgroundColor: darkBackground,
         elevation: 0,
         centerTitle: false,
         titleTextStyle: GoogleFonts.poppins(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: const Color(0xFF0F172A),
+          color: Colors.white,
         ),
-        iconTheme: const IconThemeData(color: Color(0xFF0F172A)),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkCardSurface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: darkGlassBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Colors.white12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: primary, width: 2),
+        ),
+        labelStyle: const TextStyle(color: Colors.white60),
+        hintStyle: const TextStyle(color: Colors.white38),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
+          backgroundColor: primary,
           foregroundColor: Colors.white,
-          elevation: 4,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          elevation: 8,
+          shadowColor: primary.withOpacity(0.5),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           textStyle: GoogleFonts.poppins(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
           ),
         ),
       ),
