@@ -23,6 +23,8 @@ model User {
   documents     Document[]
   certificates  Certificate[]
   transitPasses TransitPass[]
+  notifications Notification[]
+  deviceTokens  DeviceToken[]
 
   @@map("users")
 }
@@ -145,3 +147,35 @@ model TransitPass {
   @@index([userId])
   @@map("transit_passes")
 }
+
+model Notification {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  title        String
+  body         String
+  type         String    // EXPIRY_WARNING, DUE_PAYMENT, SMART_SYNC, ANNOUNCEMENT, CUSTOM
+  isRead       Boolean   @default(false) @map("is_read")
+  scheduledFor DateTime? @map("scheduled_for")
+  dismissedAt  DateTime? @map("dismissed_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+model DeviceToken {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  deviceToken String   @map("device_token")
+  platform    String   // ANDROID, IOS, WEB
+  lastSyncAt  DateTime @default(now()) @map("last_sync_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deviceToken])
+  @@map("device_tokens")
+}
+

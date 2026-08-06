@@ -12,6 +12,8 @@ import { DocumentsModule } from './documents/documents.module';
 import { CertificatesModule } from './certificates/certificates.module';
 import { TransitModule } from './transit/transit.module';
 import { AiModule } from './ai/ai.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { SyncModule } from './sync/sync.module';
 import { HealthController } from './common/health.controller';
 
 @Module({
@@ -34,6 +36,8 @@ import { HealthController } from './common/health.controller';
     CertificatesModule,
     TransitModule,
     AiModule,
+    NotificationsModule,
+    SyncModule,
   ],
   controllers: [HealthController],
   providers: [

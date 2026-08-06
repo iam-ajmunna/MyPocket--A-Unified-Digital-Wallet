@@ -233,21 +233,28 @@
 
 ## Milestone 8 — Notifications & Sync
 
-**Objective:** Push notifications and cross-device sync via the new backend (replacing Firebase Cloud Messaging dependency).
+**Objective:** Push notifications, reminder engine, and cross-device sync via the new backend.
 
-**Planned Tasks**
-- [ ] Notification service (FCM can be retained for push delivery even with custom backend, or self-hosted alternative evaluated)
-- [ ] Sync strategy for multi-device use
-- [ ] Recurring reminder engine for Smart Sync-detected notices (loan/installment due) and NID/Passport expiry dates — reminds until dismissed or resolved
-- [ ] Manual notice entry also feeds this same reminder engine (iOS parity path)
+**Planned Tasks (v1 Scope)**
+- [x] Feature spec created: `docs/features/notifications-sync.md`
+- [x] Prisma schema: `Notification` & `DeviceToken` models created
+- [x] Prisma client updated (`prisma generate`) — 0 errors
+- [x] NestJS `NotificationsModule`: GET, PATCH read status, POST read-all, POST custom reminder, DELETE dismiss, POST scan
+- [x] NestJS `SyncModule`: POST `/api/v1/sync/device` (register token), GET `/api/v1/sync/status` (multi-device sync state)
+- [x] Server-side security: all endpoints protected with `JwtAuthGuard`, notification content strictly masked (no raw IDs)
+- [x] Mobile `NotificationEntity` domain model
+- [x] Mobile `NotificationsNotifier` Riverpod provider (`notificationsNotifierProvider`)
+- [x] `NotificationsCenterScreen`: Category filter chips (All, Expiries, Dues, Smart Sync, Custom), mark as read, swipe-to-dismiss, empty state
+- [x] "Add Custom Reminder" bottom sheet (title, details/amount, type dropdown, date picker)
+- [x] Dashboard wired: Bell icon with animated unread badge counter navigating to `NotificationsCenterScreen`
 
-**Current Status:** Not Started
-**Validation Status:** Not Started
-**Date Started:** —
-**Date Completed:** —
-**Notes:** —
-**Known Issues:** None yet.
-**Next Actions:** Scheduled after core features.
+**Current Status:** Complete (v1 scope)
+**Validation Status:** Complete — NestJS build: 0 errors. Flutter analyze: 0 errors.
+**Date Started:** 2026-08-06
+**Date Completed:** 2026-08-06
+**Notes:** Rebuilt notification system with custom backend persistence. Automatic vault scan detects low transit balances (< 100 Tk) and upcoming document expiries without exposing raw sensitive data.
+**Known Issues:** None.
+**Next Actions:** Milestone 9 — QA, Security Audit & Performance.
 
 ---
 

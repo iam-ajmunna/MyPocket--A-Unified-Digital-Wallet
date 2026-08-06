@@ -6,6 +6,8 @@ import '../../../documents/presentation/screens/documents_vault_screen.dart';
 import '../../../transit/presentation/screens/transit_vault_screen.dart';
 import '../../../certificates/presentation/screens/certificates_vault_screen.dart';
 import '../../../ai/presentation/widgets/moon_floating_bubble.dart';
+import '../../../notifications/presentation/screens/notifications_center_screen.dart';
+import '../../../notifications/presentation/providers/notifications_provider.dart';
 
 class CleanDashboardScreen extends ConsumerWidget {
   const CleanDashboardScreen({super.key});
@@ -13,6 +15,7 @@ class CleanDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
+    final notifState = ref.watch(notificationsNotifierProvider);
     final user = authState.user;
 
     return Scaffold(
@@ -22,6 +25,46 @@ class CleanDashboardScreen extends ConsumerWidget {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          IconButton(
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.notifications_none_rounded, color: Color(0xFF4F46E5), size: 26),
+                if (notifState.unreadCount > 0)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.redAccent,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '${notifState.unreadCount > 9 ? '9+' : notifState.unreadCount}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            tooltip: 'Notifications',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationsCenterScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
             tooltip: 'Sign Out',
