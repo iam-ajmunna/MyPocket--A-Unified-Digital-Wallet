@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../providers/cards_mfs_provider.dart';
+import '../widgets/interactive_bank_card.dart';
 
 class CardsMfsScreen extends ConsumerStatefulWidget {
   const CardsMfsScreen({super.key});
@@ -29,25 +31,25 @@ class _CardsMfsScreenState extends ConsumerState<CardsMfsScreen> with SingleTick
     final state = ref.watch(cardsMfsNotifierProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Cards & MFS Vault'),
+        title: const Text('Cards & MFS Vault', style: TextStyle(fontWeight: FontWeight.bold)),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF4776E6),
-          labelColor: const Color(0xFF4776E6),
-          unselectedLabelColor: Colors.grey,
+          indicatorColor: const Color(0xFF6366F1),
+          labelColor: const Color(0xFF6366F1),
+          unselectedLabelColor: Colors.grey.shade600,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           tabs: const [
-            Tab(icon: Icon(Icons.credit_card), text: 'Bank Cards'),
-            Tab(icon: Icon(Icons.account_balance_wallet), text: 'MFS Accounts'),
+            Tab(icon: Icon(Icons.credit_card_rounded), text: 'Bank Cards'),
+            Tab(icon: Icon(Icons.account_balance_wallet_rounded), text: 'MFS Accounts'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Bank Cards Tab
           _buildBankCardsTab(context, state),
-          // MFS Accounts Tab
           _buildMfsAccountsTab(context, state),
         ],
       ),
@@ -59,8 +61,8 @@ class _CardsMfsScreenState extends ConsumerState<CardsMfsScreen> with SingleTick
             _showAddMfsDialog(context);
           }
         },
-        backgroundColor: const Color(0xFF4776E6),
-        icon: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: const Color(0xFF6366F1),
+        icon: const Icon(Icons.add_rounded, color: Colors.white),
         label: Text(
           _tabController.index == 0 ? 'Add Card' : 'Add MFS',
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -100,60 +102,13 @@ class _CardsMfsScreenState extends ConsumerState<CardsMfsScreen> with SingleTick
       itemCount: state.cards.length,
       itemBuilder: (context, index) {
         final card = state.cards[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF2C3E50), Color(0xFF3498DB)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      card.bankName,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const Icon(Icons.contactless, color: Colors.white70),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  '•••• •••• •••• ${card.last4Digits}',
-                  style: const TextStyle(color: Colors.white, fontSize: 20, letterSpacing: 2, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('CARD HOLDER', style: TextStyle(color: Colors.white60, fontSize: 10)),
-                        Text(card.cardHolderName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('EXPIRES', style: TextStyle(color: Colors.white60, fontSize: 10)),
-                        Text(card.expiryMonthYear, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+        return InteractiveBankCard(
+          bankName: card.bankName,
+          lastFourDigits: card.lastFourDigits,
+          isConfirmed: card.isImmutable,
+          onDelete: () {
+            ref.read(cardsMfsNotifierProvider.notifier).deleteCard(card.id);
+          },
         );
       },
     );
@@ -172,12 +127,12 @@ class _CardsMfsScreenState extends ConsumerState<CardsMfsScreen> with SingleTick
             Icon(Icons.account_balance_wallet_outlined, size: 72, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             const Text(
-              'No Mobile Financial Services Linked',
+              'No MFS Accounts Linked',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Link your bKash, Nagad, or Upay account safely.',
+              'Tap "+ Add MFS" to link bKash, Nagad, or Upay.',
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -190,144 +145,258 @@ class _CardsMfsScreenState extends ConsumerState<CardsMfsScreen> with SingleTick
       itemCount: state.mfsAccounts.length,
       itemBuilder: (context, index) {
         final mfs = state.mfsAccounts[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: CircleAvatar(
-              backgroundColor: const Color(0xFF4776E6).withOpacity(0.1),
-              child: const Icon(Icons.phone_android, color: Color(0xFF4776E6)),
-            ),
-            title: Text(
-              mfs.providerName.toUpperCase(),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text('Account: ${mfs.accountNumber}'),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: mfs.isVerified ? Colors.green.shade50 : Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(12),
+        final isBkash = mfs.provider.toLowerCase().contains('bkash');
+        final isNagad = mfs.provider.toLowerCase().contains('nagad');
+
+        final gradient = isBkash
+            ? const LinearGradient(colors: [Color(0xFFE11D48), Color(0xFFBE123C)])
+            : isNagad
+                ? const LinearGradient(colors: [Color(0xFFEA580C), Color(0xFFC2410C)])
+                : const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)]);
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
-              child: Text(
-                mfs.isVerified ? 'VERIFIED' : 'PENDING',
-                style: TextStyle(
-                  color: mfs.isVerified ? Colors.green : Colors.orange,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    mfs.provider.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 28),
+                    tooltip: 'Show Payment QR',
+                    onPressed: () => _showMfsQrSheet(context, mfs),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                mfs.accountName,
+                style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Acc: ${mfs.accountNumber}',
+                style: const TextStyle(
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 11,
+                  fontSize: 16,
+                  fontFamily: 'monospace',
                 ),
               ),
-            ),
+            ],
           ),
         );
       },
     );
   }
 
-  void _showAddCardDialog(BuildContext context) {
-    final bankNameCtrl = TextEditingController(text: 'BRAC Bank');
-    final cardHolderCtrl = TextEditingController();
-    final cardNumberCtrl = TextEditingController();
-    final expiryCtrl = TextEditingController(text: '12/28');
-
-    showDialog(
+  void _showMfsQrSheet(BuildContext context, dynamic mfs) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Bank Card'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: bankNameCtrl,
-                decoration: const InputDecoration(labelText: 'Bank Name'),
-              ),
-              TextField(
-                controller: cardHolderCtrl,
-                decoration: const InputDecoration(labelText: 'Cardholder Name'),
-              ),
-              TextField(
-                controller: cardNumberCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: '16-Digit Card Number'),
-              ),
-              TextField(
-                controller: expiryCtrl,
-                decoration: const InputDecoration(labelText: 'Expiry (MM/YY)'),
-              ),
-            ],
-          ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${mfs.provider} Payment QR',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Time-limited revocable reference token for secure transfer.',
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+            const SizedBox(height: 20),
+            QrImageView(
+              data: mfs.qrCodeToken ?? 'token_mfs_ref_${mfs.id}',
+              version: QrVersions.auto,
+              size: 200.0,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              mfs.accountName,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (cardNumberCtrl.text.isNotEmpty && cardHolderCtrl.text.isNotEmpty) {
-                ref.read(cardsMfsNotifierProvider.notifier).addCard(
-                      bankName: bankNameCtrl.text,
-                      cardHolderName: cardHolderCtrl.text,
-                      cardNumber: cardNumberCtrl.text,
-                      expiryMonthYear: expiryCtrl.text,
-                    );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Add Card'),
-          ),
-        ],
+      ),
+    );
+  }
+
+  void _showAddCardDialog(BuildContext context) {
+    final bankController = TextEditingController();
+    final numberController = TextEditingController();
+    final nameController = TextEditingController();
+    final expiryController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Add Bank Card', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: bankController,
+              decoration: InputDecoration(
+                labelText: 'Bank Name (e.g. City Bank, EBL)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: numberController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: '16-Digit Card Number',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Cardholder Name',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: expiryController,
+              decoration: InputDecoration(
+                labelText: 'Expiry Date (MM/YY)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6366F1),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  final number = numberController.text.trim();
+                  if (number.length >= 4) {
+                    ref.read(cardsMfsNotifierProvider.notifier).addCard(
+                          bankName: bankController.text.trim(),
+                          cardHolderName: nameController.text.trim(),
+                          cardNumber: number,
+                          expiryMonthYear: expiryController.text.trim(),
+                        );
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('Encrypt & Save Card', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void _showAddMfsDialog(BuildContext context) {
-    String selectedProvider = 'bKash';
-    final accountCtrl = TextEditingController();
+    final providerController = TextEditingController();
+    final numberController = TextEditingController();
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add MFS Account'),
-        content: Column(
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DropdownButtonFormField<String>(
-              value: selectedProvider,
-              items: ['bKash', 'Nagad', 'Upay']
-                  .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                  .toList(),
-              onChanged: (val) => selectedProvider = val!,
-              decoration: const InputDecoration(labelText: 'Provider'),
+            const Text('Link MFS Account', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: providerController,
+              decoration: InputDecoration(
+                labelText: 'Provider (bKash, Nagad, Upay)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: accountCtrl,
+              controller: numberController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Mobile Account Number'),
+              decoration: InputDecoration(
+                labelText: 'Account Mobile Number',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6366F1),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  ref.read(cardsMfsNotifierProvider.notifier).addMfsAccount(
+                        providerName: providerController.text.trim(),
+                        accountNumber: numberController.text.trim(),
+                      );
+                  Navigator.pop(context);
+                },
+                child: const Text('Link Wallet', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (accountCtrl.text.isNotEmpty) {
-                ref.read(cardsMfsNotifierProvider.notifier).addMfsAccount(
-                      providerName: selectedProvider,
-                      accountNumber: accountCtrl.text,
-                    );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Add MFS'),
-          ),
-        ],
       ),
     );
   }
