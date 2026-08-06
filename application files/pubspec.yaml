@@ -54,6 +54,8 @@ dependencies:
   font_awesome_flutter: ^10.8.0
   from_css_color: 2.0.0
   flutter_svg: ^2.0.17
+  pdf: ^3.11.1
+  printing: ^5.13.2
   camera: ^0.10.5+10
   flutter_facebook_auth: ^7.1.1
   file_picker: 10.1.2
