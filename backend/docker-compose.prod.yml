@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mypocket_prod_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mypocket}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_mypocket_password_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-mypocket_prod_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mypocket_prod_api
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-mypocket}:${POSTGRES_PASSWORD:-secure_mypocket_password_2026}@postgres:5432/${POSTGRES_DB:-mypocket_prod_db}?schema=public"
+      JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_mypocket_2026}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-super_secret_refresh_key_mypocket_2026}
+      MASTER_KEY_HEX: ${MASTER_KEY_HEX:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      PORT: 3000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_prod_data:

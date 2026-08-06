@@ -1,3 +1,4 @@
+# Production Multi-Stage Dockerfile for MyPocket NestJS Backend
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -9,7 +10,7 @@ RUN npm ci
 
 COPY . .
 
-RUN npm run prisma:generate
+RUN npx prisma generate
 RUN npm run build
 
 FROM node:20-alpine AS runner
@@ -22,9 +23,8 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 3000
 
