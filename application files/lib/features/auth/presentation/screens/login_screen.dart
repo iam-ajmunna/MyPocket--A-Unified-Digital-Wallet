@@ -64,31 +64,12 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
                 children: [
                   // Brand Logo Header with Ambient Glow Ring
                   Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: RadialGradient(
-                              colors: [
-                                const Color(0xFF6366F1).withOpacity(0.4),
-                                Colors.transparent,
-                              ],
-                              radius: 0.8,
-                            ),
-                          ),
-                        ),
-                        Image.asset(
-                          'assets/MyWallet White Logo.png',
-                          height: 100,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset('assets/MyWalletLogo.png', height: 90);
-                          },
-                        ),
-                      ],
+                    child: Image.asset(
+                      'assets/MyWallet White Logo.png',
+                      height: 100,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset('assets/MyWalletLogo.png', height: 90);
+                      },
                     ),
                   ),
                   const SizedBox(height: 20),
