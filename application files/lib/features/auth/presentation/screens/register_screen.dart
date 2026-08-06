@@ -68,14 +68,10 @@ class _CleanRegisterScreenState extends ConsumerState<CleanRegisterScreen> {
               children: [
                 Center(
                   child: Image.asset(
-                    'assets/MyWalletLogo.png',
-                    height: 80,
+                    'assets/mypocket_enhanced_logo.png',
+                    height: 90,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
-                        Icons.account_balance_wallet_rounded,
-                        size: 70,
-                        color: Color(0xFF6366F1),
-                      );
+                      return Image.asset('assets/MyWalletLogo.png', height: 80);
                     },
                   ),
                 ),

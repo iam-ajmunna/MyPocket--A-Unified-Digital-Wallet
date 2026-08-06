@@ -137,6 +137,7 @@ flutter:
   assets:
     - assets/MyWalletLogo.png
     - assets/MyWallet White Logo.png
+    - assets/mypocket_enhanced_logo.png
     - assets/MyPocketBrand.png
     - assets/google_logo.svg
     - assets/facebook_logo.svg
