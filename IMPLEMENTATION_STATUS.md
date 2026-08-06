@@ -3,7 +3,7 @@
 **Project:** MyPocket — Unified Digital Wallet (Bangladesh)
 **Target:** Public release on Google Play & Apple App Store
 **Last Updated:** 2026-08-05
-**Maintainer:** AJ (Tanvir)
+**Maintainer:** AJ Munna
 
 > This document is the single source of truth for engineering progress. It must be updated with every milestone change. No task is marked complete until implemented **and** verified.
 

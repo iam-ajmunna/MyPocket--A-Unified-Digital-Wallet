@@ -9,6 +9,11 @@ import '../../../ai/presentation/widgets/moon_floating_bubble.dart';
 import '../../../notifications/presentation/screens/notifications_center_screen.dart';
 import '../../../notifications/presentation/providers/notifications_provider.dart';
 import '../../../ai/presentation/screens/moon_chat_screen.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_elevation.dart';
 
 class CleanDashboardScreen extends ConsumerWidget {
   const CleanDashboardScreen({super.key});
@@ -18,11 +23,12 @@ class CleanDashboardScreen extends ConsumerWidget {
     final authState = ref.watch(authNotifierProvider);
     final notifState = ref.watch(notificationsNotifierProvider);
     final user = authState.user;
+    final colors = Theme.of(context).extension<AppColorsExtension>() ?? AppColorsExtension.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: colors.background,
         elevation: 0,
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -35,15 +41,10 @@ class CleanDashboardScreen extends ConsumerWidget {
                 return Image.asset('assets/MyWalletLogo.png', height: 32, fit: BoxFit.contain);
               },
             ),
-            const SizedBox(width: 10),
-            const Text(
+            const SizedBox(width: AppSpacing.xs),
+            Text(
               'MyPocket',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-                color: Colors.white,
-                letterSpacing: 0.5,
-              ),
+              style: AppTypography.headlineMedium(colors.textPrimary),
             ),
           ],
         ),
@@ -52,15 +53,15 @@ class CleanDashboardScreen extends ConsumerWidget {
             icon: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Icon(Icons.notifications_none_rounded, color: Colors.white70, size: 26),
+                Icon(Icons.notifications_none_rounded, color: colors.textSecondary, size: 26),
                 if (notifState.unreadCount > 0)
                   Positioned(
                     right: -2,
                     top: -2,
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.redAccent,
+                      decoration: BoxDecoration(
+                        color: colors.error,
                         shape: BoxShape.circle,
                       ),
                       constraints: const BoxConstraints(
@@ -89,7 +90,7 @@ class CleanDashboardScreen extends ConsumerWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+            icon: Icon(Icons.logout_rounded, color: colors.error),
             tooltip: 'Sign Out',
             onPressed: () {
               ref.read(authNotifierProvider.notifier).logout();
@@ -101,28 +102,22 @@ class CleanDashboardScreen extends ConsumerWidget {
         children: [
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Ultra-Premium User Greeting Card
+                  // Commercial Fintech Hero Card (Wise / Revolut / Google Wallet Benchmark)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(22),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF4F46E5), Color(0xFF7C3AED), Color(0xFFC084FC)],
+                      gradient: LinearGradient(
+                        colors: [colors.primary, colors.primaryVariant, const Color(0xFF0369A1)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF6366F1).withOpacity(0.35),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
+                      borderRadius: AppRadius.radiusXl,
+                      boxShadow: AppElevation.high,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,60 +138,60 @@ class CleanDashboardScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Welcome Back 👋',
+                                    'Total Available Balance',
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.8),
-                                      fontSize: 13,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   Text(
-                                    user?.fullName ?? 'Valued User',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    '৳ 48,250.00',
+                                    style: AppTypography.tabularBalance(Colors.white, fontSize: 26),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: colors.secondaryAccent.withOpacity(0.25),
+                                borderRadius: AppRadius.radiusMd,
+                                border: Border.all(color: colors.secondaryAccent.withOpacity(0.5)),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.shield_rounded, color: Colors.white, size: 13),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'AES-256',
+                                    style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: AppSpacing.md),
                         Divider(color: Colors.white.withOpacity(0.2)),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: AppSpacing.xs),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              user?.email ?? '',
-                              style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13),
+                              user?.fullName ?? 'Valued User',
+                              style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white.withOpacity(0.3)),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.lock_rounded, color: Colors.white, size: 12),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    'AES-256 Secured',
-                                    style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
-                                  ),
-                                ],
-                              ),
+                            Text(
+                              user?.email ?? '',
+                              style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 12),
                             ),
                           ],
                         ),
@@ -204,42 +199,26 @@ class CleanDashboardScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
 
-                  // Quick Action Bar
-                  const Text(
+                  // Quick Action Grid (DESIGN_AGENTS.md Standard)
+                  Text(
                     'Quick Actions',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTypography.titleLarge(colors.textPrimary),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.sm),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildQuickActionButton(
                         context,
-                        icon: Icons.qr_code_scanner_rounded,
-                        label: 'Payment QR',
-                        color: const Color(0xFF06B6D4),
+                        icon: Icons.credit_card_rounded,
+                        label: 'Cards & MFS',
+                        color: colors.primary,
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const CardsMfsScreen()),
-                          );
-                        },
-                      ),
-                      _buildQuickActionButton(
-                        context,
-                        icon: Icons.directions_subway_rounded,
-                        label: 'Transit Pass',
-                        color: const Color(0xFFF59E0B),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const TransitVaultScreen()),
                           );
                         },
                       ),
@@ -247,7 +226,7 @@ class CleanDashboardScreen extends ConsumerWidget {
                         context,
                         icon: Icons.badge_rounded,
                         label: 'ID Vault',
-                        color: const Color(0xFF10B981),
+                        color: colors.secondaryAccent,
                         onTap: () {
                           Navigator.push(
                             context,
@@ -257,72 +236,9 @@ class CleanDashboardScreen extends ConsumerWidget {
                       ),
                       _buildQuickActionButton(
                         context,
-                        icon: Icons.auto_awesome_rounded,
-                        label: 'Ask Moon',
-                        color: const Color(0xFFA855F7),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const MoonChatScreen()),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  const Text(
-                    'Digital Vault Features',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Vault Category Grid
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.2,
-                    children: [
-                      _buildVaultCard(
-                        context,
-                        title: 'Cards & MFS',
-                        subtitle: 'Bank Cards & Wallets',
-                        icon: Icons.credit_card_rounded,
-                        accentColor: const Color(0xFF06B6D4),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const CardsMfsScreen()),
-                          );
-                        },
-                      ),
-                      _buildVaultCard(
-                        context,
-                        title: 'Documents',
-                        subtitle: 'NID & Passport Vault',
-                        icon: Icons.badge_rounded,
-                        accentColor: const Color(0xFF8B5CF6),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const DocumentsVaultScreen()),
-                          );
-                        },
-                      ),
-                      _buildVaultCard(
-                        context,
-                        title: 'Transit Passes',
-                        subtitle: 'Metro & Bus Cards',
                         icon: Icons.directions_subway_rounded,
-                        accentColor: const Color(0xFFF59E0B),
+                        label: 'Transit',
+                        color: colors.warning,
                         onTap: () {
                           Navigator.push(
                             context,
@@ -330,12 +246,11 @@ class CleanDashboardScreen extends ConsumerWidget {
                           );
                         },
                       ),
-                      _buildVaultCard(
+                      _buildQuickActionButton(
                         context,
-                        title: 'Certificates',
-                        subtitle: 'Academic & Badges',
-                        icon: Icons.verified_user_rounded,
-                        accentColor: const Color(0xFFEC4899),
+                        icon: Icons.workspace_premium_rounded,
+                        label: 'Certificates',
+                        color: colors.info,
                         onTap: () {
                           Navigator.push(
                             context,
@@ -345,12 +260,77 @@ class CleanDashboardScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 80),
+
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Wallet Features Overview Tiles
+                  Text(
+                    'Digital Wallet Vaults',
+                    style: AppTypography.titleLarge(colors.textPrimary),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+
+                  _buildVaultTile(
+                    context,
+                    icon: Icons.account_balance_wallet_rounded,
+                    title: 'Cards & MFS Account Vault',
+                    subtitle: 'bKash, Nagad, Upay & VISA/Mastercard reference cards',
+                    color: colors.primary,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const CardsMfsScreen()));
+                    },
+                  ),
+                  _buildVaultTile(
+                    context,
+                    icon: Icons.fingerprint_rounded,
+                    title: 'Secure Document Vault',
+                    subtitle: 'Envelope-encrypted Smart NID & Passport storage',
+                    color: colors.secondaryAccent,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const DocumentsVaultScreen()));
+                    },
+                  ),
+                  _buildVaultTile(
+                    context,
+                    icon: Icons.subway_rounded,
+                    title: 'Transit Pass Manager',
+                    subtitle: 'Dhaka MRT Pass, Bus & Railway boarding QR tokens',
+                    color: colors.warning,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const TransitVaultScreen()));
+                    },
+                  ),
+                  _buildVaultTile(
+                    context,
+                    icon: Icons.verified_user_rounded,
+                    title: 'Academic & Skill Certificates',
+                    subtitle: 'Verified credentials, SSC/HSC & Olympiad awards',
+                    color: colors.info,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const CertificatesVaultScreen()));
+                    },
+                  ),
+
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
           ),
-          const MoonFloatingBubble(),
+
+          // Moon AI Mascot Assistant Bubble Overlay
+          Positioned(
+            right: 20,
+            bottom: 30,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MoonChatScreen()),
+                );
+              },
+              child: const MoonFloatingBubble(),
+            ),
+          ),
         ],
       ),
     );
@@ -363,90 +343,84 @@ class CleanDashboardScreen extends ConsumerWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    final colors = Theme.of(context).extension<AppColorsExtension>() ?? AppColorsExtension.dark;
+
+    return InkWell(
       onTap: onTap,
+      borderRadius: AppRadius.radiusLg,
       child: Column(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(18),
+              color: color.withOpacity(0.15),
+              borderRadius: AppRadius.radiusLg,
               border: Border.all(color: color.withOpacity(0.3), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.15),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
-            child: Icon(icon, color: color, size: 26),
+            child: Icon(icon, color: color, size: 28),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             label,
-            style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
+            style: AppTypography.bodySmall(colors.textPrimary).copyWith(fontWeight: FontWeight.w600),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildVaultCard(
+  Widget _buildVaultTile(
     BuildContext context, {
+    required IconData icon,
     required String title,
     required String subtitle,
-    required IconData icon,
-    required Color accentColor,
+    required Color color,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
+    final colors = Theme.of(context).extension<AppColorsExtension>() ?? AppColorsExtension.dark;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: AppRadius.radiusLg,
         child: Container(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
+            color: colors.surface,
+            borderRadius: AppRadius.radiusLg,
+            border: Border.all(color: colors.glassBorder),
+            boxShadow: AppElevation.low,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(14),
+                  color: color.withOpacity(0.15),
+                  borderRadius: AppRadius.radiusMd,
                 ),
-                child: Icon(icon, color: accentColor, size: 26),
+                child: Icon(icon, color: color, size: 24),
               ),
-              const SizedBox(height: 14),
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTypography.labelLarge(colors.textPrimary),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: AppTypography.bodySmall(colors.textSecondary),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(color: Colors.white54, fontSize: 12),
-              ),
+              Icon(Icons.chevron_right_rounded, color: colors.textMuted),
             ],
           ),
         ),

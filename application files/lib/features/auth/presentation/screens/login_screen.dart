@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import 'register_screen.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_elevation.dart';
 
 class CleanLoginScreen extends ConsumerStatefulWidget {
   const CleanLoginScreen({super.key});
@@ -36,6 +41,7 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
+    final colors = Theme.of(context).extension<AppColorsExtension>() ?? AppColorsExtension.dark;
 
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (next.errorMessage != null && next.errorMessage!.isNotEmpty) {
@@ -43,7 +49,7 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: colors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -51,18 +57,18 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0F19),
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Brand Logo Header with Ambient Glow Ring
+                  // Brand Logo Header with Proportional Alignment
                   Center(
                     child: Image.asset(
                       'assets/MyWallet White Logo.png',
@@ -73,90 +79,88 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xxs),
 
                   // Brand Title & Tagline
-                  const Text(
+                  Text(
                     'MyPocket',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 1,
-                    ),
+                    style: AppTypography.displayLarge(colors.textPrimary),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    'Unified Secure Digital Wallet',
+                    'Unified Commercial Digital Wallet',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
-                      fontSize: 14,
-                      letterSpacing: 0.5,
-                    ),
+                    style: AppTypography.bodyMedium(colors.textSecondary),
                   ),
 
-                  const SizedBox(height: 36),
+                  const SizedBox(height: AppSpacing.xl),
 
-                  // Glassmorphic Card Container for Input Fields
+                  // Glassmorphic Login Card (Wise & Revolut Inspired)
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white.withOpacity(0.08)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
+                      color: colors.surface,
+                      borderRadius: AppRadius.radiusXl,
+                      border: Border.all(color: colors.glassBorder, width: 1.5),
+                      boxShadow: AppElevation.medium,
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Sign In',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                        Text(
+                          'Sign In to Your Wallet',
+                          style: AppTypography.titleLarge(colors.textPrimary),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Enter your phone number or email address',
+                          style: AppTypography.bodySmall(colors.textMuted),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
 
-                        // Email / Phone Field
+                        // Identifier Input (Phone or Email)
                         TextFormField(
                           controller: _identifierController,
-                          style: const TextStyle(color: Colors.white),
+                          keyboardType: TextInputType.emailAddress,
+                          style: AppTypography.bodyMedium(colors.textPrimary),
                           decoration: InputDecoration(
-                            labelText: 'Email or Mobile Number',
-                            prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF6366F1)),
-                            fillColor: const Color(0xFF0F172A),
+                            labelText: 'Email or Phone Number',
+                            labelStyle: AppTypography.bodyMedium(colors.textSecondary),
+                            prefixIcon: Icon(Icons.person_outline_rounded, color: colors.primary),
+                            filled: true,
+                            fillColor: colors.surfaceVariant.withOpacity(0.5),
+                            border: OutlineInputBorder(
+                              borderRadius: AppRadius.radiusMd,
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: AppRadius.radiusMd,
+                              borderSide: BorderSide(color: colors.primary, width: 1.5),
+                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Please enter your email or mobile number';
+                              return 'Please enter your email or phone number';
                             }
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.md),
 
-                        // Password Field
+                        // Password Input
                         TextFormField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          style: const TextStyle(color: Colors.white),
+                          style: AppTypography.bodyMedium(colors.textPrimary),
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline_rounded, color: Color(0xFF6366F1)),
+                            labelStyle: AppTypography.bodyMedium(colors.textSecondary),
+                            prefixIcon: Icon(Icons.lock_outline_rounded, color: colors.primary),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                color: Colors.white54,
+                                _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                                color: colors.textMuted,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -164,7 +168,16 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
                                 });
                               },
                             ),
-                            fillColor: const Color(0xFF0F172A),
+                            filled: true,
+                            fillColor: colors.surfaceVariant.withOpacity(0.5),
+                            border: OutlineInputBorder(
+                              borderRadius: AppRadius.radiusMd,
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: AppRadius.radiusMd,
+                              borderSide: BorderSide(color: colors.primary, width: 1.5),
+                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -173,62 +186,49 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppSpacing.lg),
 
-                        // Primary Login Button
+                        // Login Action Button (Trust Teal Blue)
                         SizedBox(
-                          height: 54,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF6366F1), Color(0xFFA855F7)],
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF6366F1).withOpacity(0.4),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colors.primary,
+                              shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusMd),
+                              elevation: 4,
+                              shadowColor: colors.primary.withOpacity(0.4),
                             ),
-                            child: ElevatedButton(
-                              onPressed: authState.isLoading ? null : _handleLogin,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              ),
-                              child: authState.isLoading
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                                    )
-                                  : const Text(
-                                      'Unlock Wallet',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                            onPressed: authState.isLoading ? null : _handleLogin,
+                            child: authState.isLoading
+                                ? const SizedBox(
+                                    height: 22,
+                                    width: 22,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                  )
+                                : const Text(
+                                    'Unlock Wallet',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                            ),
+                                  ),
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // Register Redirection Footer
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Don't have a wallet yet? ",
-                        style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                        'Don\'t have a MyPocket account? ',
+                        style: AppTypography.bodySmall(colors.textSecondary),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -237,11 +237,12 @@ class _CleanLoginScreenState extends ConsumerState<CleanLoginScreen> {
                             MaterialPageRoute(builder: (context) => const CleanRegisterScreen()),
                           );
                         },
-                        child: const Text(
-                          'Create Wallet',
+                        child: Text(
+                          'Register Now',
                           style: TextStyle(
-                            color: Color(0xFF6366F1),
+                            color: colors.primary,
                             fontWeight: FontWeight.bold,
+                            fontSize: 14,
                           ),
                         ),
                       ),
