@@ -113,6 +113,8 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   local_auth: ^2.1.8
   flip_card: ^0.7.0
+  speech_to_text: ^7.0.0
+  flutter_tts: ^4.0.0
 
 
 dev_dependencies:

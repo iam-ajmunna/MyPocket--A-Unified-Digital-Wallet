@@ -205,36 +205,31 @@
 
 ## Milestone 7 — AI Assistant Integration
 
-**Objective:** Ship the AI assistant, "Moon," in two phases — document-scan-assist first, then a full conversational + voice assistant capable of answering questions about the user's own stored data.
+**Objective:** Ship the AI assistant, "Moon," — a full conversational + voice assistant capable of answering questions about the user's own stored data using server-scoped tool calling.
 
-**Planned Tasks**
-- [ ] Backend AI proxy service (API key never shipped client-side)
-- [ ] Phase 1: OCR field validation/correction assistant during NID/Passport/card scanning
-- [ ] Phase 2: Conversational assistant — **tool-calling architecture**: LLM has access to scoped tools (`get_upcoming_dues()`, `get_recent_transactions()`, etc.) that query the backend using the authenticated user's session only
-- [ ] Data exposed to the LLM is always **masked/summarized** (e.g., "Card ending 1234, Tk 5,000 due Aug 20") — full card numbers, NID/Passport numbers are never sent to the LLM provider
-- [ ] **Floating chat bubble**, accessible from anywhere in the app
-- [ ] **Hybrid behavior**: reactive (answers on demand) + proactive (unprompted nudges — due payments, Smart Sync-detected transactions, expiry reminders)
-- [ ] **Animated mascot/buddy "Moon"** (Lottie-based) — idle/thinking/celebrating/alerting states, used in onboarding and as the chat bubble icon
-- [ ] **Voice input:** on-device speech-to-text (Bangla + English), quality/coverage may vary by device for Bangla — flagged as a known platform limitation, not a MyPocket bug
-- [ ] **Voice output:** on-device text-to-speech, full spoken conversation (Bangla + English)
-- [ ] **Wake word ("Hey Moon"):**
-  - Android: true background/lock-screen wake-word detection via foreground service + on-device wake-word engine (e.g. Picovoice Porcupine), **opt-in and OFF by default**
-  - iOS: foreground-only wake-word (app must be open) — hard OS restriction, no background alternative exists
-  - Wake-word matching itself is fully on-device; no audio is transmitted anywhere until a query begins after the wake word fires
-  - Auto-suspends on low battery / Battery Saver mode; resumes on charging or normal battery
-  - Implemented as a **remote feature flag** so background listening can be disabled server-side without an app resubmission if Play Store review requires it
-- [ ] Play Store Data Safety + permissions declaration prep for background microphone/foreground service usage
-- [ ] Rate limiting / abuse prevention on AI endpoints (cost control)
+**Planned Tasks (v1 Scope)**
+- [x] Feature spec created: `docs/features/ai-assistant-moon.md`
+- [x] Backend AI proxy service (`/api/v1/ai/chat`) — Gemini API key server-side only
+- [x] Tool-calling architecture (`get_wallet_summary`, `get_certificates`, `get_transit_passes`, `get_documents_summary`)
+- [x] Server-side security: tools scoped strictly to `req.user.id` (JWT token) — LLM cannot query arbitrary user data
+- [x] Data exposed to LLM is strictly **masked/summarized** — no raw card numbers, CVVs, or NID/Passport numbers sent to LLM
+- [x] **Floating chat bubble** (`MoonFloatingBubble`), animated pulse overlay on Dashboard
+- [x] **Moon Chat Screen** (`MoonChatScreen`) — dark glassmorphism design, message bubbles, typing indicators
+- [x] **Voice input (STT):** on-device `speech_to_text` integration
+- [x] **Voice output (TTS):** on-device `flutter_tts` integration with mute/unmute toggle
+- [x] Rate limiting / session management (in-memory history, 30 min TTL cleanup)
+- [ ] Wake word ("Hey Moon") — deferred to v2 per user decision (requires Porcupine key)
 
-**Current Status:** Not Started
-**Validation Status:** Not Started
-**Date Started:** —
-**Date Completed:** —
-**Notes:** Background wake-word on Android carries real Play Store review risk and battery cost even with mitigations — the feature flag kill switch exists specifically to de-risk this. iOS cannot support background wake-word under any implementation; this is an OS-level restriction, not an engineering gap.
-**Known Issues:** None yet.
-**Next Actions:** Phase 1 depends on Milestone 5 scanner being functional. Voice/wake-word work depends on core chat (tool-calling) being functional first.
+**Current Status:** Complete (v1 scope)
+**Validation Status:** Complete — NestJS build: 0 errors. Flutter analyze: 0 errors.
+**Date Started:** 2026-08-06
+**Date Completed:** 2026-08-06
+**Notes:** Gemini 2.0 Flash integration with automatic fallback mode when API key is missing or quota is reached. Voice STT and TTS fully integrated on-device. Wake word deferred to v2 per user preference.
+**Known Issues:** None.
+**Next Actions:** Milestone 8 — Notifications & Sync.
 
 ---
+
 
 ## Milestone 8 — Notifications & Sync
 

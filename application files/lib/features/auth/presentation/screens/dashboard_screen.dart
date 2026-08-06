@@ -5,6 +5,7 @@ import '../../../cards_mfs/presentation/screens/cards_mfs_screen.dart';
 import '../../../documents/presentation/screens/documents_vault_screen.dart';
 import '../../../transit/presentation/screens/transit_vault_screen.dart';
 import '../../../certificates/presentation/screens/certificates_vault_screen.dart';
+import '../../../ai/presentation/widgets/moon_floating_bubble.dart';
 
 class CleanDashboardScreen extends ConsumerWidget {
   const CleanDashboardScreen({super.key});
@@ -30,12 +31,14 @@ class CleanDashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      body: Stack(
+        children: [
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               // User Greeting Card
               Container(
                 width: double.infinity,
@@ -202,6 +205,9 @@ class CleanDashboardScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+      const MoonFloatingBubble(),
+        ],
       ),
     );
   }

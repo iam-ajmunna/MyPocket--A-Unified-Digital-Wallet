@@ -11,6 +11,7 @@ import { MfsModule } from './mfs/mfs.module';
 import { DocumentsModule } from './documents/documents.module';
 import { CertificatesModule } from './certificates/certificates.module';
 import { TransitModule } from './transit/transit.module';
+import { AiModule } from './ai/ai.module';
 import { HealthController } from './common/health.controller';
 
 @Module({
@@ -32,6 +33,7 @@ import { HealthController } from './common/health.controller';
     DocumentsModule,
     CertificatesModule,
     TransitModule,
+    AiModule,
   ],
   controllers: [HealthController],
   providers: [
